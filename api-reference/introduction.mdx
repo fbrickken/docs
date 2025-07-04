@@ -1,6 +1,6 @@
 ---
 title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+description: 'Overview and authentication for the Brickken API.'
 ---
 
 <Note>
@@ -9,12 +9,13 @@ description: 'Example section for showcasing API endpoints'
 </Note>
 
 ## Welcome
+Welcome to the Brickken API documentation. This API allows customers to create and manage tokenization processes, including creating new tokenizations, minting/burning/transferring tokens, and whitelisting users. This documentation provides detailed information on how to use the API, including the necessary endpoints, request formats, and expected responses.
 
 There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
 
 <Card
-  title="Plant Store Endpoints"
-  icon="leaf"
+  title="Brickken Endpoints"
+  icon="house"
   href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
 >
   View the OpenAPI specification file
@@ -22,12 +23,18 @@ There are two ways to build API documentation: [OpenAPI](https://mintlify.com/do
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All API endpoints are authenticated using an API Key sent in the request header. This is defined in the OpenAPI specification under securitySchemes.
+
+You must include your unique API key in the x-api-key header of each request.
 
 ```json
-"security": [
-  {
-    "bearerAuth": []
+"components": {
+  "securitySchemes": {
+    "apiKeyAuth": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "x-api-key"
+    }
   }
-]
+}
 ```

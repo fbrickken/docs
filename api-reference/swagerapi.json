@@ -1,0 +1,1400 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Brickken API",
+    "description": "<details><summary>**Overview**</summary>Welcome to the Brickken API documentation. This API allows customers to create and manage tokenization processes, including creating new tokenizations, minting/burning/transferring tokens, whitelisting users, manage tokens approvals. This documentation provides detailed information on how to use the API, including the necessary endpoints, request formats, and expected responses.</details><details><summary>**Authentication**</summary>All API requests require an API key for authentication. Include your API key in the Authorization header of each request:<pre><code>```\n  x-api-key: YOUR_API_KEY\n```</code></pre>Ensure that your API key is kept secure and not shared publicly. A common parameter for all requests is the `signerAddress`. Such address MUST be whitelisted in our factory. To whitelist an address and/or request an API key either for sandbox/production environment please contact with: support@brickken.com. Once a `signerAddress` performs a `newTokenization` we refer to that address as the tokenizer. The tokenizer will be the only one allowed to mint such token, distribute dividends on such token and whitelist/blacklist investors of such token. Regarding actions like transferring tokens or burning tokens, the `signerAddress` can be any user and not only the tokenizer.</details><details><summary>**Supported Networks & Addresses**</summary><details><summary>Sepolia (sandbox environment only)</summary><pre><code>```\n  Chain Id: \"aa36a7\"\n  Factory Address: \"0x933ABAA95a7Fd0Bc683bDe2adB89f4C5EA64897b\"\n  BKN Address: \"0x97a13487f889dc770Ac925Be2d3b6c833FA7746a\"\n  USDT Address: \"0x28d2B01854D0aBec267a3DDcad9163580E6E8604\"\n  USDC Address: \"0xb10cE8e28aEb1ae27b968Fb3bfed2FD7dd52daCb\"\n```</code></pre></details><details><summary>Ethereum mainnet (production environment only)</summary><pre><code>```\n  Chain Id: \"1\"\n  Factory Address: \"0x91af681C85Ca98Efc5D69C1B62E6F435030969Db\"\n  BKN Address: \"0x0A638F07ACc6969abF392bB009f216D22aDEa36d\"\n  USDT Address: \"0xdac17f958d2ee523a2206206994597c13d831ec7\"\n  USDC Address: \"0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48\"\n```</code></pre></details><details><summary>Base mainnet (production environment only)</summary><pre><code>```\n  Chain Id: \"2105\"\n  Factory Address: \"0x278D7bdc2451B0Fa4087A68ce084a86cB91D4d83\"\n  BKN Address: \"0xddB293BB5C5258F7484A94a0fBd5c8B2F6E4e376\"\n  USDT Address: N/A\n  USDC Address: \"0x833589fcd6edb6e08f4c7c32d4f71b54bda02913\"\n```</code></pre></details><details><summary>BNB Smart Chain mainnet (production environment only)</summary><pre><code>```\n  Chain Id: \"38\"\n  Factory Address: \"0xCe4529Fe88df480BD777d3e32dfD7032e6C685ff\"\n  BKN Address: \"0x0e28bC9B03971E95acF9ae1326E51ecF9C55B498\"\n  USDT Address: \"0x55d398326f99059fF775485246999027B3197955\"\n  USDC Address: \"0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d\"\n```</code></pre></details><details><summary>Avalance C Chain mainnet (production environment only)</summary><pre><code>```\n  Chain Id: \"a86a\"\n  Factory Address: \"0xc6c230FA8F40022dE997727436Fae01caAbcDe61\"\n  BKN Address: \"0xd44E4Dc8bdF7C1c62CfDBb182022097BA42Ac6bC\"\n  USDT Address: \"0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7\"\n  USDC Address: \"0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E\"\n```</code></pre></details></details><details><summary>**Usage Workflow**</summary><details><summary>1. **Prepare Transactions:**</summary>- Use the `POST /prepare-api-transactions` endpoint with the desired method (e.g., `newTokenization`, `mintToken`, etc...) to prepare the transaction(s).\n- The response will include an array of unsigned transactions that needs to be signed.<details><summary>**Example Of An Endpoint Response:**</summary>```json\n  {\n    \"transactions\": [\n      {\n        \"from\": \"0xSignerAddress\",\n        \"to\": \"0xTargetAddress\",\n        \"value\": {\n          \"type\": \"BigNumber\",\n          \"hex\": \"0x00\"\n        },\n        \"nonce\": 1,\n        \"chainId\": 11155111,\n        \"data\": \"0x...\",\n        \"type\": 2,\n        \"maxPriorityFeePerGas\": {\n          \"type\": \"BigNumber\",\n          \"hex\": \"0x...\"\n        },\n        \"maxFeePerGas\": {\n          \"type\": \"BigNumber\",\n          \"hex\": \"0x...\"\n        },\n        \"gasLimit\": {\n          \"type\": \"BigNumber\",\n          \"hex\": \"0x...\"\n        }\n      }\n    ]\n  }\n```</details></details><details><summary>2. **Sign the Transactions:**</summary>- Use your preferred method or wallet to sign the transaction data provided in the response.\n- Ensure that the signer address matches the `signerAddress` provided in the initial request.<details><summary>**Example Of signing a transaction with typescript and `ethers-js`:**</summary>```typescript\n  const tx = {...} // One of the object in the array returned by the `/prepare-api-transaction` endpoint\n  const privateKey = process.env.PRIVATE_KEY;\n  const wallet = new ethers.Wallet(privateKey);\n  const signedTx = await wallet.signTransaction(tx);\n  console.log('Signed Transaction:', signedTx);\n```</details>**NOTE:** Be sure to have enough funds in the signer wallet to cover for the transaction cost</details><details><summary>3. **Submit Signed Transactions:**</summary>- Use the `POST /send-api-transactions` endpoint to submit the signed transaction(s) along with the required parameters.\n- The API will process the transactions, send them to the blockchain, and update the Brickken database accordingly.</details><details><summary>4. **Check Transaction Status:**</summary>- Use the `GET /get-api-transactions-status` endpoint to check the status of your transaction.\n- Provide the transaction hash (`txHash`) and your email to retrieve the status.</details></details><details><summary>**Environments**</summary>The API is available in several environments for testing and production purposes:- Sandbox: `https://api.sandbox.brickken.com/`\n- Master (Production): `https://api.brickken.com/`</details>",
+    "version": "1.0.1"
+  },
+  "servers": [
+    {
+      "url": "https://api.sandbox.brickken.com",
+      "description": "Sandbox Environment"
+    },
+    {
+      "url": "https://api.brickken.com",
+      "description": "Production Environment"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key"
+      }
+    }
+  },
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/prepare-api-transactions": {
+      "post": {
+        "summary": "Prepare Transactions",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "This endpoint prepares unsigned transactions for various blockchain operations. Depending on the `method` parameter in the request body, it can prepare transactions for all the supported operations such as `newTokenization`, `mintToken`, `whitelist`, `burnToken`, `approve`, `transferTo` and `transferFrom`.\n\n**Headers:**\n\n-  `x-api-key`: `YOUR_API_KEY`,\n-  `Content-Type`: `application/json`\n\n**Common Request Body Parameters:**\n\n- `method` (string): The operation to be performed. Possible values are `newTokenization`, `mintToken`, `whitelist`, `burnToken`, `transferFrom`, `transferTo`, `approve`, `dividendDistribution`, `newSto`.\n- `signerAddress` (string): The address of the user initiating the transaction.\n- `chainId` (string): The blockchain network's chain ID in hexadecimal format (e.g., \"aa36a7\" for Sepolia testnet).\n- `gasLimit` (string, optional): an amount of gas units as limits. If not specified, it will be automatically estimated\n- `rpcUrl` (string, optional): The RPC URL of the blockchain network. If not provided, a default RPC URL for the specified chain ID will be used.\n\n**Method-Specific Parameters:**\n\nBelow are the parameters required for each method.\n\n<details><summary>**Method: `newTokenization`**</summary>\n\n**Description:** Prepares a new tokenization transaction. It might require a BKN fee to be paid. If so, a previous approval of BKN to our factory must be done. Address of the factory depends on the chain in which the action is being performed.\n\n**Additional Request Body Parameters:**\n\n- `url` (string): The URL associated with the tokenization documents (e.g., company website, IPFS links or just an empty string).\n- `name` (string): The name of the token.\n- `symbol` (string): The symbol of the token. Max 5 characters.\n- `supplyCap` (string, optional): The maximum token supply cap. Uncapped if not specified.\n- `preMints` (array, optional): An array of pre-mint configurations. It must match with initialHolders length if specificed.\n- `initialHolders` (array, optional): An array of initial holder configurations. It must match with preMints length if specificed.\n</details>\n\n<details><summary>**Method: `mintToken`**</summary>\n\n**Description:** Prepares transactions to mint tokens to specified users. This may include whitelisting users if necessary.\n\n**Additional Request Body Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token for which tokens are being minted. It must be one of the tokens created through `newTokenization`.\n- `userToMint` (array): An array of user objects. Each `user` object will contain:\n  - `email` (string): The email of the user.\n  - `investorAddress` (string): The wallet address of the user.\n  - `amount` (string): The amount of tokens to mint to the user.\n  - `needWhitelist` (boolean): true\" or \"false\", indicating whether to whitelist the user before minting.\n</details>\n\n<details><summary>**Method: `whitelist`**</summary>\n\n**Description:** Prepares transactions to whitelist or blacklist users for a specific token. Users which are not whitelisted can receive tokens, but they can't transfer out their tokens.\n\n**Additional Request Body Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token for which users are being whitelisted. It must be one of the tokens created through `newTokenization`.\n- `userToWhitelist` (array): An array of user objects. Each user object must contain:\n  - `whitelistStatus` (string): \"true\" if the user needs to be whitelisted, \"false\" if the user needs to be blacklisted.\n  - `investorAddress` (string): The wallet address of the user.\n</details>\n\n<details><summary>**Method: `burnToken`**</summary>\n\n**Description:** Prepares a transaction to burn tokens from the signer's balance.\n\n**Additional Request Body Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token to burn. It must be one of the tokens created through `newTokenization`.\n- `amount` (string): The amount of tokens to burn.\n</details>\n\n<details><summary>**Method: `transferFrom`**</summary>\n\n**Description:** Prepares a transaction to transfer tokens from one address to another. The `signerAddress` will be the spender of the tokens and it must have an approval done beforehand. the `from` and `to` must be both whitelisted addresses for the specified token.\n\n**Additional Request Body Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token to transfer. It must be one of the tokens created through `newTokenization`.\n- `from` (string): The address from which tokens are being transferred.\n- `to` (string): The address to which tokens are being transferred.\n- `amount` (string): The amount of tokens to transfer.\n</details>\n\n<details><summary>**Method: `transferto`**</summary>\n\n**Description:** Prepares a transaction to transfer tokens from `signerAddress` address to another. The `to` must be a whitelisted address for the specified token.\n\n**Additional Request Body Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token to transfer. It must be one of the tokens created through `newTokenization`.\n- `to` (string): The address to which tokens are being transferred.\n- `amount` (string): The amount of tokens to transfer.\n</details>\n\n<details><summary>**Method: `approve`**</summary>\n\n**Description:** Prepares a transaction to approve a spender `spenderAddress` for tokens owned by the `signerAddress` address.\n\n**Additional Request Body Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token to transfer. It must be one of the tokens created through `newTokenization`. Additionally BKN, USDT (USDt in Avalanche), and USDC can be specified too.\n- `spenderAddress` (string): The address of the spender that is being allowed.\n- `amount` (string): The amount of tokens to allow as expenditure.\n</details>\n\n<details><summary>**Method: `dividendDistribution`**</summary>\n\n**Description:** Distribute `amount` of `paymentToken` token into the `tokenSymbol` token to its holders. The `paymentToken` can be read from the token contract itself and it is usually USDT (USDC in Base, USDt in Avalanche). It requires an approval done from the `signerAddress` to the token contract itself as `spenderAddress` of the amount being distributed at least.\n\n**Additional Request Body Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token to transfer. It must be one of the tokens created through `newTokenization`.\n- `amount` (string): The amount of `paymentToken` tokens being distributed.\n\n**Note:** USDT and USDC usually have 6 decimals. The API handle decimals on its own so amounts should be specified as always( example, 10 USDT -> `amount` = '10').\n</details>\n\n<details><summary>**Method: `newSto`**</summary>\n\n**Description:** Prepares transacton to create a new offering. Requires a token be already created and no other offerings ongoing.\n\n**Additional Request Body Parameters:**\n- `tokenizerEmail` (string): The email from the tokenizer that created the token.\n- `tokenAmount` (string): The ammoint of tokens to be distributed thorugh this offering.\n- `offeringName` (string): The name of said offering.\n- `startDate` (string): The date for the offering to start and be available to investors.\n- `endDate` (string): The date for the offering to end and be able to close.\n- `acceptedCoin` (string): The accepted method of payment for the token (USD/EUR/...).\n- `minRaiseUSD` (string): The minimum ammount of USD to be able to close the offer and consider it a success.\n- `maxRaiseUSD` (string): The maximum ammount of USD to raise, stoping the offering at the moment of reaching said cap.\n- `minInvestment` (string): The minimum ammount of USD per investment.\n- `maxInvestment` (string): The maximum ammount of USD per investment.\n- `signerAddress` (string): The wallet address of the tokenizer to create the offer.\n\n</details>",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "example": "newTokenization",
+                    "description": "The operation to be performed. Possible values are newTokenization, mintToken, whitelist, burnToken, transferFrom, transferTo, approve, dividendDistribution, newSto."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "example": "0xSignerAddress",
+                    "description": "The address of the user initiating the transaction."
+                  },
+                  "chainId": {
+                    "type": "string",
+                    "example": "aa36a7",
+                    "description": "The blockchain network's chain ID in hexadecimal format (e.g., \"aa36a7\" for Sepolia testnet)."
+                  },
+                  "gasLimit": {
+                    "type": "string",
+                    "example": "2000000 but can be omitted",
+                    "description": "An amount of gas units as limits. If not specified, it will be automatically estimated."
+                  },
+                  "rpcUrl": {
+                    "type": "string",
+                    "example": "{URL_TO_RPC} but can be omitted",
+                    "description": "The RPC URL of the blockchain network. If not provided, a default RPC URL for the specified chain ID will be used."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "from": {
+                            "type": "string"
+                          },
+                          "to": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string"
+                              },
+                              "hex": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "nonce": {
+                            "type": "integer"
+                          },
+                          "chainId": {
+                            "type": "integer"
+                          },
+                          "data": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "integer"
+                          },
+                          "maxPriorityFeePerGas": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string"
+                              },
+                              "hex": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "maxFeePerGas": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string"
+                              },
+                              "hex": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "gasLimit": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string"
+                              },
+                              "hex": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/send-api-transactions": {
+      "post": {
+        "summary": "Submit Signed Transactions",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "**Description:** This endpoint sends signed transactions to the blockchain.\n\n**Headers:**\n\n-  `x-api-key`: `YOUR_API_KEY`,\n-  `Content-Type`: `application/json`\n\n**Common Request Body Parameters:**\n\n- `signedTransactions` (array): Array of signed Ethereum transactions (as hex strings).\n- `rpcUrl` (string, optional): The RPC URL of the blockchain network. If not provided, a default RPC URL for the specified chain ID will be used.\n- `chainId` (string): The blockchain network's chain ID in hexadecimal format (e.g., \"aa36a7\" for Sepolia testnet).\n- `chainId` (number): Chain ID representing the blockchain network where transactions are to be executed.\n- `method` (string): The operation to be performed. Possible values are `newTokenization`, `mintToken`, `whitelist`, `burnToken`, `transferFrom`, `transferTo`, `approve`, `dividendDistribution`, `newSto`.\n\n**Method-Specific Parameters:**\n\nBelow are the parameters required for each method.\n\n<details><summary>**Method: `newTokenization`**</summary>\n\n**Description:** Sends a transaction to create a new token and initiate tokenization for a company.\n\n**Additional Request Body Parameters:**\n\n- `tokenName` (string): The name of the token being created.\n- `tokenSymbol` (string): The symbol of the token being created.\n- `tokenizerCompanyName` (string): The company name associated with the token.\n- `tokenizerName` (string): The name of the token issuer (the tokenizer).\n- `tokenizerMiddleName` (string, optional): The middle name of the token issuer (the tokenizer).\n- `tokenizerSurname` (string): The surname of the token issuer (the tokenizer).\n- `tokenizerSecondSurname` (string, optional): The second surname of the token issuer (the tokenizer), if any.\n- `tokenizerEmail` (string): The email of the token issuer (the tokenizer).\n- `tokenizerAddress` (string): The Ethereum wallet address of the `signerAddress`.\n- `supplyCap` (string): The maximum supply of tokens allowed.\n- `initialShareholders` (array, optional): An array of initial shareholders involved in the tokenization, if any. A `shareholder` is an object that has:\n  - `walletAddress` (string): The address of the initial shareholder.\n  - `amount` (string): How much initial tokens the shareholder must have. Ie \"800000\" for 800k. \n  - `email` (string): The email of the shareholders.\n</details>\n\n<details><summary>**Method: `mintToken`**</summary>\n\n**Description:** Sends transactions to mint additional tokens for specified users. If a mint is preceeded by a whitelist, the `signedTransactions` must be populated in order (Ie, [whitelist user 1, mint to user 1, whitelist user 2, mint to user 2, ...])\n\n**Additional Request Body Parameters:**\n\n- `investorAddress` (string): The Ethereum wallet address of the recipient who will receive the minted tokens.\n- `investorEmail` (string): The email of the investor receiving the tokens.\n- `tokenSymbol` (string): The symbol  of the token being minted.\n- `needInvestorCreation` (boolean): true if `newInvestor` is populated and the investor must be created, false otherwise.\n- `newInvestor` (object, optional): If the `needInvestorCreation` is true this must be specified:\n  - `type` (string, optional): Either \"INVESTOR_PERSON\" or \"INVESTOR_BUSINESS\". Defaults to \"INVESTOR_PERSON\".\n  - `name` (string): The name of the new investor being created.\n  - `middleName` (string, optional): The middle name of the new investor being created.\n  - `surname` (string): The surname of the new investor being created.\n  - `secondSurname` (string, optional): The second surname of the new investor being created.\n</details>\n\n<details><summary>**Method: `whitelist`**</summary>\n\n**Description:** Sends transactions to whitelist specific users for participating in a token sale or tokenization process.\n\n**Additional Request Body Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token for which the user is being whitelisted.\n- `investorAddress` (string): The Ethereum wallet address of the investor to be whitelisted.\n- `investorEmail` (string): The email address of the investor to be whitelisted.\n- `needInvestorCreation` (boolean): true if `newInvestor` is populated and the investor must be created, false otherwise.\n- `newInvestor` (object, optional): If the `needInvestorCreation` is true this must be specified:\n  - `type` (string, optional): Either \"INVESTOR_PERSON\" or \"INVESTOR_BUSINESS\". Defaults to \"INVESTOR_PERSON\".\n  - `name` (string): The name of the new investor being created.\n  - `middleName` (string, optional): The middle name of the new investor being created.\n  - `surname` (string): The surname of the new investor being created.\n  - `secondSurname` (string, optional): The second surname of the new investor being created.\n</details>\n\n<details><summary>**Method: `burnToken`**</summary>\n\n**Description:** Sends a transaction to burn tokens from the specified user's balance, effectively reducing the token supply.\n\n**Additional Request Body Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token that the user is burning.\n- `investorEmail` (string): The email of the token holder whose tokens are to be burned.\n</details>\n\n<details><summary>**Method: `transferFrom`**</summary>\n\n**Description:** Sends a transaction to transfer tokens from one Ethereum wallet address to another.\n\n**Additional Request Body Parameters:**\n\n- `tokenSymbol` (string): The symbol  of the token being transferred.\n</details>\n\n<details><summary>**Method: `transferTo`**</summary>\n\n**Description:** Sends a transaction to transfer tokens from the sender address to another address.\n\n**Additional Request Body Parameters:**\n\n- `tokenSymbol` (string): The symbol  of the token being transferred.\n</details>\n\n<details><summary>**Method: `approve`**</summary>\n\n**Description:** Approve a spender to spend an amount of token from sender address.\n\n**Additional Request Body Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token being transferred.\n- `tokenizerAddress` (string, optional): The address of the tokenizer sending the request. This is mandatory if the `tokenSymbol` is one of the following: `BKN`, `USDT`, `USDC`.\n</details>\n\n<details><summary>**Method: `dividendDistribution`**</summary>\n\n**Description:** Create a new dividend distribution.\n</details>\n\n<details><summary>**Method: `newSto`**</summary>\n\n**Description:** Create a new offering.\n\n**Additional Request Body Parameters:**\n\n- `tokenAmount` (string): The token amount to offer.\n- `tokenizerEmail` (string): The email of the tokenizer that created the token.\n- `offeringName` (string): The name of the offering.\n- `startDate` (date): The date of the start of the offering.\n- `endDate` (date): The date of the end of the offering.\n- `acceptedCoin` (string): The accepted payment coin (USDT,USDC...).\n- `minRaiseUSD` (string): Softcap of the offering.\n- `maxRaiseUSD` (string): Hardcap of the offering.\n- `minInvestment` (string): Minimum amount to invest on each investment.\n- `maxInvestment` (string): Maximum amount to invest on each investment.\n- `signerAddress` (string): The wallet address of the signer for the offering.\n</details>\n\n**Additional Request Body Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token being transferred.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "signedTransactions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Array of signed Ethereum transactions (as hex strings)."
+                  },
+                  "rpcUrl": {
+                    "type": "string",
+                    "example": "{URL_TO_RPC} but can be omitted",
+                    "description": "The RPC URL to use for sending transactions. Defaults to network-based configuration if not provided."
+                  },
+                  "chainId": {
+                    "type": "string",
+                    "example": "aa36a7",
+                    "description": "Chain ID representing the blockchain network where transactions are to be executed."
+                  },
+                  "method": {
+                    "type": "string",
+                    "example": "newTokenization",
+                    "description": "Transaction type. Must be one of newTokenization, mintToken, whitelist, burnToken, transferFrom, transferTo, approve, dividendDistribution."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "txResponses": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "hash": {
+                            "type": "string"
+                          },
+                          "from": {
+                            "type": "string"
+                          },
+                          "to": {
+                            "type": "string"
+                          },
+                          "data": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "statusTx": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/patch-api-token-docs": {
+      "patch": {
+        "summary": "Update Token Documentation",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "**Description:** This endpoint allows you to update token-related documentation and branding materials.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY`\n\n**Request Format:**\nThis endpoint accepts `multipart/form-data` input, which should include:\n- `tokenSymbol` (text)\n- `tokenLogotype` (image file) - optional\n- `subscriptionAgreement` (PDF file) - optional\n- `legalDocs` (PDF file) - optional\n\n**What the endpoint does:**\n- The `tokenLogotype` is uploaded to S3.\n- The `subscriptionAgreement` and `legalDocs` are uploaded to IPFS.\n- The token record (identified by `tokenSymbol`) is then updated with references to the uploaded files.\n\n**Security:**\n- You must provide a valid `x-api-key`.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tokenSymbol": {
+                    "type": "string",
+                    "description": "The symbol of the token being updated."
+                  },
+                  "tokenLogotype": {
+                    "type": "object",
+                    "format": "binary",
+                    "description": "Image file for the token's logo."
+                  },
+                  "subscriptionAgreement": {
+                    "type": "object",
+                    "format": "binary",
+                    "description": "PDF file for the token's subscription agreement."
+                  },
+                  "legalDocs": {
+                    "type": "object",
+                    "format": "binary",
+                    "description": "PDF file containing the legal documentation."
+                  }
+                },
+                "required": [
+                  "tokenSymbol"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful update",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Indicates if the operation was successful.",
+                      "example": true
+                    },
+                    "tokenSymbol": {
+                      "type": "string",
+                      "description": "The token symbol that was updated."
+                    },
+                    "tokenLogotypeRef": {
+                      "type": "string",
+                      "description": "Reference (e.g., S3 path) to the uploaded token logotype image."
+                    },
+                    "subscriptionAgreementIpfs": {
+                      "type": "string",
+                      "description": "IPFS CID reference to the uploaded subscription agreement."
+                    },
+                    "legalDocsIpfs": {
+                      "type": "string",
+                      "description": "IPFS CID reference to the uploaded legal documents."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Error message indicating what went wrong."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized request (invalid or missing API key)."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/get-api-stos": {
+      "get": {
+        "summary": "Get all stos by TokenSymbol",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "**Description:** This endpoint retrieves all stos from a token (`tokenSymbol`).\n\n**Headers:**\n\n- `Authorization: Bearer YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The token symbol from a specific token.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tokenSymbol",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The token symbol from a specific token."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "uuid": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Unique identifier of the STO.",
+                            "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "Name of the STO.",
+                            "example": "Example Project Alpha STO"
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "Current status of the STO (e.g., UPCOMING, ACTIVE, COMPLETED).",
+                            "example": "ACTIVE"
+                          },
+                          "tokenAmount": {
+                            "type": "string",
+                            "description": "Total amount of tokens offered in the STO (as a string).",
+                            "example": "1000000"
+                          },
+                          "hardCap": {
+                            "type": "string",
+                            "description": "The hard cap funding goal (as a string).",
+                            "example": "500000"
+                          },
+                          "softCap": {
+                            "type": "string",
+                            "description": "The soft cap funding goal (as a string).",
+                            "example": "100000"
+                          },
+                          "maxInvestment": {
+                            "type": "string",
+                            "description": "Maximum allowed investment per participant (as a string).",
+                            "example": "10000"
+                          },
+                          "minInvestment": {
+                            "type": "string",
+                            "description": "Minimum required investment per participant (as a string).",
+                            "example": "100"
+                          },
+                          "tokenSymbol": {
+                            "type": "string",
+                            "description": "Symbol for the token being offered.",
+                            "example": "EXA"
+                          },
+                          "startDate": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "The STO start date and time in ISO 8601 format.",
+                            "example": "2025-04-01T10:00:00.000Z"
+                          },
+                          "endDate": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "The STO end date and time in ISO 8601 format.",
+                            "example": "2025-07-01T23:59:59.000Z"
+                          },
+                          "tokenPrice": {
+                            "type": "string",
+                            "description": "Price per token (as a string).",
+                            "example": "0.50"
+                          },
+                          "acceptedCoin": {
+                            "type": "string",
+                            "description": "The symbol of the accepted cryptocurrency for payment.",
+                            "example": "USDC"
+                          }
+                        },
+                        "required": [
+                          "uuid",
+                          "name",
+                          "status",
+                          "tokenAmount",
+                          "hardCap",
+                          "softCap",
+                          "maxInvestment",
+                          "minInvestment",
+                          "tokenSymbol",
+                          "startDate",
+                          "endDate",
+                          "tokenPrice",
+                          "acceptedCoin"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-api-sto-by-id/{id}": {
+      "get": {
+        "summary": "Get a specific STO by its UUID",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "**Description:** This endpoint retrieves the details of a specific STO using its unique identifier (`uuid`).\n\n**Headers:**\n\n- `Authorization: Bearer YOUR_API_KEY`\n\n**Path Parameters:**\n\n- `uuid` (string, format: uuid): The unique identifier of the STO to retrieve.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The unique identifier (UUID) of the STO."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response - STO details retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Represents the structure of an STO based on the defined interface.",
+                  "properties": {
+                    "uuid": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "Unique identifier of the STO.",
+                      "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Name of the STO.",
+                      "example": "Example Project Alpha STO"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Current status of the STO (e.g., UPCOMING, ACTIVE, COMPLETED).",
+                      "example": "ACTIVE"
+                    },
+                    "tokenAmount": {
+                      "type": "string",
+                      "description": "Total amount of tokens offered in the STO (as a string).",
+                      "example": "1000000"
+                    },
+                    "hardCap": {
+                      "type": "string",
+                      "description": "The hard cap funding goal (as a string).",
+                      "example": "500000"
+                    },
+                    "softCap": {
+                      "type": "string",
+                      "description": "The soft cap funding goal (as a string).",
+                      "example": "100000"
+                    },
+                    "maxInvestment": {
+                      "type": "string",
+                      "description": "Maximum allowed investment per participant (as a string).",
+                      "example": "10000"
+                    },
+                    "minInvestment": {
+                      "type": "string",
+                      "description": "Minimum required investment per participant (as a string).",
+                      "example": "100"
+                    },
+                    "tokenSymbol": {
+                      "type": "string",
+                      "description": "Symbol for the token being offered.",
+                      "example": "EXA"
+                    },
+                    "startDate": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The STO start date and time in ISO 8601 format.",
+                      "example": "2025-04-01T10:00:00.000Z"
+                    },
+                    "endDate": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The STO end date and time in ISO 8601 format.",
+                      "example": "2025-07-01T23:59:59.000Z"
+                    },
+                    "tokenPrice": {
+                      "type": "string",
+                      "description": "Price per token (as a string).",
+                      "example": "0.50"
+                    },
+                    "acceptedCoin": {
+                      "type": "string",
+                      "description": "The symbol of the accepted cryptocurrency for payment.",
+                      "example": "USDC"
+                    }
+                  },
+                  "required": [
+                    "uuid",
+                    "name",
+                    "status",
+                    "tokenAmount",
+                    "hardCap",
+                    "softCap",
+                    "maxInvestment",
+                    "minInvestment",
+                    "tokenSymbol",
+                    "startDate",
+                    "endDate",
+                    "tokenPrice",
+                    "acceptedCoin"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-api-sto-balance": {
+      "get": {
+        "summary": "Get STO balance and status information",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "**Description:** This endpoint retrieves balance details and current status for a Security Token Offering (STO). The specific STO may be determined by context (e.g., associated with the API key) or might require parameters not specified here.\n\n**Headers:**\n\n- `Authorization: Bearer YOUR_API_KEY`",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response - STO balance details retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Represents the balance and status details of an STO.",
+                  "properties": {
+                    "uuid": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "Unique identifier of the STO.",
+                      "example": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Name of the STO.",
+                      "example": "Project Phoenix STO"
+                    },
+                    "companyName": {
+                      "type": "string",
+                      "description": "Name of the company issuing the STO.",
+                      "example": "Phoenix Innovations Inc."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Current status of the STO (e.g., ACTIVE, PAUSED, COMPLETED).",
+                      "example": "ACTIVE"
+                    },
+                    "tokenAmount": {
+                      "type": "string",
+                      "description": "Total amount of tokens offered in the STO (as a string).",
+                      "example": "5000000"
+                    },
+                    "hardCap": {
+                      "type": "string",
+                      "description": "The hard cap funding goal (as a string).",
+                      "example": "2500000"
+                    },
+                    "softCap": {
+                      "type": "string",
+                      "description": "The soft cap funding goal (as a string).",
+                      "example": "500000"
+                    },
+                    "minInvestment": {
+                      "type": "string",
+                      "description": "Minimum required investment per participant (as a string).",
+                      "example": "200"
+                    },
+                    "maxInvestment": {
+                      "type": "string",
+                      "description": "Maximum allowed investment per participant (as a string).",
+                      "example": "25000"
+                    },
+                    "startDate": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The STO start date and time in ISO 8601 format.",
+                      "example": "2025-05-01T09:00:00.000Z"
+                    },
+                    "endDate": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The STO end date and time in ISO 8601 format.",
+                      "example": "2025-08-01T23:59:59.000Z"
+                    },
+                    "tokenPrice": {
+                      "type": "string",
+                      "description": "Price per token (as a string).",
+                      "example": "0.75"
+                    },
+                    "tokenSymbol": {
+                      "type": "string",
+                      "description": "Symbol for the token being offered.",
+                      "example": "PHNX"
+                    },
+                    "currentAmountRaised": {
+                      "type": "string",
+                      "description": "The amount currently raised in the STO (as a string).",
+                      "example": "875320.50"
+                    },
+                    "availableAmount": {
+                      "type": "string",
+                      "description": "The amount of tokens still available for sale (as a string).",
+                      "example": "4124679.33"
+                    }
+                  },
+                  "required": [
+                    "uuid",
+                    "name",
+                    "companyName",
+                    "status",
+                    "tokenAmount",
+                    "hardCap",
+                    "softCap",
+                    "minInvestment",
+                    "maxInvestment",
+                    "startDate",
+                    "endDate",
+                    "tokenPrice",
+                    "tokenSymbol",
+                    "currentAmountRaised",
+                    "availableAmount"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-api-investor-info": {
+      "get": {
+        "summary": "Get investors information",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The email of the investor."
+          },
+          {
+            "name": "token symbol",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The tokens symbol."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succesful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "description": "User's email address.",
+                      "example": "investor@example.com"
+                    },
+                    "firstName": {
+                      "type": "string",
+                      "description": "User's first name.",
+                      "example": "John"
+                    },
+                    "lastName": {
+                      "type": "string",
+                      "description": "User's last name (derived from firstSurname).",
+                      "example": "Doe"
+                    },
+                    "kycUrl": {
+                      "type": "string",
+                      "format": "url",
+                      "description": "URL related to the user's KYC status/process.",
+                      "example": "https://kyc.example.com/user/123"
+                    },
+                    "profilePicture": {
+                      "type": "string",
+                      "format": "url",
+                      "description": "URL or identifier for the user's profile picture.",
+                      "example": "https://images.example.com/profiles/john_doe.jpg"
+                    },
+                    "walletAddress": {
+                      "type": "string",
+                      "description": "User's associated wallet address.",
+                      "example": "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B"
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Type classification of the user.",
+                      "example": "INVESTOR_INDIVIDUAL"
+                    },
+                    "investments": {
+                      "type": "array",
+                      "description": "An array containing the user's investment details.",
+                      "items": {
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Unique identifier of the investment (from inv.uuid).",
+                            "example": "b8341970-b99d-4c75-929c-854ab746723e"
+                          },
+                          "date": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Timestamp when the investment was created (from inv.createdAt).",
+                            "example": "2024-06-13T08:20:00.656Z"
+                          },
+                          "txHash": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Transaction hash, if available (from inv.investmentTransaction?.txHash).",
+                            "example": "0x123abc456def789..."
+                          },
+                          "currency": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Symbol of the currency used for payment (from inv.paymentToken?.symbol).",
+                            "example": "USDT"
+                          },
+                          "amountInUSDT": {
+                            "type": "string",
+                            "description": "Invested amount, represented in USDT value (from inv.investedAmount).",
+                            "example": "100.0"
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "Status of the investment (from inv.status).",
+                            "example": "success"
+                          },
+                          "tokenSymbol": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Symbol of the token acquired in the offering (from inv.sto?.company?.tokenSymbol).",
+                            "example": "ABC"
+                          },
+                          "offeringId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true,
+                            "description": "Unique identifier of the STO/offering (from inv.sto?.uuid).",
+                            "example": "a5232594-3f97-47d0-b362-491caac9388f"
+                          },
+                          "offeringName": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Name of the STO/offering (from inv.sto?.name).",
+                            "example": "Round A"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-api-investments-by-sto-id/{id}{tokenSymbol}": {
+      "get": {
+        "summary": "Get investments associated with a specific STO ID",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "**Description:** This endpoint retrieves a list of investment transactions associated with a specific Security Token Offering (STO), identified by its UUID.\n\n**Headers:**\n\n- `Authorization: Bearer YOUR_API_KEY`\n\n**Path Parameters:**\n\n- `stoId` (string, format: uuid): The unique identifier of the STO for which to retrieve investments.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The unique identifier (UUID) of the STO."
+          },
+          {
+            "name": "tokenSymbol",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The unique identifier (UUID) of the STO."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response - Investments for the specified STO retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Contains a list of offering transactions and the total count.",
+                  "properties": {
+                    "offeringTransactionsList": {
+                      "type": "array",
+                      "description": "An array containing the details of offering-related transactions (investments for this STO).",
+                      "items": {
+                        "type": "object",
+                        "description": "Represents details of a single investment transaction related to an offering.",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Unique identifier of the investment record (from inv.uuid).",
+                            "example": "42594b34-1c1f-4e03-9dd2-78b16ff9826e"
+                          },
+                          "date": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Timestamp when the investment record was created (from inv.createdAt).",
+                            "example": "2024-06-06T09:35:43.106Z"
+                          },
+                          "txHash": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Transaction hash associated with the investment, if available (from inv.investmentTransaction?.txHash).",
+                            "example": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+                          },
+                          "user": {
+                            "type": "string",
+                            "format": "email",
+                            "description": "Email address of the investor (from inv.investorEmail).",
+                            "example": "investor.email@example.com"
+                          },
+                          "currency": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Symbol of the currency used for the transaction (from inv.paymentToken?.symbol).",
+                            "example": "USDC"
+                          },
+                          "amountInUSD": {
+                            "type": "string",
+                            "description": "Invested amount, represented in USD value (from inv.investedAmount).",
+                            "example": "500.00"
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "Status or type of the transaction (derived from inv.stoClaimant?.operation or defaults to 'invest').",
+                            "example": "invest"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "date",
+                          "user",
+                          "amountInUSD",
+                          "status"
+                        ]
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "The total number of investment records found for this STO.",
+                      "example": 42
+                    }
+                  },
+                  "required": [
+                    "offeringTransactionsList",
+                    "total"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-api-transaction-status": {
+      "get": {
+        "summary": "Check Transaction Status",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "**Description:** This endpoint retrieves the status of submitted transactions using the transaction hash (`hash`).\n\n**Headers:**\n\n- `Authorization: Bearer YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `hash` (string): The hash of the transaction.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "hash",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hash of the transaction."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "Transaction status.",
+                      "enum": [
+                        "pending",
+                        "success",
+                        "rejected"
+                      ]
+                    },
+                    "details": {
+                      "type": "object",
+                      "description": "Additional details about the transaction status."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-api-allowance": {
+      "get": {
+        "summary": "Get Allowance",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "**Description:** Retrieves the allowance of a spender address for a given token from the owner's address.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token (e.g., \"USDT\").\n- `spenderAddress` (string): The Ethereum address of the spender.\n- `ownerAddress` (string): The Ethereum address of the token owner.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tokenSymbol",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The symbol of the token (e.g., \"USDT\")."
+          },
+          {
+            "name": "spenderAddress",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The Ethereum address of the spender."
+          },
+          {
+            "name": "ownerAddress",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The Ethereum address of the token owner."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "allowance": {
+                      "type": "string",
+                      "description": "Allowance amount."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-api-balance-whitelist": {
+      "get": {
+        "summary": "Get Balance and Whitelist Status",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "**Description:** Fetches the balance and whitelist status of a user for a specific token.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.\n- `investorEmail` (string): The email of the investor.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tokenSymbol",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The symbol of the token."
+          },
+          {
+            "name": "investorEmail",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The email of the investor."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "bknFees": {
+                      "type": "string",
+                      "description": "Amount of BKN fees."
+                    },
+                    "senderBalance": {
+                      "type": "string",
+                      "description": "Balance of the sender."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-api-network-info": {
+      "get": {
+        "summary": "Get Network Information",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "**Description:** Retrieves network information for a specified chain ID.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `chainId` (string): The blockchain's chain ID (e.g., \"aa36a7\").",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The blockchain's chain ID (e.g., \"aa36a7\")."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "currencyName": {
+                      "type": "string",
+                      "description": "The name of the blockchain's currency."
+                    },
+                    "blockExplorerUrl": {
+                      "type": "string",
+                      "description": "The URL of the block explorer."
+                    },
+                    "factoryAddress": {
+                      "type": "string",
+                      "description": "The address of the factory contract."
+                    },
+                    "BKNAddress": {
+                      "type": "string",
+                      "description": "The address of the BKN token."
+                    },
+                    "USDTAddress": {
+                      "type": "string",
+                      "description": "The address of the USDT token."
+                    },
+                    "USDCAddress": {
+                      "type": "string",
+                      "description": "The address of the USDC token."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-api-token-info": {
+      "get": {
+        "summary": "Get Token Information",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "**Description:** Retrieves detailed information about a specific token.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tokenSymbol",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The symbol of the token."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tokenSymbols": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "List of token symbols."
+                    },
+                    "tokenizerEmails": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "List of tokenizer emails."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-api-tokenizer-info": {
+      "get": {
+        "summary": "Get Tokenizer Information",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "**Description:** Retrieves information about the tokenizer of a specific token.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tokenSymbol",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The symbol of the token."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "companyWalletAddress": {
+                      "type": "string",
+                      "description": "The company's wallet address."
+                    },
+                    "paymentTokenAddress": {
+                      "type": "string",
+                      "description": "The payment token's address."
+                    },
+                    "escrowAddress": {
+                      "type": "string",
+                      "description": "The escrow address."
+                    },
+                    "chainId": {
+                      "type": "string",
+                      "description": "The blockchain's chain ID."
+                    },
+                    "email": {
+                      "type": "string",
+                      "description": "The email of the tokenizer."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-api-whitelist-status": {
+      "get": {
+        "summary": "Get Whitelist Status",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "**Description:** Checks the whitelist status of an investor for a specific token.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.\n- `investorAddress` (string): The Ethereum address of the investor.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tokenSymbol",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The symbol of the token."
+          },
+          {
+            "name": "investorAddress",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The Ethereum address of the investor."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "whitelistStatus": {
+                      "type": "boolean",
+                      "description": "Whitelist status of the investor."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
