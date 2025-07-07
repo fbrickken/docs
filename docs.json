@@ -11,30 +11,6 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Platform Guide",
-        "groups": [
-          {
-            "group": "Get Started",
-            "pages": [
-              "index",
-              "quickstart",
-              "development"
-            ]
-          },
-          {
-            "group": "Essentials",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
-            ]
-          }
-        ]
-      },
-      {
         "tab": "API Reference",
         "groups": [
           {
@@ -46,10 +22,21 @@
           {
             "group": "Endpoint Examples",
             "pages": [
-              "api-reference/endpoint/get",
               "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "api-reference/endpoint/send",
+              "api-reference/endpoint/update-docs",
+              "api-reference/endpoint/get-offers",
+              "api-reference/endpoint/get-sto-by-id",
+              "api-reference/endpoint/get-sto-balance",
+              "api-reference/endpoint/get-investors-info",
+              "api-reference/endpoint/get-investments-by-sto",
+              "api-reference/endpoint/get-transaction-status",
+              "api-reference/endpoint/get-api-allowance",
+              "api-reference/endpoint/get-api-balance-whitelist",
+              "api-reference/endpoint/get-api-network-info",
+              "api-reference/endpoint/get-api-token-info",
+              "api-reference/endpoint/get-api-tokenizer-info",
+              "api-reference/endpoint/get-api-whitelist-status"
             ]
           }
         ]
