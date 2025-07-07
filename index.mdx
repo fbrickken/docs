@@ -1,10 +1,7 @@
 ---
-title: Introduction
-description: "Welcome to the Brickken DApp – your all-in-one platform to issue, manage, and invest in tokenized real-world assets.
-
-Brickken’s decentralized application is designed to simplify the complex processes behind tokenization. Whether you're an issuer looking to raise capital or an investor exploring new opportunities in digital assets, our DApp provides a seamless, secure, and compliant environment to interact with tokenized assets."
+title: 'Introduction'
+description: 'Overview and authentication for the Brickken API.'
 ---
-
 <img
   className="block dark:hidden"
   src="/images/hero-light.png"
@@ -16,19 +13,49 @@ Brickken’s decentralized application is designed to simplify the complex proce
   alt="Hero Dark"
 />
 
-## What You Can Do with the DApp
-#### Issuers
-Create and launch your own tokenized offerings, manage shareholders, and track investments – all from a simple, intuitive dashboard.
+## Welcome
 
-#### Investor
-Browse offerings, complete KYC, purchase digital assets, and monitor your portfolio in real time.
+Welcome to the Brickken Platform your gateway to tokenizing real-world assets in a secure, compliant, and efficient way. This documentation is designed to help you navigate through the platform’s capabilities, understand the core concepts, and start building with our APIs and smart contracts.
 
-#### On-chain and Off-chain Compliance
-The DApp ensures a compliant framework by integrating identity verification, whitelisting, and transaction monitoring across jurisdictions.
-
-#### Multi-network Support
-Interact with assets deployed on various EVM-compatible blockchains, and manage operations across different networks effortlessly.
+Whether you're a developer integrating tokenization workflows, a business issuing digital assets, or a partner building on top of Brickken's infrastructure, this guide will walk you through the essential steps to get started.
 
 
-> With Brickken’s DApp, blockchain becomes a powerful tool – not a technical barrier. No coding required. Just a clean interface designed for real-world finance.
+<Card
+  title="Brickken Sandbox enviroment"
+  icon="1"
+  href="https://dapp.sandbox.brickken.com"
+>
+  create an account on brickken sandbox.
+</Card>
+<Card
+  title="Request your api key"
+  icon="2"
+  href="mailto:tech@brickken.com"
+>
+  Send us an email to tech@brickken.com with your user (email) to get your api key
+</Card>
+<Card
+  title="Start your tokenization journey"
+  icon="3"
+  href="mailto:tech@brickken.com"
+>
+  you are ready to start using our api in sandbox enviroment
+</Card>
 
+## Authentication
+
+All API endpoints are authenticated using an API Key sent in the request header. This is defined in the OpenAPI specification under securitySchemes.
+
+You must include your unique API key in the x-api-key header of each request.
+
+```json
+"components": {
+  "securitySchemes": {
+    "apiKeyAuth": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "x-api-key"
+    }
+  }
+}
+```
