@@ -74,6 +74,11 @@
                     "example": "10",
                     "description": "Max token supply."
                   },
+                  "name": {
+                    "type": "string",
+                    "example": "Brickken",
+                    "description": "Name of the token."
+                  },
                   "gasLimit": {
                     "type": "string",
                     "example": "2000000 but can be omitted",
