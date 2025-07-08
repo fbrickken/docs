@@ -64,6 +64,16 @@
                     "example": "aa36a7",
                     "description": "The blockchain network's chain ID in hexadecimal format (e.g., \"aa36a7\" for Sepolia testnet)."
                   },
+                  "symbol": {
+                    "type": "string",
+                    "example": "BKN",
+                    "description": "The token symbol (max 5 characters)."
+                  },
+                  "supplyCap": {
+                    "type": "string",
+                    "example": "10",
+                    "description": "Max token supply."
+                  },
                   "gasLimit": {
                     "type": "string",
                     "example": "2000000 but can be omitted",
