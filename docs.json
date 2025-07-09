@@ -10,15 +10,56 @@
   "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
+      
       {
         "tab": "Guides",
         "groups": [
           {
             "group": "Get Started",
             "pages": [
-              "index",
-              "quickstart",
-              "development"
+              "guides/introduction",
+              "guides/quickstart",
+              "guides/development"
+            ]
+          },
+          {
+            "group": "Investor Guide",
+            "pages": [
+              "guides/understanding",
+              "guides/quickstart-invest",
+              "guides/development"
+            ]
+          },
+          {
+            "group": "Tokenizer Guide (Asset Issuer)",
+            "pages": [
+              "guides/introduction",
+              "guides/quickstart",
+              "guides/development"
+            ]
+          },
+          {
+            "group": "Essentials",
+            "pages": [
+              "essentials/markdown",
+              "essentials/code",
+              "essentials/images",
+              "essentials/settings",
+              "essentials/navigation",
+              "essentials/reusable-snippets"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "White-Label",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "guides/introduction",
+              "guides/quickstart",
+              "guides/development"
             ]
           },
           {
