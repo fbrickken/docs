@@ -1,0 +1,152 @@
+---
+title: Build with Brickken
+mode: "custom"
+description: "Learn how to get started with the Brickken API, the dApp, and our developer tools."
+---
+
+{/* --- Section 1: Two-Column Hero --- */}
+<div className="py-10 sm:py-15">
+  <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <div className="grid grid-cols-1 items-center gap-x-16 gap-y-10 md:grid-cols-2">
+      
+      {/* Column 1: Text Content */}
+      <div>
+        <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-5xl">
+          Build with Brickken
+        </h1>
+        <p className="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">
+          Learn how to get started with the Brickken API, the dApp, and our suite of developer tools for the tokenization economy.
+        </p>
+        <div className="mt-10">
+          {/* CORRECTED LINE: Replaced the <a> tag with the <Button> component */}
+          <Button href="/api-reference/introduction" variant="primary">Explore the API</Button>
+        </div>
+      </div>
+
+      {/* Column 2: Image */}
+      <div className="flex justify-center">
+        <img
+          src="/images/hero-light.png"
+          alt="Abstract illustration"
+          className="w-full max-w-sm" 
+        />
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+{/* --- Section 2: Brickken Dapp Card Grid --- */}
+<div className="py-20 sm:py-24">
+  <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <div className="text-left md:text-center">
+        <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+            Brickken Dapp
+        </h2>
+    </div>
+    
+    {/* Use CardGroup for a perfectly aligned, responsive grid */}
+    <CardGroup cols={3} className="mt-16">
+      <Card
+        title="Get started"
+        icon="play"
+        href="/tokenizer"
+      >
+        Make your first API call in minutes and start issuing assets.
+      </Card>
+      <Card
+        title="Features overview"
+        icon="sparkles"
+        href="/investor"
+      >
+        Explore the advanced features and capabilities now available.
+      </Card>
+      <Card
+        title="API reference"
+        icon="code"
+        href="/api-reference/introduction"
+      >
+        Integrate and scale using our API and SDKs.
+      </Card>
+      <Card
+        title="Whitelabel dApp"
+        icon="layer-group"
+        href="/developer/whitelabel"
+      >
+        Deploy your own branded tokenization platform with our solution.
+      </Card>
+      <Card
+        title="Release notes"
+        icon="star"
+        href="/release-notes"
+      >
+        Learn about changes and new features in the Brickken platform.
+      </Card>
+      <Card
+        title="Get Support"
+        icon="question"
+        href="/support"
+      >
+        Have a question? Reach out to our team for developer support.
+      </Card>
+    </CardGroup>
+  </div>
+  
+</div>
+<div className="py-20 sm:py-24">
+  <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <div className="text-left md:text-center">
+        <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+            Developer Platform
+        </h2>
+    </div>
+    
+    {/* Use CardGroup for a perfectly aligned, responsive grid */}
+    <CardGroup cols={3} className="mt-16">
+      <Card
+        title="Get started"
+        icon="play"
+        href="/tokenizer"
+      >
+        Make your first API call in minutes and start issuing assets.
+      </Card>
+      <Card
+        title="Features overview"
+        icon="sparkles"
+        href="/investor"
+      >
+        Explore the advanced features and capabilities now available.
+      </Card>
+      <Card
+        title="API reference"
+        icon="code"
+        href="/api-reference/introduction"
+      >
+        Integrate and scale using our API and SDKs.
+      </Card>
+      <Card
+        title="Whitelabel dApp"
+        icon="layer-group"
+        href="/developer/whitelabel"
+      >
+        Deploy your own branded tokenization platform with our solution.
+      </Card>
+      <Card
+        title="Release notes"
+        icon="star"
+        href="/release-notes"
+      >
+        Learn about changes and new features in the Brickken platform.
+      </Card>
+      <Card
+        title="Get Support"
+        icon="question"
+        href="/support"
+      >
+        Have a question? Reach out to our team for developer support.
+      </Card>
+    </CardGroup>
+  </div>
+  
+</div>

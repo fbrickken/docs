@@ -7,10 +7,17 @@
     "light": "#4C82df",
     "dark": "#4C82df"
   },
+  
   "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
-      
+      {
+        "tab": "Welcome",
+            "pages": [
+              "index"
+            ]
+          },
+
       {
         "tab": "Guides",
         "groups": [
