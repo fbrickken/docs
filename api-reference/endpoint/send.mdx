@@ -1,4 +1,85 @@
 ---
-title: 'Submit Signed Transactions'
-openapi: 'POST /send-api-transactions'
+title: 'Send Transactions'
+openapi: 'POST /send-transactions'
 ---
+
+Submits signed transactions to the blockchain. This endpoint works uniformly for all transaction types prepared using the `/prepare-transactions` endpoint.
+
+## Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `signedTransactions` | string[] | Yes | Array of signed transaction hex strings |
+| `txId` | string | Yes | Transaction ID from prepare-transactions response |
+
+## Request Body
+
+```json
+{
+  "signedTransactions": [
+    "0x02f8b1018203e8843b9aca00850ba43b740082520894742d35cc6634c0532925a3b8d4c9db96c4b4d8b80b844a9059cbb000000000000000000000000456789abcdef..."
+  ],
+  "txId": "tx_abc123def456"
+}
+```
+
+## Response
+
+### Success Response
+
+```json
+{
+  "txHash": "0x1234567890abcdef...",
+  "status": "pending"
+}
+```
+
+### Error Response
+
+```json
+{
+  "error": {
+    "code": "INVALID_SIGNATURE",
+    "message": "Transaction signature is invalid",
+    "details": {
+      "transactionIndex": 0,
+      "expectedSigner": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+      "actualSigner": "0x..."
+    }
+  }
+}
+```
+
+## Workflow
+
+1. **Prepare Transactions**: First, call `/prepare-transactions` with your desired method and parameters
+2. **Sign Transactions**: Sign each transaction in the returned `transactions` array using your preferred wallet or signing method
+3. **Send Transactions**: Submit the signed transactions along with the `txId` to this endpoint
+
+## Supported Transaction Types
+
+This endpoint accepts signed transactions for all methods supported by `/prepare-transactions`:
+
+- `newTokenization` - Create new tokenized assets
+- `newSto` - Create Security Token Offerings
+- `newInvest` - Make investments in STOs
+- `claimTokens` - Claim tokens from completed STOs
+- `closeOffer` - Close active STOs
+- `mintToken` - Mint additional tokens
+- `whitelist` - Manage address whitelist status
+- `approve` - Approve token spending
+- `burnToken` - Burn tokens
+- `transferFrom` - Transfer tokens (with approval)
+- `transferTo` - Transfer tokens from signer
+- `dividendDistribution` - Distribute dividends
+
+## Transaction Status
+
+After submitting transactions, you can check their status using the `/get-transaction-status` endpoint with the returned transaction hash.
+
+## Security Notes
+
+- Always verify transaction details before signing
+- Ensure the `txId` matches the one received from `/prepare-transactions`
+- Use secure signing methods for production environments
+- Never share private keys or expose them in client-side code

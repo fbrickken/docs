@@ -1,4 +1,245 @@
 ---
-title: 'Prepare Transaction'
-openapi: 'POST /prepare-api-transactions'
+title: 'Prepare Transactions'
+openapi: 'POST /prepare-transactions'
 ---
+
+Prepares unsigned transactions for various blockchain operations. This endpoint supports multiple transaction methods for tokenization, STO management, token operations, and more.
+
+## Common Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chainId` | string | Yes | Blockchain network identifier (hex format) |
+| `method` | string | Yes | Transaction method type |
+| `signerAddress` | string | Yes | Address that will sign the transaction |
+
+## Supported Methods
+
+### newTokenization
+
+Creates a new tokenized asset.
+
+```json
+{
+  "chainId": "0x89",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "method": "newTokenization",
+  "tokenizerEmail": "tokenizer@example.com",
+  "url": "https://example.com/token-docs",
+  "name": "Example Token",
+  "tokenSymbol": "EXMPL",
+  "supplyCap": "1000000",
+  "preMints": [
+    {
+      "email": "holder@example.com",
+      "investorAddress": "0x123...",
+      "amount": "1000",
+      "needWhitelist": true
+    }
+  ],
+  "initialHolders": [
+    {
+      "email": "holder@example.com",
+      "percentage": 10
+    }
+  ]
+}
+```
+
+### newSto
+
+Creates a new Security Token Offering.
+
+```json
+{
+  "chainId": "0x89",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "method": "newSto",
+  "tokenSymbol": "EXMPL",
+  "paymentTokenAddress": "0x456...",
+  "price": "100",
+  "minInvestment": "10",
+  "maxInvestment": "10000",
+  "startDate": "2024-01-01T00:00:00Z",
+  "endDate": "2024-12-31T23:59:59Z",
+  "softCap": "50000",
+  "hardCap": "500000"
+}
+```
+
+### newInvest
+
+Makes an investment in an STO.
+
+```json
+{
+  "chainId": "0x89",
+  "investorAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "method": "newInvest",
+  "tokenSymbol": "EXMPL",
+  "investorEmail": "investor@example.com",
+  "amount": "1000"
+}
+```
+
+### claimTokens
+
+Claims tokens from a completed STO.
+
+```json
+{
+  "chainId": "0x89",
+  "investorAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "method": "claimTokens",
+  "tokenSymbol": "EXMPL",
+  "investorEmail": "investor@example.com"
+}
+```
+
+### closeOffer
+
+Closes an active STO.
+
+```json
+{
+  "chainId": "0x89",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "method": "closeOffer",
+  "tokenSymbol": "EXMPL"
+}
+```
+
+### mintToken
+
+Mints additional tokens to specified addresses.
+
+```json
+{
+  "chainId": "0x89",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "method": "mintToken",
+  "tokenSymbol": "EXMPL",
+  "userToMint": [
+    {
+      "email": "user@example.com",
+      "investorAddress": "0x789...",
+      "amount": "500",
+      "needWhitelist": true
+    }
+  ]
+}
+```
+
+### whitelist
+
+Manages whitelist status for addresses.
+
+```json
+{
+  "chainId": "0x89",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "method": "whitelist",
+  "tokenSymbol": "EXMPL",
+  "userToWhitelist": [
+    {
+      "whitelistStatus": "true",
+      "investorAddress": "0x789..."
+    }
+  ]
+}
+```
+
+### approve
+
+Approves another address to spend tokens on behalf of the signer.
+
+```json
+{
+  "chainId": "0x89",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "method": "approve",
+  "tokenSymbol": "EXMPL",
+  "spenderAddress": "0x456...",
+  "amount": "100"
+}
+```
+
+### burnToken
+
+Burns tokens from the signer's address.
+
+```json
+{
+  "chainId": "0x89",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "method": "burnToken",
+  "tokenSymbol": "EXMPL",
+  "amount": "100"
+}
+```
+
+### transferFrom
+
+Transfers tokens from one address to another (requires approval).
+
+```json
+{
+  "chainId": "0x89",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "method": "transferFrom",
+  "tokenSymbol": "EXMPL",
+  "from": "0x123...",
+  "to": "0x456...",
+  "amount": "50"
+}
+```
+
+### transferTo
+
+Transfers tokens from signer's address to another address.
+
+```json
+{
+  "chainId": "0x89",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "method": "transferTo",
+  "tokenSymbol": "EXMPL",
+  "to": "0x456...",
+  "amount": "50"
+}
+```
+
+### dividendDistribution
+
+Distributes dividends to token holders.
+
+```json
+{
+  "chainId": "0x89",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "method": "dividendDistribution",
+  "tokenSymbol": "EXMPL",
+  "amount": "1000"
+}
+```
+
+## Response Format
+
+```json
+{
+  "txId": "tx_abc123def456",
+  "transactions": [
+    {
+      "to": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+      "data": "0x...",
+      "value": "0",
+      "gasLimit": "500000",
+      "maxFeePerGas": "20000000000",
+      "maxPriorityFeePerGas": "2000000000",
+      "nonce": 42,
+      "type": 2,
+      "chainId": "0x89"
+    }
+  ]
+}
+```

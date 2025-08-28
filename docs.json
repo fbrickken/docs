@@ -20,23 +20,50 @@
             ]
           },
           {
-            "group": "Endpoint Examples",
+            "group": "Transaction Endpoints",
             "pages": [
               "api-reference/endpoint/create",
-              "api-reference/endpoint/send",
-              "api-reference/endpoint/update-docs",
+              "api-reference/endpoint/send"
+            ]
+          },
+          {
+            "group": "V2 Transaction Methods",
+            "pages": [
+              "api-reference/endpoint/new-sto",
+              "api-reference/endpoint/new-invest",
+              "api-reference/endpoint/claim-tokens",
+              "api-reference/endpoint/close-offer"
+            ]
+          },
+          {
+            "group": "On Behalf Endpoints",
+            "pages": [
+              "api-reference/endpoint/create-token-on-behalf",
+              "api-reference/endpoint/invest-on-behalf",
+              "api-reference/endpoint/sto-claim-on-behalf"
+            ]
+          },
+          {
+            "group": "Information Endpoints",
+            "pages": [
               "api-reference/endpoint/get-offers",
               "api-reference/endpoint/get-sto-by-id",
               "api-reference/endpoint/get-sto-balance",
               "api-reference/endpoint/get-investors-info",
               "api-reference/endpoint/get-investments-by-sto",
               "api-reference/endpoint/get-transaction-status",
-              "api-reference/endpoint/get-api-allowance",
-              "api-reference/endpoint/get-api-balance-whitelist",
-              "api-reference/endpoint/get-api-network-info",
-              "api-reference/endpoint/get-api-token-info",
-              "api-reference/endpoint/get-api-tokenizer-info",
-              "api-reference/endpoint/get-api-whitelist-status"
+              "api-reference/endpoint/get-allowance",
+              "api-reference/endpoint/get-balance-whitelist",
+              "api-reference/endpoint/get-network-info",
+              "api-reference/endpoint/get-token-info",
+              "api-reference/endpoint/get-tokenizer-info",
+              "api-reference/endpoint/get-whitelist-status"
+            ]
+          },
+          {
+            "group": "Management Endpoints",
+            "pages": [
+              "api-reference/endpoint/update-docs"
             ]
           }
         ]
