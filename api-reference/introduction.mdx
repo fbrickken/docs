@@ -1,6 +1,6 @@
 ---
 title: 'Introduction'
-description: 'Overview and authentication for the Brickken API.'
+description: 'Overview and authentication for the Brickken API V2.'
 ---
 <img
   className="block dark:hidden"
@@ -13,45 +13,108 @@ description: 'Overview and authentication for the Brickken API.'
   alt="Hero Dark"
 />
 
-## Welcome
+## Welcome to Brickken API V2
 
-Welcome to the Brickken Platform your gateway to tokenizing real-world assets in a secure, compliant, and efficient way. This documentation is designed to help you navigate through the platform’s capabilities, understand the core concepts, and start building with our APIs and smart contracts.
+Welcome to the Brickken API V2, your comprehensive interface for tokenizing real-world assets on the blockchain. This updated version includes streamlined endpoints, new transaction methods, and enhanced "on behalf" functionality for managing tokenization workflows.
 
 Whether you're a developer integrating tokenization workflows, a business issuing digital assets, or a partner building on top of Brickken's infrastructure, this guide will walk you through the essential steps to get started.
 
+### Key Changes in V2
+
+- **Simplified Endpoints**: Removed "-api" suffix from all endpoints (e.g., `prepare-api-transactions` → `prepare-transactions`)
+- **New Transaction Methods**: Added `newSto`, `newInvest`, `claimTokens`, and `closeOffer`
+- **Unified Send Transactions**: The `send-transactions` endpoint now accepts signed transactions and `txId` for all transaction types
+- **On Behalf Endpoints**: Three new endpoints for performing actions on behalf of users:
+  - `create-token-on-behalf`: Create tokens on behalf of tokenizers
+  - `invest-on-behalf`: Make investments on behalf of investors
+  - `sto-claim-on-behalf`: Claim tokens on behalf of investors
+
 
 <Card
-  title="Brickken Sandbox enviroment"
+  title="Brickken Sandbox Environment"
   icon="1"
   href="https://dapp.sandbox.brickken.com"
 >
-  create an account on brickken sandbox.
+  Create an account on Brickken sandbox to get started.
 </Card>
 <Card
-  title="Request your api key"
+  title="Request Your API Key"
   icon="2"
   href="mailto:tech@brickken.com"
 >
-  Send us an email to tech@brickken.com with your user (email) to get your api key
+  Send us an email to tech@brickken.com with your user (email) to get your API key
 </Card>
 <Card
-  title="Start your tokenization journey!"
+  title="Start Your Tokenization Journey!"
   icon="3"
   href="/api-reference/endpoint/create"
 >
-  you are ready to start using our api in sandbox enviroment
+  You are ready to start using our API V2 in sandbox environment
 </Card>
 <Card
-  title="Are you ready to go to Prod? "
+  title="Ready for Production?"
   icon="4"
   href="https://meetings.hubspot.com/ludovico-rossi/t1"
 >
-  Schedule a call with us 
+  Schedule a call with us to go live
 </Card>
+
+## API Workflow
+
+The typical workflow involves three steps:
+
+1. **Prepare**: Use `POST /prepare-transactions` to prepare unsigned transactions
+2. **Sign**: Sign the returned transactions using your preferred wallet/signing method
+3. **Send**: Submit signed transactions using `POST /send-transactions`
+
+### On Behalf Workflow
+
+1. **Create Token on Behalf**: Use `POST /create-token-on-behalf` to create tokens on behalf of tokenizers
+2. **Invest on Behalf**: Use `POST /invest-on-behalf` to make investments on behalf of investors
+3. **Claim Tokens on Behalf**: Use `POST /sto-claim-on-behalf` to claim tokens on behalf of investors
+
+## Supported Networks
+
+The API supports multiple blockchain networks. Specify the network using the `chainId` parameter:
+
+### Sandbox Environment
+
+```
+Sepolia testnet:
+Chain Id: "0xAA36A7"
+
+Polygon Amoy testnet:
+Chain Id: "0x13882"
+```
+
+### Production Environment
+
+```
+Ethereum mainnet:
+Chain Id: "0x1"
+
+Base mainnet:
+Chain Id: "0x2105"
+
+BNB Smart Chain Mainnet:
+Chain Id: "0x38"
+
+Polygon mainnet:
+Chain Id: "0x89"
+```
+
+## Environments
+
+- **Sandbox**: `https://api-sandbox.brickken.com`
+- **Production**: `https://api.brickken.com`
 
 ## Authentication
 
-All API endpoints are authenticated using an API Key sent in the request header. This is defined in the OpenAPI specification under securitySchemes.
+All API requests require authentication using an API key provided in the request headers.
+
+```http
+x-api-key: your-api-key-here
+```
 
 You must include your unique API key in the x-api-key header of each request.
 
