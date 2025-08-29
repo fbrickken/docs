@@ -2,3 +2,29 @@
 title: 'Get Tokenizer Information'
 openapi: 'GET /get-tokenizer-info'
 ---
+
+Retrieves information about the tokenizer for a specific token.
+
+## Query Parameters
+
+- `tokenSymbol` (required): Token symbol
+- `chainId` (required): Blockchain network ID
+
+## Example
+
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-tokenizer-info?tokenSymbol=EXMPL&chainId=0x89' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
+## Response
+
+```json
+{
+  "tokenizerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "tokenizerEmail": "tokenizer@example.com",
+  "tokenSymbol": "EXMPL",
+  "isActive": true
+}
+```

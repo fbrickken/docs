@@ -1,0 +1,47 @@
+---
+title: 'Get STOs'
+openapi: 'GET /get-stos'
+---
+
+Retrieves information about Security Token Offerings (STOs).
+
+## Query Parameters
+
+- `tokenSymbol` (optional): Filter by specific token symbol
+- `id` (optional): Get specific STO by ID
+- `chainId` (required): Blockchain network ID
+
+## Example - Get all STOs
+
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-stos?chainId=0x89' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
+## Example - Get specific STO by ID
+
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-stos?id=123&chainId=0x89' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
+## Response
+
+```json
+{
+  "stos": [
+    {
+      "id": "123",
+      "tokenSymbol": "EXMPL",
+      "status": "active",
+      "startDate": "2024-01-01T00:00:00Z",
+      "endDate": "2024-12-31T23:59:59Z",
+      "softCap": "50000",
+      "hardCap": "500000",
+      "raised": "25000"
+    }
+  ]
+}
+```

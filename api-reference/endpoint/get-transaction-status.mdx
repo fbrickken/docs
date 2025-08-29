@@ -2,3 +2,28 @@
 title: 'Get Transaction Status'
 openapi: 'GET /get-transaction-status'
 ---
+
+Retrieves the status of a transaction.
+
+## Query Parameters
+
+- `hash` (required): Transaction hash
+
+## Example
+
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-transaction-status?hash=0x46f7114878c49ad5af0f1e6f0a2ce9c700c1fdf36455fd956b20f492ee813e80' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
+## Response
+
+```json
+{
+  "status": "success",
+  "txHash": "0x1234567890abcdef...",
+  "blockNumber": 12345678,
+  "gasUsed": "150000"
+}
+```

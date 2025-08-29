@@ -35,8 +35,7 @@
           {
             "group": "Information Endpoints",
             "pages": [
-              "api-reference/endpoint/get-offers",
-              "api-reference/endpoint/get-sto-by-id",
+              "api-reference/endpoint/get-stos",
               "api-reference/endpoint/get-sto-balance",
               "api-reference/endpoint/get-investors-info",
               "api-reference/endpoint/get-investments-by-sto",

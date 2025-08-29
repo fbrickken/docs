@@ -2,3 +2,28 @@
 title: 'Get Balance and Whitelist Status'
 openapi: 'GET /get-balance-whitelist'
 ---
+
+Retrieves token balance and whitelist status for an address.
+
+## Query Parameters
+
+- `tokenSymbol` (required): Token symbol
+- `address` (required): Wallet address
+- `chainId` (required): Blockchain network ID
+
+## Example
+
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-balance-whitelist?tokenSymbol=EXMPL&address=0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b&chainId=0x89' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
+## Response
+
+```json
+{
+  "balance": "500000000000000000",
+  "isWhitelisted": true
+}
+```

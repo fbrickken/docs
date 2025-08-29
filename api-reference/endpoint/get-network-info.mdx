@@ -2,3 +2,33 @@
 title: 'Get Network Information'
 openapi: 'GET /get-network-info'
 ---
+
+Retrieves information about a blockchain network.
+
+## Query Parameters
+
+- `chainId` (required): Blockchain network ID
+
+## Example
+
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-network-info?chainId=0x89' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
+## Response
+
+```json
+{
+  "chainId": "0x89",
+  "networkName": "Polygon",
+  "rpcUrl": "https://polygon-rpc.com",
+  "blockExplorerUrl": "https://polygonscan.com",
+  "nativeCurrency": {
+    "name": "MATIC",
+    "symbol": "MATIC",
+    "decimals": 18
+  }
+}
+```

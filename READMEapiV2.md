@@ -431,7 +431,14 @@ Claims tokens on behalf of an investor.
 Retrieves the status of a transaction.
 
 **Query Parameters:**
-- `txHash` (required): Transaction hash
+- `hash` (required): Transaction hash
+
+**Example:**
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-transaction-status?hash=0x46f7114878c49ad5af0f1e6f0a2ce9c700c1fdf36455fd956b20f492ee813e80' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
 
 **Response:**
 ```json
@@ -453,6 +460,13 @@ Retrieves the allowance amount for a spender.
 - `spenderAddress` (required): Spender address
 - `chainId` (required): Blockchain network ID
 
+**Example:**
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-allowance?tokenSymbol=EXMPL&ownerAddress=0x123...&spenderAddress=0x456...&chainId=0x89' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
 **Response:**
 ```json
 {
@@ -469,6 +483,13 @@ Retrieves token balance and whitelist status for an address.
 - `address` (required): Wallet address
 - `chainId` (required): Blockchain network ID
 
+**Example:**
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-balance-whitelist?tokenSymbol=EXMPL&address=0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b&chainId=0x89' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
 **Response:**
 ```json
 {
@@ -483,6 +504,13 @@ Retrieves information about supported networks.
 
 **Query Parameters:**
 - `chainId` (optional): Specific chain ID
+
+**Example:**
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-network-info?chainId=0x89' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
 
 **Response:**
 ```json
@@ -506,6 +534,13 @@ Retrieves detailed information about a token.
 - `tokenSymbol` (required): Token symbol
 - `chainId` (required): Blockchain network ID
 
+**Example:**
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-token-info?tokenSymbol=EXMPL&chainId=0x89' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
 **Response:**
 ```json
 {
@@ -523,6 +558,13 @@ Retrieves information about a tokenizer.
 
 **Query Parameters:**
 - `tokenizerEmail` (required): Tokenizer email address
+
+**Example:**
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-tokenizer-info?tokenizerEmail=tokenizer@example.com' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
 
 **Response:**
 ```json
@@ -548,12 +590,60 @@ Checks if an address is whitelisted for a specific token.
 - `address` (required): Wallet address to check
 - `chainId` (required): Blockchain network ID
 
+**Example:**
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-whitelist-status?tokenSymbol=EXMPL&address=0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b&chainId=0x89' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
 **Response:**
 ```json
 {
   "isWhitelisted": true,
   "address": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "tokenSymbol": "EXMPL"
+}
+```
+
+### GET /get-stos
+
+Retrieves information about Security Token Offerings (STOs).
+
+**Query Parameters:**
+- `tokenSymbol` (optional): Filter by specific token symbol
+- `id` (optional): Get specific STO by ID
+- `chainId` (required): Blockchain network ID
+
+**Example - Get all STOs:**
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-stos?chainId=0x89' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
+**Example - Get specific STO by ID:**
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-stos?id=123&chainId=0x89' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
+**Response:**
+```json
+{
+  "stos": [
+    {
+      "id": "123",
+      "tokenSymbol": "EXMPL",
+      "status": "active",
+      "startDate": "2024-01-01T00:00:00Z",
+      "endDate": "2024-12-31T23:59:59Z",
+      "softCap": "50000",
+      "hardCap": "500000",
+      "raised": "25000"
+    }
+  ]
 }
 ```
 

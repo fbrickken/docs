@@ -2,3 +2,29 @@
 title: 'Get Whitelist Status'
 openapi: 'GET /get-whitelist-status'
 ---
+
+Checks if an address is whitelisted for a specific token.
+
+## Query Parameters
+
+- `tokenSymbol` (required): Token symbol
+- `address` (required): Wallet address to check
+- `chainId` (required): Blockchain network ID
+
+## Example
+
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-whitelist-status?tokenSymbol=EXMPL&address=0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b&chainId=0x89' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
+## Response
+
+```json
+{
+  "isWhitelisted": true,
+  "address": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "tokenSymbol": "EXMPL"
+}
+```

@@ -2,3 +2,30 @@
 title: 'Get Token Information'
 openapi: 'GET /get-token-info'
 ---
+
+Retrieves detailed information about a token.
+
+## Query Parameters
+
+- `tokenSymbol` (required): Token symbol
+- `chainId` (required): Blockchain network ID
+
+## Example
+
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-token-info?tokenSymbol=EXMPL&chainId=0x89' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
+## Response
+
+```json
+{
+  "name": "Example Token",
+  "symbol": "EXMPL",
+  "totalSupply": "1000000000000000000000",
+  "decimals": 18,
+  "contractAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b"
+}
+```
