@@ -23,24 +23,22 @@
             "group": "Transaction Endpoints",
             "pages": [
               "api-reference/endpoint/create",
-              "api-reference/endpoint/send"
+              "api-reference/endpoint/send",
+              "api-reference/endpoint/new-invest",
+              "api-reference/endpoint/claim-tokens"
             ]
           },
           {
             "group": "V2 Transaction Methods",
             "pages": [
               "api-reference/endpoint/new-sto",
-              "api-reference/endpoint/new-invest",
-              "api-reference/endpoint/claim-tokens",
               "api-reference/endpoint/close-offer"
             ]
           },
           {
             "group": "On Behalf Endpoints",
             "pages": [
-              "api-reference/endpoint/create-token-on-behalf",
-              "api-reference/endpoint/invest-on-behalf",
-              "api-reference/endpoint/sto-claim-on-behalf"
+              "api-reference/endpoint/create-token-on-behalf"
             ]
           },
           {
