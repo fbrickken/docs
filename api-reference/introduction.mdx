@@ -22,12 +22,9 @@ Whether you're a developer integrating tokenization workflows, a business issuin
 ### Key Changes in V2
 
 - **Simplified Endpoints**: Removed "-api" suffix from all endpoints (e.g., `prepare-api-transactions` → `prepare-transactions`)
-- **New Transaction Methods**: Added `newSto`, `newInvest`, `claimTokens`, and `closeOffer`
+- **Unified Transaction Methods**: All transaction methods (`newTokenization`, `newSto`, `newInvest`, `claimTokens`, `mintToken`, `whitelist`, etc.) are now handled through the `prepare-transactions` endpoint
 - **Unified Send Transactions**: The `send-transactions` endpoint now accepts signed transactions and `txId` for all transaction types
-- **On Behalf Endpoints**: Three new endpoints for performing actions on behalf of users:
-  - `create-token-on-behalf`: Create tokens on behalf of tokenizers
-  - `invest-on-behalf`: Make investments on behalf of investors
-  - `sto-claim-on-behalf`: Claim tokens on behalf of investors
+- **On Behalf Functionality**: The `create-token-on-behalf` endpoint provides tokenization functionality equivalent to using `prepare-transactions` with the `newTokenization` method
 
 
 <Card
@@ -63,9 +60,11 @@ Whether you're a developer integrating tokenization workflows, a business issuin
 
 The typical workflow involves three steps:
 
-1. **Prepare**: Use `POST /prepare-transactions` to prepare unsigned transactions with methods like `newInvest` and `claimTokens`
+1. **Prepare**: Use `POST /prepare-transactions` to prepare unsigned transactions for any supported method (see Available Transaction Methods below)
 2. **Sign**: Sign the returned transactions using your preferred wallet/signing method
 3. **Send**: Submit signed transactions using `POST /send-transactions`
+
+All transaction operations are centralized through the `prepare-transactions` endpoint, which supports multiple methods for different blockchain operations.
 
 ### Available Transaction Methods
 

@@ -23,16 +23,7 @@
             "group": "Transaction Endpoints",
             "pages": [
               "api-reference/endpoint/create",
-              "api-reference/endpoint/send",
-              "api-reference/endpoint/new-invest",
-              "api-reference/endpoint/claim-tokens"
-            ]
-          },
-          {
-            "group": "V2 Transaction Methods",
-            "pages": [
-              "api-reference/endpoint/new-sto",
-              "api-reference/endpoint/close-offer"
+              "api-reference/endpoint/send"
             ]
           },
           {

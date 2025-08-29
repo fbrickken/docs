@@ -1,4 +1,40 @@
 ---
 title: 'Create Token on Behalf'
-openapi: 'POST /create-token-on-behalf'
+openapi: 'POST /prepare-transactions'
 ---
+
+This endpoint prepares a new tokenization transaction. It is equivalent to using the `prepare-transactions` endpoint with the `newTokenization` method.
+
+## Request Body
+
+The request body should include the following parameters:
+
+```json
+{
+  "method": "newTokenization",
+  "tokenizerAddress": "0xB610470ae0fEa78A1B27cD3F0D4011eb5361fAf1",
+  "chainId": "aa36a7",
+  "rpcUrl": null,
+  "url": "https://example.com/token-docs",
+  "name": "Example Token",
+  "tokenizerEmail": "tokenizer@example.com",
+  "tokenSymbol": "EXMPL",
+  "supplyCap": "1000000",
+  "preMints": [],
+  "initialHolders": []
+}
+```
+
+## Parameters
+
+- **method** (string): Must be "newTokenization"
+- **tokenizerAddress** (string): The address of the tokenizer initiating the transaction
+- **chainId** (string): The blockchain network chain ID in hex format
+- **rpcUrl** (string, optional): Optional RPC URL
+- **url** (string): URL associated with tokenization documents
+- **name** (string): The name of the token
+- **tokenizerEmail** (string): Email of the tokenizer
+- **tokenSymbol** (string): The symbol of the token (max 5 characters)
+- **supplyCap** (string): Maximum token supply cap
+- **preMints** (array): Array of pre-mint configurations
+- **initialHolders** (array): Array of initial token holders
