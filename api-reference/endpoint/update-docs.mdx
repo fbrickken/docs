@@ -2,3 +2,114 @@
 title: 'Update Token Documentation'
 openapi: 'PATCH /update-docs'
 ---
+
+## Overview
+
+The `PATCH /update-docs` endpoint allows you to update token-related documentation and branding materials for existing tokens. This endpoint handles file uploads for token logos, subscription agreements, and legal documents.
+
+## Key Features
+
+- **Token Logo Upload**: Upload token logotype images to S3 storage
+- **Legal Document Management**: Upload subscription agreements and legal documents to IPFS
+- **Multipart Form Data**: Supports file uploads through multipart/form-data format
+- **Selective Updates**: All file fields are optional - update only what you need
+
+## Request Format
+
+This endpoint accepts `multipart/form-data` with the following fields:
+
+### Required Fields
+- **`tokenSymbol`** (string): The symbol of the token being updated
+
+### Optional File Fields
+- **`tokenLogotype`** (image file): Logo image for the token (uploaded to S3)
+- **`subscriptionAgreement`** (PDF file): Subscription agreement document (uploaded to IPFS)
+- **`legalDocs`** (PDF file): Legal documentation (uploaded to IPFS)
+
+## Example Request
+
+```bash
+curl -X PATCH "https://api-sandbox.brickken.com/update-docs" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -F "tokenSymbol=MYTOKEN" \
+  -F "tokenLogotype=@logo.png" \
+  -F "subscriptionAgreement=@agreement.pdf" \
+  -F "legalDocs=@legal.pdf"
+```
+
+## Response Format
+
+### Success Response (200)
+
+```json
+{
+  "success": true,
+  "tokenSymbol": "MYTOKEN",
+  "tokenLogotypeRef": "s3://bucket/path/to/logo.png",
+  "subscriptionAgreementIpfs": "QmXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXx",
+  "legalDocsIpfs": "QmYyYyYyYyYyYyYyYyYyYyYyYyYyYyYyYyYyYyYy"
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | Indicates if the operation was successful |
+| `tokenSymbol` | string | The token symbol that was updated |
+| `tokenLogotypeRef` | string | S3 path reference to the uploaded logo (if provided) |
+| `subscriptionAgreementIpfs` | string | IPFS CID for the subscription agreement (if provided) |
+| `legalDocsIpfs` | string | IPFS CID for the legal documents (if provided) |
+
+## File Storage Details
+
+### Token Logotype
+- **Storage**: Amazon S3
+- **Supported Formats**: Image files (PNG, JPG, etc.)
+- **Access**: Direct S3 URL reference
+- **Use Case**: Token branding and display
+
+### Legal Documents
+- **Storage**: IPFS (InterPlanetary File System)
+- **Supported Formats**: PDF files
+- **Access**: IPFS CID (Content Identifier)
+- **Use Case**: Immutable legal document storage
+
+## Security & Authorization
+
+- **API Key Required**: Include your API key in the `x-api-key` header
+- **Token Ownership**: You can only update documentation for tokens associated with your account
+- **File Validation**: Files are validated for type and size before upload
+
+## Error Handling
+
+### Common Error Responses
+
+**400 Bad Request**
+```json
+{
+  "message": "tokenSymbol is required"
+}
+```
+
+**401 Unauthorized**
+```json
+{
+  "message": "No email found in token. Unauthorized."
+}
+```
+
+## Use Cases
+
+1. **Brand Updates**: Update token logos for better visual representation
+2. **Legal Compliance**: Upload updated subscription agreements and legal documents
+3. **Documentation Management**: Maintain current legal and compliance documentation
+4. **Token Maintenance**: Keep token information up-to-date post-creation
+
+## Important Notes
+
+- Only the `tokenSymbol` field is required - all file uploads are optional
+- Files are processed and uploaded to different storage systems based on their purpose
+- IPFS storage ensures immutable document storage for legal compliance
+- S3 storage provides fast access for branding materials
+- The endpoint validates file types and user permissions before processing uploads
