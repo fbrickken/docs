@@ -15,17 +15,14 @@ description: 'Overview and authentication for the Brickken API V2.'
 
 ## Welcome to Brickken API V2
 
-Welcome to the Brickken API V2, your comprehensive interface for tokenizing real-world assets on the blockchain. This updated version includes streamlined endpoints, new transaction methods, and enhanced "on behalf" functionality for managing tokenization workflows.
+Brickken API V2 is your comprehensive interface for tokenizing real-world assets on the blockchain. This updated version features streamlined endpoints, unified transaction methods, and enhanced "on behalf" functionality.
 
-Whether you're a developer integrating tokenization workflows, a business issuing digital assets, or a partner building on top of Brickken's infrastructure, this guide will walk you through the essential steps to get started.
+### Key Features
 
-### Key Changes in V2
-
-- **Simplified Endpoints**: Removed "-api" suffix from all endpoints (e.g., `prepare-api-transactions` → `prepare-transactions`)
-- **Unified Transaction Methods**: All transaction methods (`newTokenization`, `newSto`, `newInvest`, `claimTokens`, `mintToken`, `whitelist`, etc.) are now handled through the `prepare-transactions` endpoint
-- **Unified Send Transactions**: The `send-transactions` endpoint now accepts signed transactions and `txId` for all transaction types
-- **On Behalf Functionality**: The `create-token-on-behalf` endpoint provides tokenization functionality equivalent to using `prepare-transactions` with the `newTokenization` method
-
+- **Unified Endpoints**: All transaction methods handled through `prepare-transactions`
+- **Simplified Workflow**: 3-step process (prepare, sign, send) or 1-step with "on behalf"
+- **Multi-Network Support**: Ethereum, Polygon, Base, and BNB Smart Chain
+- **Complete Asset Management**: From tokenization to dividend distribution
 
 <Card
   title="Brickken Sandbox Environment"
@@ -56,13 +53,13 @@ Whether you're a developer integrating tokenization workflows, a business issuin
   Schedule a call with us to go live
 </Card>
 
-## API Workflow
+## API Flow
 
 ### Standard Workflow (3 Steps)
 
-The typical workflow involves three steps:
+The typical workflow for blockchain transactions:
 
-1. **Prepare**: Use `POST /prepare-transactions` to prepare unsigned transactions for any supported method (see Available Transaction Methods below)
+1. **Prepare**: Use `POST /prepare-transactions` to prepare unsigned transactions
 2. **Sign**: Sign the returned transactions using your preferred wallet/signing method
 3. **Send**: Submit signed transactions using `POST /send-transactions`
 
@@ -70,78 +67,65 @@ All transaction operations are centralized through the `prepare-transactions` en
 
 ### Simplified Workflow (1 Step) - Token Creation Only
 
-For token creation, you can use our simplified "on behalf" endpoint:
+For token creation without transaction management:
 
-- **create-token-on-behalf**: Use `POST /create-token-on-behalf` to create tokens without handling transactions yourself. Brickken signs and submits the transaction automatically, eliminating the need for manual transaction management.
-
-### Available Transaction Methods
-
-- **newTokenization**: Create new tokenized assets with customizable parameters
-- **newSto**: Create new Security Token Offerings with investment parameters
-- **newInvest**: Prepare transactions for making new investments in STOs
-- **claimTokens**: Prepare transactions for claiming tokens from STO investments
-- **closeOffer**: Close an active STO
-- **mintToken**: Mint additional tokens to specified addresses
-- **whitelist**: Manage whitelist status for addresses
-- **burnToken**: Burn tokens from the signer's address
-- **transferFrom**: Transfer tokens from one address to another (requires approval)
-- **transferTo**: Transfer tokens from signer's address to another address
-- **approve**: Approve another address to spend tokens on behalf of the signer
-- **dividendDistribution**: Distribute dividends to token holders
-
-## Supported Networks
-
-The API supports multiple blockchain networks. Specify the network using the `chainId` parameter:
-
-### Sandbox Environment
-
-```
-Sepolia testnet:
-Chain Id: "0xAA36A7"
-
-Polygon Amoy testnet:
-Chain Id: "0x13882"
-```
-
-### Production Environment
-
-```
-Ethereum mainnet:
-Chain Id: "0x1"
-
-Base mainnet:
-Chain Id: "0x2105"
-
-BNB Smart Chain Mainnet:
-Chain Id: "0x38"
-
-Polygon mainnet:
-Chain Id: "0x89"
-```
-
-## Environments
-
-- **Sandbox**: `https://api-sandbox.brickken.com`
-- **Production**: `https://api.brickken.com`
+- **create-token-on-behalf**: Use `POST /create-token-on-behalf` to create tokens automatically. Brickken handles signing and submission, eliminating manual transaction management.
 
 ## Authentication
 
-All API requests require authentication using an API key provided in the request headers.
+All API requests require authentication using an API key in the request headers:
 
 ```http
 x-api-key: your-api-key-here
 ```
 
-You must include your unique API key in the x-api-key header of each request.
+Include your unique API key in the `x-api-key` header of each request. Contact tech@brickken.com to obtain your API key.
 
-```json
-"components": {
-  "securitySchemes": {
-    "apiKeyAuth": {
-      "type": "apiKey",
-      "in": "header",
-      "name": "x-api-key"
-    }
-  }
-}
+## Supported Methods
+
+The API supports comprehensive blockchain operations through the `prepare-transactions` endpoint:
+
+### Token Management
+- **newTokenization**: Create new tokenized assets
+- **mintToken**: Mint additional tokens to addresses
+- **burnToken**: Burn tokens from signer's address
+
+### STO Operations
+- **newSto**: Create Security Token Offerings
+- **newInvest**: Make investments in STOs
+- **claimTokens**: Claim tokens from STO investments
+- **closeOffer**: Close active STOs
+
+### Transfer Operations
+- **transferFrom**: Transfer tokens between addresses (requires approval)
+- **transferTo**: Transfer tokens from signer's address
+- **approve**: Approve spending allowances
+
+### Advanced Features
+- **whitelist**: Manage address whitelist status
+- **dividendDistribution**: Distribute dividends to token holders
+
+## Environments and Networks
+
+### API Endpoints
+
+- **Sandbox**: `https://api-sandbox.brickken.com`
+- **Production**: `https://api.brickken.com`
+
+### Supported Networks
+
+Specify the network using the `chainId` parameter:
+
+#### Sandbox Environment
+```
+Sepolia testnet: "0xAA36A7"
+Polygon Amoy testnet: "0x13882"
+```
+
+#### Production Environment
+```
+Ethereum mainnet: "0x1"
+Base mainnet: "0x2105"
+BNB Smart Chain Mainnet: "0x38"
+Polygon mainnet: "0x89"
 ```

@@ -60,11 +60,6 @@
                     "example": "0xSignerAddress",
                     "description": "The address of the user initiating the transaction."
                   },
-                  "tokenizerEmail": {
-                    "type": "string",
-                    "example": "tokenizer.email@example.com",
-                    "description": "The email of the user."
-                  },
                   "chainId": {
                     "type": "string",
                     "example": "aa36a7",
@@ -75,35 +70,111 @@
                     "example": "BKN",
                     "description": "The token symbol (max 5 characters)."
                   },
-                  "supplyCap": {
+                  "tokenizerEmail": {
                     "type": "string",
-                    "example": "10",
-                    "description": "Max token supply."
+                    "example": "tokenizer.email@example.com",
+                    "description": "The email of the user."
                   },
-                  "name": {
+                  "acceptedCoin": {
                     "type": "string",
-                    "example": "Brickken",
-                    "description": "Name of the token."
+                    "example": "USDT",
+                    "description": "Accepted payment token symbol (used in newSto)."
+                  },
+                  "amount": {
+                    "type": "string",
+                    "example": "100",
+                    "description": "Amount for various operations (approve, burnToken, transferFrom, transferTo, dividendDistribution)."
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2025-10-02T00:00:00.000Z",
+                    "description": "End date of the STO (used in newSto)."
+                  },
+                  "from": {
+                    "type": "string",
+                    "example": "0x123...",
+                    "description": "Source address for transfer (used in transferFrom)."
                   },
                   "gasLimit": {
                     "type": "string",
                     "example": "2000000 but can be omitted",
                     "description": "An amount of gas units as limits. If not specified, it will be automatically estimated."
                   },
-                  "rpcUrl": {
-                    "type": "string",
-                    "example": "{URL_TO_RPC} but can be omitted",
-                    "description": "The RPC URL of the blockchain network. If not provided, a default RPC URL for the specified chain ID will be used."
+                  "initialHolders": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "email": {"type": "string"},
+                        "percentage": {"type": "number"}
+                      }
+                    },
+                    "description": "Array of initial token holders (used in newTokenization)."
                   },
-                  "url": {
+                  "investmentAmount": {
                     "type": "string",
-                    "example": "https://example.com/token-docs",
-                    "description": "URL associated with tokenization documents (required for newTokenization)."
+                    "example": "10",
+                    "description": "Amount to invest (used in newInvest)."
                   },
-                  "tokenizerAddress": {
+                  "investorAddress": {
                     "type": "string",
                     "example": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
-                    "description": "The address of the tokenizer (used in newTokenization)."
+                    "description": "Address of the investor (used in newInvest, claimTokens, mintToken)."
+                  },
+                  "investorEmail": {
+                    "type": "string",
+                    "example": "investor@example.com",
+                    "description": "Email of the investor (used in newInvest, claimTokens, whitelist)."
+                  },
+                  "maxInvestment": {
+                    "type": "string",
+                    "example": "100",
+                    "description": "Maximum investment amount (used in newSto)."
+                  },
+                  "maxRaiseUSD": {
+                    "type": "string",
+                    "example": "100",
+                    "description": "Maximum raise amount in USD (used in newSto)."
+                  },
+                  "minInvestment": {
+                    "type": "string",
+                    "example": "10",
+                    "description": "Minimum investment amount (used in newSto)."
+                  },
+                  "minRaiseUSD": {
+                    "type": "string",
+                    "example": "10",
+                    "description": "Minimum raise amount in USD (used in newSto)."
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Brickken",
+                    "description": "Name of the token."
+                  },
+                  "newInvestor": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "example": "John"
+                      },
+                      "surname": {
+                        "type": "string",
+                        "example": "Doe"
+                      }
+                    },
+                    "description": "New investor information (used in whitelist and mintToken)."
+                  },
+                  "offeringName": {
+                    "type": "string",
+                    "example": "FE Test STO 5",
+                    "description": "Name of the STO offering (used in newSto)."
+                  },
+                  "paymentTokenSymbol": {
+                    "type": "string",
+                    "example": "USDT",
+                    "description": "Symbol of the payment token (used in newInvest, claimTokens)."
                   },
                   "preMints": {
                     "type": "array",
@@ -118,26 +189,15 @@
                     },
                     "description": "Array of pre-mint configurations (used in newTokenization)."
                   },
-                  "initialHolders": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "email": {"type": "string"},
-                        "percentage": {"type": "number"}
-                      }
-                    },
-                    "description": "Array of initial token holders (used in newTokenization)."
-                  },
-                  "tokenAmount": {
+                  "rpcUrl": {
                     "type": "string",
-                    "example": "1000",
-                    "description": "Amount of tokens for STO (used in newSto)."
+                    "example": "{URL_TO_RPC} but can be omitted",
+                    "description": "The RPC URL of the blockchain network. If not provided, a default RPC URL for the specified chain ID will be used."
                   },
-                  "offeringName": {
+                  "spenderAddress": {
                     "type": "string",
-                    "example": "FE Test STO 5",
-                    "description": "Name of the STO offering (used in newSto)."
+                    "example": "0x456...",
+                    "description": "Address of the spender being approved (used in approve)."
                   },
                   "startDate": {
                     "type": "string",
@@ -145,56 +205,30 @@
                     "example": "2025-08-26T17:30:00.000Z",
                     "description": "Start date of the STO (used in newSto)."
                   },
-                  "endDate": {
-                    "type": "string",
-                    "format": "date-time",
-                    "example": "2025-10-02T00:00:00.000Z",
-                    "description": "End date of the STO (used in newSto)."
-                  },
-                  "acceptedCoin": {
-                    "type": "string",
-                    "example": "USDT",
-                    "description": "Accepted payment token symbol (used in newSto)."
-                  },
-                  "minRaiseUSD": {
+                  "supplyCap": {
                     "type": "string",
                     "example": "10",
-                    "description": "Minimum raise amount in USD (used in newSto)."
+                    "description": "Max token supply."
                   },
-                  "maxRaiseUSD": {
+                  "to": {
                     "type": "string",
-                    "example": "100",
-                    "description": "Maximum raise amount in USD (used in newSto)."
+                    "example": "0x456...",
+                    "description": "Destination address for transfer (used in transferFrom, transferTo)."
                   },
-                  "minInvestment": {
+                  "tokenAmount": {
                     "type": "string",
-                    "example": "10",
-                    "description": "Minimum investment amount (used in newSto)."
+                    "example": "1000",
+                    "description": "Amount of tokens for STO (used in newSto)."
                   },
-                  "maxInvestment": {
-                    "type": "string",
-                    "example": "100",
-                    "description": "Maximum investment amount (used in newSto)."
-                  },
-                  "investorAddress": {
+                  "tokenizerAddress": {
                     "type": "string",
                     "example": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
-                    "description": "Address of the investor (used in newInvest, claimTokens, mintToken)."
+                    "description": "The address of the tokenizer (used in newTokenization)."
                   },
-                  "investorEmail": {
+                  "url": {
                     "type": "string",
-                    "example": "investor@example.com",
-                    "description": "Email of the investor (used in newInvest, claimTokens, whitelist)."
-                  },
-                  "investmentAmount": {
-                    "type": "string",
-                    "example": "10",
-                    "description": "Amount to invest (used in newInvest)."
-                  },
-                  "paymentTokenSymbol": {
-                    "type": "string",
-                    "example": "USDT",
-                    "description": "Symbol of the payment token (used in newInvest, claimTokens)."
+                    "example": "https://example.com/token-docs",
+                    "description": "URL associated with tokenization documents (required for newTokenization)."
                   },
                   "userToMint": {
                     "type": "array",
@@ -219,26 +253,6 @@
                       }
                     },
                     "description": "Array of users to whitelist/blacklist (used in whitelist)."
-                  },
-                  "spenderAddress": {
-                    "type": "string",
-                    "example": "0x456...",
-                    "description": "Address of the spender being approved (used in approve)."
-                  },
-                  "amount": {
-                    "type": "string",
-                    "example": "100",
-                    "description": "Amount for various operations (approve, burnToken, transferFrom, transferTo, dividendDistribution)."
-                  },
-                  "from": {
-                    "type": "string",
-                    "example": "0x123...",
-                    "description": "Source address for transfer (used in transferFrom)."
-                  },
-                  "to": {
-                    "type": "string",
-                    "example": "0x456...",
-                    "description": "Destination address for transfer (used in transferFrom, transferTo)."
                   }
                 }
               }
@@ -255,75 +269,91 @@
                   "properties": {
                     "transactions": {
                       "type": "array",
+                      "description": "Array of unsigned transaction objects ready for signing",
                       "items": {
                         "type": "object",
                         "properties": {
                           "from": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Sender address",
+                            "example": "0x1234567890abcdef1234567890abcdef12345678"
                           },
                           "to": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Recipient address",
+                            "example": "0xabcdef1234567890abcdef1234567890abcdef12"
                           },
                           "value": {
-                            "type": "object",
-                            "properties": {
-                              "type": {
-                                "type": "string"
-                              },
-                              "hex": {
-                                "type": "string"
-                              }
-                            }
+                            "type": "string",
+                            "description": "Transaction value in hex",
+                            "example": "0x00"
                           },
                           "nonce": {
-                            "type": "integer"
+                            "type": "integer",
+                            "description": "Transaction nonce",
+                            "example": 3792
                           },
                           "chainId": {
-                            "type": "integer"
+                            "type": "integer",
+                            "description": "Blockchain network chain ID",
+                            "example": 11155111
                           },
                           "data": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Transaction data payload",
+                            "example": "0xd362e8a70000000000000000000000000000000000000000000000000000000000000040..."
                           },
                           "type": {
-                            "type": "integer"
+                            "type": "integer",
+                            "description": "Transaction type (EIP-1559)",
+                            "example": 2
                           },
                           "maxPriorityFeePerGas": {
-                            "type": "object",
-                            "properties": {
-                              "type": {
-                                "type": "string"
-                              },
-                              "hex": {
-                                "type": "string"
-                              }
-                            }
+                            "type": "string",
+                            "description": "Maximum priority fee per gas",
+                            "example": "1150000"
                           },
                           "maxFeePerGas": {
-                            "type": "object",
-                            "properties": {
-                              "type": {
-                                "type": "string"
-                              },
-                              "hex": {
-                                "type": "string"
-                              }
-                            }
+                            "type": "string",
+                            "description": "Maximum fee per gas",
+                            "example": "1156037"
                           },
                           "gasLimit": {
-                            "type": "object",
-                            "properties": {
-                              "type": {
-                                "type": "string"
-                              },
-                              "hex": {
-                                "type": "string"
-                              }
-                            }
+                            "type": "string",
+                            "description": "Gas limit in hex",
+                            "example": "0xccef"
                           }
                         }
                       }
+                    },
+                    "info": {
+                      "type": "object",
+                      "description": "Metadata about the operation",
+                      "properties": {
+                        "tokenizerEmail": {
+                          "type": "string",
+                          "description": "Email of the tokenizer",
+                          "example": "tokenizer@example.com"
+                        },
+                        "tokenSymbol": {
+                          "type": "string",
+                          "description": "Symbol of the token",
+                          "example": "EXMPL"
+                        },
+                        "investorEmail": {
+                          "type": "string",
+                          "description": "Email of the investor (when applicable)",
+                          "example": "investor@example.com"
+                        }
+                      }
+                    },
+                    "txId": {
+                      "type": "string",
+                      "description": "Unique identifier for this transaction batch (required for /send-transactions). This is NOT a blockchain transaction hash.",
+                      "example": "0x46adea7bdf49c576a760102e0d6bc9ecd650b3998588cd3d7f576a7973426aad"
                     }
-                  }
+                  },
+                  "required": ["transactions", "txId"]
                 }
               }
             }
@@ -337,7 +367,7 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** This endpoint sends signed transactions to the blockchain.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY`\n- `Content-Type`: `application/json`\n\n**Common Request Body Parameters:**\n- `signedTransactions` (array): Array of signed Ethereum transactions (as hex strings).\n- `rpcUrl` (string, optional): RPC URL of the blockchain network. If not provided, a default is used.\n- `chainId` (string): Blockchain network Chain ID in hex format (e.g., \"aa36a7\").\n- `method` (string): Operation to be performed. Possible values: `newTokenization`, `mintToken`, `whitelist`, `burnToken`, `transferFrom`, `transferTo`, `approve`, `dividendDistribution`, `newSto`.\n\n---\n\n**Method: `newTokenization`**\nSends a transaction to create a new token and start the tokenization process.\n\n**Additional Request Body Parameters:**\n- `tokenName` (string)\n- `tokenSymbol` (string)\n- `tokenizerCompanyName` (string)\n- `tokenizerName` (string)\n- `tokenizerMiddleName` (string, optional)\n- `tokenizerSurname` (string)\n- `tokenizerSecondSurname` (string, optional)\n- `tokenizerEmail` (string)\n- `tokenizerAddress` (string)\n- `supplyCap` (string)\n- `initialShareholders` (array, optional): Each object includes:\n  - `walletAddress` (string)\n  - `amount` (string)\n  - `email` (string)\n\n---\n\n**Method: `mintToken`**\nSends transactions to mint tokens to users.\n\n**Additional Request Body Parameters:**\n- `investorAddress` (string)\n- `investorEmail` (string)\n- `tokenSymbol` (string)\n- `needInvestorCreation` (boolean)\n- `newInvestor` (object, optional): If creation is needed:\n  - `type` (string, optional): \"INVESTOR_PERSON\" or \"INVESTOR_BUSINESS\"\n  - `name` (string)\n  - `middleName` (string, optional)\n  - `surname` (string)\n  - `secondSurname` (string, optional)\n\n---\n\n**Method: `whitelist`**\nWhitelists a user for a token.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string)\n- `investorAddress` (string)\n- `investorEmail` (string)\n- `needInvestorCreation` (boolean)\n- `newInvestor` (object, optional): Same structure as above\n\n---\n\n**Method: `burnToken`**\nBurns tokens from a user's balance.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string)\n- `investorEmail` (string)\n\n---\n\n**Method: `transferFrom`**\nTransfers tokens from one wallet to another using allowance.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string)\n- `from` (string): Address from which tokens are transferred\n- `to` (string): Destination address\n- `amount` (string)\n\n---\n\n**Method: `transferTo`**\nTransfers tokens from the signer to a recipient.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string)\n- `to` (string)\n- `amount` (string)\n\n---\n\n**Method: `approve`**\nApproves a spender to use tokens.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string)\n- `spenderAddress` (string)\n- `amount` (string)\n- `tokenizerAddress` (string, optional): Required if `tokenSymbol` is `BKN`, `USDT`, or `USDC`\n\n---\n\n**Method: `dividendDistribution`**\nDistributes payment tokens to token holders.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string)\n- `amount` (string)\n\n---\n\n**Method: `newSto`**\nCreates a new STO (Security Token Offering).\n\n**Additional Request Body Parameters:**\n- `tokenAmount` (string)\n- `tokenizerEmail` (string)\n- `offeringName` (string)\n- `startDate` (string)\n- `endDate` (string)\n- `acceptedCoin` (string)\n- `minRaiseUSD` (string)\n- `maxRaiseUSD` (string)\n- `minInvestment` (string)\n- `maxInvestment` (string)\n- `signerAddress` (string)",
+        "description": "**Description:** This endpoint submits signed transactions to the blockchain. This endpoint works uniformly for all transaction types prepared using the `/prepare-transactions` endpoint.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY`\n- `Content-Type`: `application/json`\n\n**Workflow:**\n1. **Prepare Transactions**: First, call `/prepare-transactions` with your desired method and parameters\n2. **Sign Transactions**: Sign each transaction in the returned `transactions` array using your preferred wallet or signing method\n3. **Send Transactions**: Submit the signed transactions along with the `txId` to this endpoint\n\n**Supported Transaction Types:**\nThis endpoint accepts signed transactions for all methods supported by `/prepare-transactions`:\n- `newTokenization` - Create new tokenized assets\n- `newSto` - Create Security Token Offerings\n- `newInvest` - Make investments in STOs\n- `claimTokens` - Claim tokens from completed STOs\n- `closeOffer` - Close active STOs\n- `mintToken` - Mint additional tokens\n- `whitelist` - Manage address whitelist status\n- `approve` - Approve token spending\n- `burnToken` - Burn tokens\n- `transferFrom` - Transfer tokens (with approval)\n- `transferTo` - Transfer tokens from signer\n- `dividendDistribution` - Distribute dividends",
         "security": [
           {
             "apiKeyAuth": []
@@ -355,24 +385,21 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "Array of signed Ethereum transactions (as hex strings)."
+                    "description": "Array of signed transaction hex strings.",
+                    "example": [
+                      "0x02f8b1018203e8843b9aca00850ba43b740082520894742d35cc6634c0532925a3b8d4c9db96c4b4d8b80b844a9059cbb000000000000000000000000456789abcdef..."
+                    ]
                   },
-                  "rpcUrl": {
+                  "txId": {
                     "type": "string",
-                    "example": "{URL_TO_RPC} but can be omitted",
-                    "description": "The RPC URL to use for sending transactions. Defaults to network-based configuration if not provided."
-                  },
-                  "chainId": {
-                    "type": "string",
-                    "example": "aa36a7",
-                    "description": "Chain ID representing the blockchain network where transactions are to be executed."
-                  },
-                  "method": {
-                    "type": "string",
-                    "example": "newTokenization",
-                    "description": "Transaction type. Must be one of newTokenization, mintToken, whitelist, burnToken, transferFrom, transferTo, approve, dividendDistribution."
+                    "description": "Transaction ID from prepare-transactions response.",
+                    "example": "tx_abc123def456"
                   }
-                }
+                },
+                "required": [
+                  "signedTransactions",
+                  "txId"
+                ]
               }
             }
           }
@@ -385,28 +412,54 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "txResponses": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "hash": {
-                            "type": "string"
-                          },
-                          "from": {
-                            "type": "string"
-                          },
-                          "to": {
-                            "type": "string"
-                          },
-                          "data": {
-                            "type": "string"
-                          },
-                          "type": {
-                            "type": "string"
-                          },
-                          "statusTx": {
-                            "type": "string"
+                    "txHash": {
+                      "type": "string",
+                      "description": "Transaction hash of the submitted transaction",
+                      "example": "0x1234567890abcdef..."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Transaction status",
+                      "example": "pending"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_SIGNATURE"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Transaction signature is invalid"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "transactionIndex": {
+                              "type": "integer",
+                              "example": 0
+                            },
+                            "expectedSigner": {
+                              "type": "string",
+                              "example": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b"
+                            },
+                            "actualSigner": {
+                              "type": "string",
+                              "example": "0x..."
+                            }
                           }
                         }
                       }

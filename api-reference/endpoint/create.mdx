@@ -22,16 +22,17 @@ Creates a new tokenized asset.
 ```json
 {
   "method": "newTokenization",
-  "tokenizerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
-  "rpcUrl": null,
-  "url": "https://example.com/token-docs",
-  "name": "Example Token",
-  "tokenizerEmail": "tokenizer@example.com",
   "tokenSymbol": "EXMPL",
-  "supplyCap": "1000000",
+  "tokenizerEmail": "tokenizer@example.com",
+  "initialHolders": [],
+  "name": "Example Token",
   "preMints": [],
-  "initialHolders": []
+  "rpcUrl": null,
+  "supplyCap": "1000000",
+  "tokenizerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "url": "https://example.com/token-docs"
 }
 ```
 
@@ -44,19 +45,19 @@ Creates a new Security Token Offering.
   "method": "newSto",
   "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
-  "gasLimit": null,
-  "rpcUrl": null,
+  "tokenSymbol": "EXMPL",
   "tokenizerEmail": "tokenizer@example.com",
-  "tokenAmount": "1000",
-  "offeringName": "Example STO Offering",
-  "startDate": "2025-01-01T00:00:00.000Z",
-  "endDate": "2025-12-31T23:59:59.000Z",
   "acceptedCoin": "USDT",
-  "minRaiseUSD": "10",
+  "endDate": "2025-12-31T23:59:59.000Z",
+  "gasLimit": null,
+  "maxInvestment": "100",
   "maxRaiseUSD": "100",
   "minInvestment": "10",
-  "maxInvestment": "100",
-  "tokenSymbol": "EXMPL"
+  "minRaiseUSD": "10",
+  "offeringName": "Example STO Offering",
+  "rpcUrl": null,
+  "startDate": "2025-01-01T00:00:00.000Z",
+  "tokenAmount": "1000"
 }
 ```
 
@@ -67,11 +68,13 @@ Makes an investment in an STO.
 ```json
 {
   "method": "newInvest",
-  "investorAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
-  "investorEmail": "investor@example.com",
   "tokenSymbol": "EXMPL",
+  "tokenizerEmail": "tokenizer@example.com",
   "investmentAmount": "10",
+  "investorAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "investorEmail": "investor@example.com",
   "paymentTokenSymbol": "USDT"
 }
 ```
@@ -83,10 +86,12 @@ Claims tokens from a completed STO.
 ```json
 {
   "method": "claimTokens",
-  "investorAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
-  "investorEmail": "investor@example.com",
   "tokenSymbol": "EXMPL",
+  "tokenizerEmail": "tokenizer@example.com",
+  "investorAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "investorEmail": "investor@example.com",
   "paymentTokenSymbol": "USDT"
 }
 ```
@@ -101,7 +106,12 @@ Mints additional tokens to specified addresses.
   "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
   "tokenSymbol": "EXMPL",
+  "tokenizerEmail": "tokenizer@example.com",
   "investorAddress": "0x456def789abc123ghi456jkl789mno012pqr345",
+  "newInvestor": {
+    "name": "John",
+    "surname": "Doe"
+  },
   "userToMint": [
     {
       "email": "user@example.com",
@@ -122,10 +132,15 @@ Manages whitelist status for addresses.
   "method": "whitelist",
   "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
-  "gasLimit": null,
-  "rpcUrl": null,
   "tokenSymbol": "EXMPL",
+  "tokenizerEmail": "tokenizer@example.com",
+  "gasLimit": null,
   "investorEmail": "investor@example.com",
+  "newInvestor": {
+    "name": "John",
+    "surname": "Doe"
+  },
+  "rpcUrl": null,
   "userToWhitelist": [
     {
       "whitelistStatus": true,
@@ -141,12 +156,13 @@ Approves another address to spend tokens on behalf of the signer.
 
 ```json
 {
-  "chainId": "0x89",
-  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "method": "approve",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "chainId": "0x89",
   "tokenSymbol": "EXMPL",
-  "spenderAddress": "0x456...",
-  "amount": "100"
+  "tokenizerEmail": "tokenizer@example.com",
+  "amount": "100",
+  "spenderAddress": "0x456..."
 }
 ```
 
@@ -156,10 +172,11 @@ Burns tokens from the signer's address.
 
 ```json
 {
-  "chainId": "0x89",
-  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "method": "burnToken",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "chainId": "0x89",
   "tokenSymbol": "EXMPL",
+  "tokenizerEmail": "tokenizer@example.com",
   "amount": "100"
 }
 ```
@@ -170,13 +187,14 @@ Transfers tokens from one address to another (requires approval).
 
 ```json
 {
-  "chainId": "0x89",
-  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "method": "transferFrom",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "chainId": "0x89",
   "tokenSymbol": "EXMPL",
+  "tokenizerEmail": "tokenizer@example.com",
+  "amount": "50",
   "from": "0x123...",
-  "to": "0x456...",
-  "amount": "50"
+  "to": "0x456..."
 }
 ```
 
@@ -186,12 +204,13 @@ Transfers tokens from signer's address to another address.
 
 ```json
 {
-  "chainId": "0x89",
-  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "method": "transferTo",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "chainId": "0x89",
   "tokenSymbol": "EXMPL",
-  "to": "0x456...",
-  "amount": "50"
+  "tokenizerEmail": "tokenizer@example.com",
+  "amount": "50",
+  "to": "0x456..."
 }
 ```
 
@@ -201,31 +220,54 @@ Distributes dividends to token holders.
 
 ```json
 {
-  "chainId": "0x89",
-  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "method": "dividendDistribution",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "chainId": "0x89",
   "tokenSymbol": "EXMPL",
+  "tokenizerEmail": "tokenizer@example.com",
   "amount": "1000"
 }
 ```
 
 ## Response Format
 
+The response includes the transaction details, metadata, and a unique transaction ID that must be saved for use with the `/send-transactions` endpoint.
+
+**Important:** The `txId` is NOT a blockchain transaction hash - it's an internal identifier used to link the prepared transactions with the send operation.
+
 ```json
 {
-  "txId": "tx_abc123def456",
   "transactions": [
     {
-      "to": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
-      "data": "0x...",
-      "value": "0",
-      "gasLimit": "500000",
-      "maxFeePerGas": "20000000000",
-      "maxPriorityFeePerGas": "2000000000",
-      "nonce": 42,
+      "from": "0x1234567890abcdef1234567890abcdef12345678",
+      "to": "0xabcdef1234567890abcdef1234567890abcdef12",
+      "value": "0x00",
+      "nonce": 3792,
+      "chainId": 11155111,
+      "data": "0xd362e8a70000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000010000000000000000000000001234567890abcdef1234567890abcdef1234567800000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001",
       "type": 2,
-      "chainId": "0x89"
+      "maxPriorityFeePerGas": "1150000",
+      "maxFeePerGas": "1156037",
+      "gasLimit": "0xccef"
     }
-  ]
+  ],
+  "info": {
+    "tokenizerEmail": "tokenizer@example.com",
+    "tokenSymbol": "EXMPL",
+    "investorEmail": "investor@example.com"
+  },
+  "txId": "0x46adea7bdf49c576a760102e0d6bc9ecd650b3998588cd3d7f576a7973426aad"
 }
 ```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `transactions` | array | Array of unsigned transaction objects ready for signing |
+| `info` | object | Metadata about the operation including emails and token symbol |
+| `txId` | string | Unique identifier for this transaction batch (required for `/send-transactions`) |
+
+**Next Steps:**
+1. Sign each transaction in the `transactions` array
+2. Submit the signed transactions along with the `txId` to `/send-transactions`
