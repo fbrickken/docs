@@ -52,7 +52,8 @@
                   "method": {
                     "type": "string",
                     "example": "newTokenization",
-                    "description": "The operation to be performed. Possible values are newTokenization, mintToken, whitelist, burnToken, transferFrom, transferTo, approve, dividendDistribution, newSto."
+                    "enum": ["newTokenization", "newSto", "newInvest", "claimTokens", "mintToken", "whitelist", "approve", "burnToken", "transferFrom", "transferTo", "dividendDistribution"],
+                    "description": "The operation to be performed. Supported methods: newTokenization (create tokenized asset), newSto (create STO), newInvest (invest in STO), claimTokens (claim from completed STO), mintToken (mint additional tokens), whitelist (manage whitelist), approve (approve spending), burnToken (burn tokens), transferFrom (transfer with approval), transferTo (transfer from signer), dividendDistribution (distribute dividends)."
                   },
                   "signerAddress": {
                     "type": "string",
@@ -69,7 +70,7 @@
                     "example": "aa36a7",
                     "description": "The blockchain network's chain ID in hexadecimal format (e.g., \"aa36a7\" for Sepolia testnet)."
                   },
-                  "symbol": {
+                  "tokenSymbol": {
                     "type": "string",
                     "example": "BKN",
                     "description": "The token symbol (max 5 characters)."
@@ -93,6 +94,151 @@
                     "type": "string",
                     "example": "{URL_TO_RPC} but can be omitted",
                     "description": "The RPC URL of the blockchain network. If not provided, a default RPC URL for the specified chain ID will be used."
+                  },
+                  "url": {
+                    "type": "string",
+                    "example": "https://example.com/token-docs",
+                    "description": "URL associated with tokenization documents (required for newTokenization)."
+                  },
+                  "tokenizerAddress": {
+                    "type": "string",
+                    "example": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                    "description": "The address of the tokenizer (used in newTokenization)."
+                  },
+                  "preMints": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "email": {"type": "string"},
+                        "investorAddress": {"type": "string"},
+                        "amount": {"type": "string"},
+                        "needWhitelist": {"type": "boolean"}
+                      }
+                    },
+                    "description": "Array of pre-mint configurations (used in newTokenization)."
+                  },
+                  "initialHolders": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "email": {"type": "string"},
+                        "percentage": {"type": "number"}
+                      }
+                    },
+                    "description": "Array of initial token holders (used in newTokenization)."
+                  },
+                  "tokenAmount": {
+                    "type": "string",
+                    "example": "1000",
+                    "description": "Amount of tokens for STO (used in newSto)."
+                  },
+                  "offeringName": {
+                    "type": "string",
+                    "example": "FE Test STO 5",
+                    "description": "Name of the STO offering (used in newSto)."
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2025-08-26T17:30:00.000Z",
+                    "description": "Start date of the STO (used in newSto)."
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2025-10-02T00:00:00.000Z",
+                    "description": "End date of the STO (used in newSto)."
+                  },
+                  "acceptedCoin": {
+                    "type": "string",
+                    "example": "USDT",
+                    "description": "Accepted payment token symbol (used in newSto)."
+                  },
+                  "minRaiseUSD": {
+                    "type": "string",
+                    "example": "10",
+                    "description": "Minimum raise amount in USD (used in newSto)."
+                  },
+                  "maxRaiseUSD": {
+                    "type": "string",
+                    "example": "100",
+                    "description": "Maximum raise amount in USD (used in newSto)."
+                  },
+                  "minInvestment": {
+                    "type": "string",
+                    "example": "10",
+                    "description": "Minimum investment amount (used in newSto)."
+                  },
+                  "maxInvestment": {
+                    "type": "string",
+                    "example": "100",
+                    "description": "Maximum investment amount (used in newSto)."
+                  },
+                  "investorAddress": {
+                    "type": "string",
+                    "example": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                    "description": "Address of the investor (used in newInvest, claimTokens, mintToken)."
+                  },
+                  "investorEmail": {
+                    "type": "string",
+                    "example": "investor@example.com",
+                    "description": "Email of the investor (used in newInvest, claimTokens, whitelist)."
+                  },
+                  "investmentAmount": {
+                    "type": "string",
+                    "example": "10",
+                    "description": "Amount to invest (used in newInvest)."
+                  },
+                  "paymentTokenSymbol": {
+                    "type": "string",
+                    "example": "USDT",
+                    "description": "Symbol of the payment token (used in newInvest, claimTokens)."
+                  },
+                  "userToMint": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "email": {"type": "string"},
+                        "investorAddress": {"type": "string"},
+                        "amount": {"type": "string"},
+                        "needWhitelist": {"type": "boolean"}
+                      }
+                    },
+                    "description": "Array of users to mint tokens to (used in mintToken)."
+                  },
+                  "userToWhitelist": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "whitelistStatus": {"type": "boolean"},
+                        "investorAddress": {"type": "string"}
+                      }
+                    },
+                    "description": "Array of users to whitelist/blacklist (used in whitelist)."
+                  },
+                  "spenderAddress": {
+                    "type": "string",
+                    "example": "0x456...",
+                    "description": "Address of the spender being approved (used in approve)."
+                  },
+                  "amount": {
+                    "type": "string",
+                    "example": "100",
+                    "description": "Amount for various operations (approve, burnToken, transferFrom, transferTo, dividendDistribution)."
+                  },
+                  "from": {
+                    "type": "string",
+                    "example": "0x123...",
+                    "description": "Source address for transfer (used in transferFrom)."
+                  },
+                  "to": {
+                    "type": "string",
+                    "example": "0x456...",
+                    "description": "Destination address for transfer (used in transferFrom, transferTo)."
                   }
                 }
               }

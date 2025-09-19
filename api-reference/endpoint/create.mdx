@@ -22,14 +22,14 @@ Creates a new tokenized asset.
 ```json
 {
   "method": "newTokenization",
-  "tokenizerAddress": "0xB610470ae0fEa78A1B27cD3F0D4011eb5361fAf1",
+  "tokenizerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
   "rpcUrl": null,
-  "url": "url",
-  "name": "namcace98",
-  "tokenizerEmail": "davide.pizzo+groc14@brickken.com",
-  "tokenSymbol": "VZV98",
-  "supplyCap": "0",
+  "url": "https://example.com/token-docs",
+  "name": "Example Token",
+  "tokenizerEmail": "tokenizer@example.com",
+  "tokenSymbol": "EXMPL",
+  "supplyCap": "1000000",
   "preMints": [],
   "initialHolders": []
 }
@@ -42,21 +42,21 @@ Creates a new Security Token Offering.
 ```json
 {
   "method": "newSto",
-  "signerAddress": "0xB610470ae0fEa78A1B27cD3F0D4011eb5361fAf1",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
   "gasLimit": null,
   "rpcUrl": null,
-  "tokenizerEmail": "davide.pizzo+groc14@brickken.com",
+  "tokenizerEmail": "tokenizer@example.com",
   "tokenAmount": "1000",
-  "offeringName": "FE Test STO 5",
-  "startDate": "2025-08-26T17:30:00.000Z",
-  "endDate": "2025-10-02T00:00:00.000Z",
+  "offeringName": "Example STO Offering",
+  "startDate": "2025-01-01T00:00:00.000Z",
+  "endDate": "2025-12-31T23:59:59.000Z",
   "acceptedCoin": "USDT",
   "minRaiseUSD": "10",
   "maxRaiseUSD": "100",
   "minInvestment": "10",
   "maxInvestment": "100",
-  "tokenSymbol": "VZV99"
+  "tokenSymbol": "EXMPL"
 }
 ```
 
@@ -67,10 +67,10 @@ Makes an investment in an STO.
 ```json
 {
   "method": "newInvest",
-  "investorAddress": "0xB610470ae0fEa78A1B27cD3F0D4011eb5361fAf1",
+  "investorAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
-  "investorEmail": "davide.pizzo+groci1@brickken.com",
-  "tokenSymbol": "INDS",
+  "investorEmail": "investor@example.com",
+  "tokenSymbol": "EXMPL",
   "investmentAmount": "10",
   "paymentTokenSymbol": "USDT"
 }
@@ -83,10 +83,10 @@ Claims tokens from a completed STO.
 ```json
 {
   "method": "claimTokens",
-  "investorAddress": "0x98Bc5C91aeF60ad4Ef0BCCaa8D3da87185E5ec77",
+  "investorAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
-  "investorEmail": "jordi.vallejo+groc+inv03@brickken.com",
-  "tokenSymbol": "N26A0",
+  "investorEmail": "investor@example.com",
+  "tokenSymbol": "EXMPL",
   "paymentTokenSymbol": "USDT"
 }
 ```
@@ -101,11 +101,11 @@ Mints additional tokens to specified addresses.
   "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
   "tokenSymbol": "EXMPL",
-  "investorAddress": "0x789abc123def456ghi789jkl012mno345pqr678",
+  "investorAddress": "0x456def789abc123ghi456jkl789mno012pqr345",
   "userToMint": [
     {
       "email": "user@example.com",
-      "investorAddress": "0x789abc123def456ghi789jkl012mno345pqr678",
+      "investorAddress": "0x456def789abc123ghi456jkl789mno012pqr345",
       "amount": "500",
       "needWhitelist": true
     }
@@ -120,16 +120,16 @@ Manages whitelist status for addresses.
 ```json
 {
   "method": "whitelist",
-  "signerAddress": "0x060BC1F72e7a55fD3bABcFf841836e86A77BCb9A",
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
   "gasLimit": null,
   "rpcUrl": null,
-  "tokenSymbol": "N26A0",
-  "investorEmail": "jordi.vallejo+groc+inv02@brickken.com",
+  "tokenSymbol": "EXMPL",
+  "investorEmail": "investor@example.com",
   "userToWhitelist": [
     {
       "whitelistStatus": true,
-      "investorAddress": "0x6712513BF6C53df35A7174FE662dBe0Fbc967CE9"
+      "investorAddress": "0x456def789abc123ghi456jkl789mno012pqr345"
     }
   ]
 }

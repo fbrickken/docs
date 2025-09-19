@@ -1,18 +1,32 @@
 ---
 title: 'Create Token on Behalf'
-openapi: 'POST /prepare-transactions'
+openapi: 'POST /create-token-on-behalf'
 ---
 
-This endpoint prepares a new tokenization transaction. It is equivalent to using the `prepare-transactions` endpoint with the `newTokenization` method.
+## Overview
+
+This endpoint allows you to create a new token **without having to sign or send any blockchain transactions yourself**. Brickken handles the entire transaction signing and submission process on your behalf, making token creation seamless and secure.
+
+<Note>
+**Key Advantage**: This endpoint eliminates the complexity of blockchain transaction management. Simply provide the token parameters, and Brickken will create the token for you automatically.
+</Note>
+
+## How It Works
+
+1. **Submit Request**: Send your token parameters to this endpoint
+2. **Automatic Processing**: Brickken signs and submits the `newTokenization` transaction
+3. **Token Created**: Your token is deployed on the blockchain without any manual intervention
+
+This is particularly useful for:
+- **Simplified Integration**: No need to handle private keys or transaction signing
+- **Reduced Complexity**: Focus on your business logic instead of blockchain mechanics
+- **Enhanced Security**: Brickken manages the secure transaction process
 
 ## Request Body
 
-The request body should include the following parameters:
-
 ```json
 {
-  "method": "newTokenization",
-  "tokenizerAddress": "0xB610470ae0fEa78A1B27cD3F0D4011eb5361fAf1",
+  "tokenizerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
   "rpcUrl": null,
   "url": "https://example.com/token-docs",
@@ -27,14 +41,34 @@ The request body should include the following parameters:
 
 ## Parameters
 
-- **method** (string): Must be "newTokenization"
-- **tokenizerAddress** (string): The address of the tokenizer initiating the transaction
-- **chainId** (string): The blockchain network chain ID in hex format
-- **rpcUrl** (string, optional): Optional RPC URL
-- **url** (string): URL associated with tokenization documents
-- **name** (string): The name of the token
-- **tokenizerEmail** (string): Email of the tokenizer
-- **tokenSymbol** (string): The symbol of the token (max 5 characters)
-- **supplyCap** (string): Maximum token supply cap
-- **preMints** (array): Array of pre-mint configurations
-- **initialHolders** (array): Array of initial token holders
+- **tokenizerAddress** (string, required): The wallet address that will own the token contract
+- **chainId** (string, required): The blockchain network chain ID in hex format (e.g., "aa36a7" for Avalanche testnet)
+- **rpcUrl** (string, optional): Custom RPC URL for the blockchain network (null uses default)
+- **url** (string, required): URL pointing to token documentation or legal documents
+- **name** (string, required): The full name of the token (e.g., "My Company Token")
+- **tokenizerEmail** (string, required): Email address of the token creator for notifications
+- **tokenSymbol** (string, required): The token ticker symbol (maximum 5 characters, e.g., "EXMPL")
+- **supplyCap** (string, required): Maximum number of tokens that can ever be minted ("0" for unlimited)
+- **preMints** (array, optional): Array of addresses and amounts to mint tokens to immediately upon creation
+- **initialHolders** (array, optional): Array of initial token holders and their allocations
+
+## Response
+
+The endpoint returns transaction details and the newly created token information:
+
+```json
+{
+  "success": true,
+  "transactionHash": "0x...",
+  "tokenAddress": "0x...",
+  "tokenSymbol": "EXMPL",
+  "status": "pending"
+}
+```
+
+## Example Use Cases
+
+- **Real Estate Tokenization**: Create tokens representing property shares
+- **Investment Funds**: Issue tokens for fund participation
+- **Loyalty Programs**: Deploy tokens for customer rewards
+- **Asset Digitization**: Convert physical assets into blockchain tokens

@@ -372,7 +372,7 @@ Creates a new tokenization on behalf of a tokenizer.
   "tokenizerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "0x89",
   "name": "Example Token",
-  "symbol": "EXMPL",
+  "tokenSymbol": "EXMPL",
   "supplyCap": "1000000",
   "preMints": [
     {

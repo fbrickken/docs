@@ -58,6 +58,8 @@ Whether you're a developer integrating tokenization workflows, a business issuin
 
 ## API Workflow
 
+### Standard Workflow (3 Steps)
+
 The typical workflow involves three steps:
 
 1. **Prepare**: Use `POST /prepare-transactions` to prepare unsigned transactions for any supported method (see Available Transaction Methods below)
@@ -65,6 +67,12 @@ The typical workflow involves three steps:
 3. **Send**: Submit signed transactions using `POST /send-transactions`
 
 All transaction operations are centralized through the `prepare-transactions` endpoint, which supports multiple methods for different blockchain operations.
+
+### Simplified Workflow (1 Step) - Token Creation Only
+
+For token creation, you can use our simplified "on behalf" endpoint:
+
+- **create-token-on-behalf**: Use `POST /create-token-on-behalf` to create tokens without handling transactions yourself. Brickken signs and submits the transaction automatically, eliminating the need for manual transaction management.
 
 ### Available Transaction Methods
 
