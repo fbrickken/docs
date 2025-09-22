@@ -20,9 +20,26 @@
             ]
           },
           {
-            "group": "Transaction Endpoints",
+            "group": "Create Transaction",
             "pages": [
               "api-reference/endpoint/create",
+              "api-reference/endpoint/prepare-newTokenization",
+              "api-reference/endpoint/prepare-mintToken",
+              "api-reference/endpoint/prepare-whitelist",
+              "api-reference/endpoint/prepare-burnToken",
+              "api-reference/endpoint/prepare-transferFrom",
+              "api-reference/endpoint/prepare-transferTo",
+              "api-reference/endpoint/prepare-approve",
+              "api-reference/endpoint/prepare-dividendDistribution",
+              "api-reference/endpoint/prepare-newSto",
+              "api-reference/endpoint/prepare-newInvest",
+              "api-reference/endpoint/prepare-claimTokens",
+              "api-reference/endpoint/prepare-closeOffer"
+            ]
+          },
+          {
+            "group": "Send Transaction",
+            "pages": [
               "api-reference/endpoint/send"
             ]
           },

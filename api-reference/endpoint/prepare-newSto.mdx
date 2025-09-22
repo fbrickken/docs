@@ -1,0 +1,66 @@
+---
+title: 'Prepare Transactions - newSto'
+openapi: 'POST /prepare-transactions/newSto'
+---
+
+Prepares unsigned transactions for creating a new Security Token Offering (STO). This endpoint is equivalent to calling `/prepare-transactions` with `method=newSto`.
+
+## Request Body
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `signerAddress` | string | Yes | Address that will sign the transaction |
+| `chainId` | string | Yes | Blockchain network identifier (hex format) |
+| `tokenizerEmail` | string | Yes | Email of the tokenizer |
+| `tokenAmount` | string | Yes | Amount of tokens for the STO |
+| `offeringName` | string | Yes | Name of the STO offering |
+| `startDate` | string | Yes | Start date of the STO (ISO format) |
+| `endDate` | string | Yes | End date of the STO (ISO format) |
+| `acceptedCoin` | string | Yes | Accepted payment token symbol |
+| `minRaiseUSD` | string | Yes | Minimum raise amount in USD |
+| `maxRaiseUSD` | string | Yes | Maximum raise amount in USD |
+| `minInvestment` | string | Yes | Minimum investment amount |
+| `maxInvestment` | string | Yes | Maximum investment amount |
+
+## Example Request
+
+```json
+{
+  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+  "chainId": "aa36a7",
+  "tokenizerEmail": "tokenizer@example.com",
+  "tokenAmount": "1000",
+  "offeringName": "Example STO",
+  "startDate": "2025-08-26T17:30:00.000Z",
+  "endDate": "2025-10-02T00:00:00.000Z",
+  "acceptedCoin": "USDT",
+  "minRaiseUSD": "10000",
+  "maxRaiseUSD": "100000",
+  "minInvestment": "100",
+  "maxInvestment": "10000"
+}
+```
+
+## Response
+
+Returns an array of unsigned transactions that need to be signed and a transaction ID for tracking.
+
+```json
+{
+  "transactions": [
+    {
+      "from": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+      "to": "0xTargetAddress",
+      "value": {"type": "BigNumber", "hex": "0x00"},
+      "nonce": 1,
+      "chainId": 11155111,
+      "data": "0x...",
+      "type": 2,
+      "maxPriorityFeePerGas": {"type": "BigNumber", "hex": "0x..."},
+      "maxFeePerGas": {"type": "BigNumber", "hex": "0x..."},
+      "gasLimit": {"type": "BigNumber", "hex": "0x..."}
+    }
+  ],
+  "txId": "unique-transaction-id"
+}
+```
