@@ -363,7 +363,7 @@
     },
     "/prepare-transactions/newTokenization": {
       "post": {
-        "summary": "Prepare Transactions - newTokenization",
+        "summary": "newTokenization",
         "tags": [
           "Endpoints",
           "Prepare Transactions"
@@ -417,7 +417,7 @@
     },
     "/prepare-transactions/mintToken": {
       "post": {
-        "summary": "Prepare Transactions - mintToken",
+        "summary": "mintToken",
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the mintToken method. Equivalent to POST /prepare-transactions with method=mintToken.",
         "security": [{"apiKeyAuth": []}],
@@ -430,7 +430,7 @@
     },
     "/prepare-transactions/whitelist": {
       "post": {
-        "summary": "Prepare Transactions - whitelist",
+        "summary": "whitelist",
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the whitelist method. Equivalent to POST /prepare-transactions with method=whitelist.",
         "security": [{"apiKeyAuth": []}],
@@ -440,7 +440,7 @@
     },
     "/prepare-transactions/burnToken": {
       "post": {
-        "summary": "Prepare Transactions - burnToken",
+        "summary": "burnToken",
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the burnToken method. Equivalent to POST /prepare-transactions with method=burnToken.",
         "security": [{"apiKeyAuth": []}],
@@ -450,7 +450,7 @@
     },
     "/prepare-transactions/transferFrom": {
       "post": {
-        "summary": "Prepare Transactions - transferFrom",
+        "summary": "transferFrom",
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the transferFrom method. Equivalent to POST /prepare-transactions with method=transferFrom.",
         "security": [{"apiKeyAuth": []}],
@@ -460,7 +460,7 @@
     },
     "/prepare-transactions/transferTo": {
       "post": {
-        "summary": "Prepare Transactions - transferTo",
+        "summary": "transferTo",
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the transferTo method. Equivalent to POST /prepare-transactions with method=transferTo.",
         "security": [{"apiKeyAuth": []}],
@@ -470,7 +470,7 @@
     },
     "/prepare-transactions/approve": {
       "post": {
-        "summary": "Prepare Transactions - approve",
+        "summary": "approve",
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the approve method. Equivalent to POST /prepare-transactions with method=approve.",
         "security": [{"apiKeyAuth": []}],
@@ -480,7 +480,7 @@
     },
     "/prepare-transactions/dividendDistribution": {
       "post": {
-        "summary": "Prepare Transactions - dividendDistribution",
+        "summary": "dividendDistribution",
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the dividendDistribution method. Equivalent to POST /prepare-transactions with method=dividendDistribution.",
         "security": [{"apiKeyAuth": []}],
@@ -490,7 +490,7 @@
     },
     "/prepare-transactions/newSto": {
       "post": {
-        "summary": "Prepare Transactions - newSto",
+        "summary": "newSto",
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the newSto method. Equivalent to POST /prepare-transactions with method=newSto.",
         "security": [{"apiKeyAuth": []}],
@@ -500,7 +500,7 @@
     },
     "/prepare-transactions/newInvest": {
       "post": {
-        "summary": "Prepare Transactions - newInvest",
+        "summary": "newInvest",
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the newInvest method. Equivalent to POST /prepare-transactions with method=newInvest.",
         "security": [{"apiKeyAuth": []}],
@@ -510,7 +510,7 @@
     },
     "/prepare-transactions/claimTokens": {
       "post": {
-        "summary": "Prepare Transactions - claimTokens",
+        "summary": "claimTokens",
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the claimTokens method. Equivalent to POST /prepare-transactions with method=claimTokens.",
         "security": [{"apiKeyAuth": []}],
@@ -520,7 +520,7 @@
     },
     "/prepare-transactions/closeOffer": {
       "post": {
-        "summary": "Prepare Transactions - closeOffer",
+        "summary": "closeOffer",
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the closeOffer method. Equivalent to POST /prepare-transactions with method=closeOffer.",
         "security": [{"apiKeyAuth": []}],
