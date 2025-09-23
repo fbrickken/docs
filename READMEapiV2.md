@@ -90,6 +90,19 @@ Prepares unsigned transactions for various blockchain operations.
 
 Creates a new tokenized asset.
 
+**Additional Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `tokenizerEmail` | string | Yes | Email of the tokenizer |
+| `url` | string | Yes | URL for token documentation |
+| `name` | string | Yes | Name of the token |
+| `tokenSymbol` | string | Yes | Token symbol (max 5 characters) |
+| `tokenType` | string | Yes | Type of token. Allowed values: EQUITY, DEBT, BILL_FACTORING, ICO, STABLECOIN, REVENUE_SHARE, RWA_TOKEN, PROFIT_SHARING |
+| `supplyCap` | string | No | Maximum token supply cap |
+| `preMints` | array | No | Pre-mint configurations |
+| `initialHolders` | array | No | Initial holder configurations |
+
 **Request Body:**
 ```json
 {
@@ -100,6 +113,7 @@ Creates a new tokenized asset.
   "url": "https://example.com/token-docs",
   "name": "Example Token",
   "tokenSymbol": "EXMPL",
+  "tokenType": "EQUITY",
   "supplyCap": "1000000",
   "preMints": [
     {
@@ -373,6 +387,7 @@ Creates a new tokenization on behalf of a tokenizer.
   "chainId": "0x89",
   "name": "Example Token",
   "tokenSymbol": "EXMPL",
+  "tokenType": "EQUITY",
   "supplyCap": "1000000",
   "preMints": [
     {

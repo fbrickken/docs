@@ -70,6 +70,12 @@
                     "example": "BKN",
                     "description": "The token symbol (max 5 characters)."
                   },
+                  "tokenType": {
+                    "type": "string",
+                    "enum": ["EQUITY", "DEBT", "BILL_FACTORING", "ICO", "STABLECOIN", "REVENUE_SHARE", "RWA_TOKEN", "PROFIT_SHARING"],
+                    "example": "EQUITY",
+                    "description": "Type of token. Allowed values: EQUITY, DEBT, BILL_FACTORING, ICO, STABLECOIN, REVENUE_SHARE, RWA_TOKEN, PROFIT_SHARING."
+                  },
                   "tokenizerEmail": {
                     "type": "string",
                     "example": "tokenizer.email@example.com",
@@ -388,6 +394,7 @@
                   "url": {"type": "string"},
                   "name": {"type": "string"},
                   "tokenSymbol": {"type": "string"},
+                  "tokenType": {"type": "string", "enum": ["EQUITY", "DEBT", "BILL_FACTORING", "ICO", "STABLECOIN", "REVENUE_SHARE", "RWA_TOKEN", "PROFIT_SHARING"], "description": "Type of token."},
                   "supplyCap": {"type": "string"},
                   "preMints": {"type": "array", "items": {"type": "object"}},
                   "initialHolders": {"type": "array", "items": {"type": "object"}}
