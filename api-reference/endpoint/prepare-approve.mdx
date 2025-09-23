@@ -11,6 +11,7 @@ Prepares unsigned transactions for approving a spender to use tokens on behalf o
 |-----------|------|----------|-------------|
 | `signerAddress` | string | Yes | Address that will sign the transaction |
 | `chainId` | string | Yes | Blockchain network identifier (hex format) |
+| `method` | string | Yes | Transaction method type (should be "approve") |
 | `tokenSymbol` | string | Yes | Symbol of the token to approve (BKN, USDT, USDC, etc.) |
 | `spenderAddress` | string | Yes | Address of the spender being approved |
 | `amount` | string | Yes | Allowance amount to approve |
@@ -21,6 +22,7 @@ Prepares unsigned transactions for approving a spender to use tokens on behalf o
 {
   "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
+  "method": "approve",
   "tokenSymbol": "USDT",
   "spenderAddress": "0x456...",
   "amount": "1000"

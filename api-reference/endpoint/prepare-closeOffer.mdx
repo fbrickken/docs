@@ -9,10 +9,10 @@ Prepares unsigned transactions for closing an active Security Token Offering (ST
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `signerAddress` | string | Yes | Address that will sign the transaction (must be the tokenizer) |
+| `signerAddress` | string | Yes | Address that will sign the transaction |
 | `chainId` | string | Yes | Blockchain network identifier (hex format) |
-| `stoId` | string | Yes | ID of the STO to close |
-| `tokenizerEmail` | string | Yes | Email of the tokenizer |
+| `method` | string | Yes | Transaction method type (should be "closeOffer") |
+| `tokenSymbol` | string | Yes | Symbol of the token for the offer to close |
 
 ## Example Request
 
@@ -20,8 +20,8 @@ Prepares unsigned transactions for closing an active Security Token Offering (ST
 {
   "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
-  "stoId": "sto-123",
-  "tokenizerEmail": "tokenizer@example.com"
+  "method": "closeOffer",
+  "tokenSymbol": "PROP1"
 }
 ```
 

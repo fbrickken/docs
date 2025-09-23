@@ -388,6 +388,7 @@
                 "properties": {
                   "signerAddress": {"type": "string", "description": "Address initiating the transaction."},
                   "chainId": {"type": "string", "description": "Chain ID in hex."},
+                  "method": {"type": "string", "description": "Transaction method type (should be \"newTokenization\")"},
                   "gasLimit": {"type": "string", "description": "Optional gas limit."},
                   "rpcUrl": {"type": "string", "description": "Optional RPC URL."},
                   "tokenizerEmail": {"type": "string"},
@@ -430,7 +431,7 @@
         "security": [{"apiKeyAuth": []}],
         "requestBody": {
           "required": true,
-          "content": {"application/json": {"schema": {"type": "object", "description": "Same request body as /prepare-transactions for method=mintToken. The method is implied by the path.", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "gasLimit": {"type": "string"}, "rpcUrl": {"type": "string"}, "tokenSymbol": {"type": "string"}, "userToMint": {"type": "array", "items": {"type": "object"}}}}}}
+          "content": {"application/json": {"schema": {"type": "object", "description": "Same request body as /prepare-transactions for method=mintToken. The method is implied by the path.", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"mintToken\")"}, "gasLimit": {"type": "string"}, "rpcUrl": {"type": "string"}, "tokenSymbol": {"type": "string"}, "userToMint": {"type": "array", "items": {"type": "object"}}}}}}
         },
         "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
       }
@@ -441,7 +442,7 @@
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the whitelist method. Equivalent to POST /prepare-transactions with method=whitelist.",
         "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "description": "Same request body as /prepare-transactions for method=whitelist. The method is implied by the path.", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "gasLimit": {"type": "string"}, "rpcUrl": {"type": "string"}, "tokenSymbol": {"type": "string"}, "userToWhitelist": {"type": "array", "items": {"type": "object"}}, "newInvestor": {"type": "object"}}}}}},
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "description": "Same request body as /prepare-transactions for method=whitelist. The method is implied by the path.", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"whitelist\")"}, "gasLimit": {"type": "string"}, "rpcUrl": {"type": "string"}, "tokenSymbol": {"type": "string"}, "userToWhitelist": {"type": "array", "items": {"type": "object"}}, "newInvestor": {"type": "object"}}}}}},
         "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
       }
     },
@@ -451,7 +452,7 @@
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the burnToken method. Equivalent to POST /prepare-transactions with method=burnToken.",
         "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "tokenSymbol": {"type": "string"}, "amount": {"type": "string"}}}}}},
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"burnToken\")"}, "tokenSymbol": {"type": "string"}, "amount": {"type": "string"}, "investorEmail": {"type": "string", "description": "Email of the investor"}}}}}},
         "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
       }
     },
@@ -461,7 +462,7 @@
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the transferFrom method. Equivalent to POST /prepare-transactions with method=transferFrom.",
         "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "tokenSymbol": {"type": "string"}, "from": {"type": "string"}, "to": {"type": "string"}, "amount": {"type": "string"}}}}}},
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"transferFrom\")"}, "tokenSymbol": {"type": "string"}, "from": {"type": "string"}, "to": {"type": "string"}, "amount": {"type": "string"}}}}}},
         "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
       }
     },
@@ -471,7 +472,7 @@
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the transferTo method. Equivalent to POST /prepare-transactions with method=transferTo.",
         "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "tokenSymbol": {"type": "string"}, "to": {"type": "string"}, "amount": {"type": "string"}}}}}},
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"transferTo\")"}, "tokenSymbol": {"type": "string"}, "to": {"type": "string"}, "amount": {"type": "string"}}}}}},
         "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
       }
     },
@@ -481,7 +482,7 @@
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the approve method. Equivalent to POST /prepare-transactions with method=approve.",
         "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "tokenSymbol": {"type": "string"}, "spenderAddress": {"type": "string"}, "amount": {"type": "string"}}}}}},
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"approve\")"}, "tokenSymbol": {"type": "string"}, "spenderAddress": {"type": "string"}, "amount": {"type": "string"}}}}}},
         "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
       }
     },
@@ -491,7 +492,7 @@
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the dividendDistribution method. Equivalent to POST /prepare-transactions with method=dividendDistribution.",
         "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "tokenSymbol": {"type": "string"}, "amount": {"type": "string"}}}}}},
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"dividendDistribution\")"}, "tokenSymbol": {"type": "string"}, "amount": {"type": "string"}}}}}},
         "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
       }
     },
@@ -501,7 +502,7 @@
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the newSto method. Equivalent to POST /prepare-transactions with method=newSto.",
         "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "tokenizerEmail": {"type": "string"}, "tokenAmount": {"type": "string"}, "offeringName": {"type": "string"}, "startDate": {"type": "string", "format": "date-time"}, "endDate": {"type": "string", "format": "date-time"}, "acceptedCoin": {"type": "string"}, "minRaiseUSD": {"type": "string"}, "maxRaiseUSD": {"type": "string"}, "minInvestment": {"type": "string"}, "maxInvestment": {"type": "string"}}}}}},
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"newSto\")"}, "tokenizerEmail": {"type": "string"}, "tokenAmount": {"type": "string"}, "offeringName": {"type": "string"}, "startDate": {"type": "string", "format": "date-time"}, "endDate": {"type": "string", "format": "date-time"}, "acceptedCoin": {"type": "string"}, "minRaiseUSD": {"type": "string"}, "maxRaiseUSD": {"type": "string"}, "minInvestment": {"type": "string"}, "maxInvestment": {"type": "string"}}}}}},
         "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
       }
     },
@@ -511,7 +512,7 @@
         "tags": ["Endpoints", "Prepare Transactions"],
         "description": "Prepares unsigned transactions for the newInvest method. Equivalent to POST /prepare-transactions with method=newInvest.",
         "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"chainId": {"type": "string"}, "investorAddress": {"type": "string"}, "tokenSymbol": {"type": "string"}, "investorEmail": {"type": "string"}, "investmentAmount": {"type": "string"}, "paymentTokenSymbol": {"type": "string"}}}}}},
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"newInvest\")"}, "investorAddress": {"type": "string"}, "tokenSymbol": {"type": "string"}, "investorEmail": {"type": "string"}, "investmentAmount": {"type": "string"}, "paymentTokenSymbol": {"type": "string"}}}}}},
         "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
       }
     },

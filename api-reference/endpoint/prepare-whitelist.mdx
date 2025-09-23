@@ -11,6 +11,7 @@ Prepares unsigned transactions for whitelisting or blacklisting users. This endp
 |-----------|------|----------|-------------|
 | `signerAddress` | string | Yes | Address that will sign the transaction |
 | `chainId` | string | Yes | Blockchain network identifier (hex format) |
+| `method` | string | Yes | Transaction method type (should be "whitelist") |
 | `tokenSymbol` | string | Yes | Symbol of the token for whitelisting |
 | `userToWhitelist` | array | Yes | Array of users to whitelist/blacklist |
 | `gasLimit` | string | No | Optional gas limit |
@@ -37,6 +38,7 @@ Prepares unsigned transactions for whitelisting or blacklisting users. This endp
 {
   "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
+  "method": "whitelist",
   "tokenSymbol": "EXMPL",
   "userToWhitelist": [
     {

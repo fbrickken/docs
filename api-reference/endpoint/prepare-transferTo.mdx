@@ -11,8 +11,9 @@ Prepares unsigned transactions for transferring tokens from the signer's address
 |-----------|------|----------|-------------|
 | `signerAddress` | string | Yes | Address that will sign the transaction |
 | `chainId` | string | Yes | Blockchain network identifier (hex format) |
+| `method` | string | Yes | Transaction method type (should be "transferTo") |
 | `tokenSymbol` | string | Yes | Symbol of the token to transfer |
-| `to` | string | Yes | Destination address for the transfer |
+| `to` | string | Yes | Address to transfer tokens to |
 | `amount` | string | Yes | Amount of tokens to transfer |
 
 ## Example Request
@@ -21,7 +22,8 @@ Prepares unsigned transactions for transferring tokens from the signer's address
 {
   "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
-  "tokenSymbol": "EXMPL",
+  "method": "transferTo",
+  "tokenSymbol": "PROP1",
   "to": "0x456...",
   "amount": "100"
 }

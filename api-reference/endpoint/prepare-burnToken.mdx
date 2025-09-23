@@ -11,8 +11,10 @@ Prepares unsigned transactions for burning tokens from the signer's balance. Thi
 |-----------|------|----------|-------------|
 | `signerAddress` | string | Yes | Address that will sign the transaction |
 | `chainId` | string | Yes | Blockchain network identifier (hex format) |
+| `method` | string | Yes | Transaction method type (should be "burnToken") |
 | `tokenSymbol` | string | Yes | Symbol of the token to burn |
 | `amount` | string | Yes | Amount of tokens to burn |
+| `investorEmail` | string | Yes | Email of the investor burning tokens |
 
 ## Example Request
 
@@ -20,8 +22,10 @@ Prepares unsigned transactions for burning tokens from the signer's balance. Thi
 {
   "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
-  "tokenSymbol": "EXMPL",
-  "amount": "100"
+  "method": "burnToken",
+  "tokenSymbol": "PROP1",
+  "amount": "100",
+  "investorEmail": "investor@example.com"
 }
 ```
 

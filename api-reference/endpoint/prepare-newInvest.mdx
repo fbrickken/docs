@@ -11,11 +11,12 @@ Prepares unsigned transactions for making an investment in a Security Token Offe
 |-----------|------|----------|-------------|
 | `signerAddress` | string | Yes | Address that will sign the transaction |
 | `chainId` | string | Yes | Blockchain network identifier (hex format) |
-| `stoId` | string | Yes | ID of the STO to invest in |
-| `amount` | string | Yes | Investment amount |
+| `method` | string | Yes | Transaction method type (should be "newInvest") |
+| `tokenSymbol` | string | Yes | Symbol of the token to invest in |
+| `paymentTokenSymbol` | string | Yes | Symbol of the payment token |
+| `amount` | string | Yes | Amount to invest |
 | `investorAddress` | string | Yes | Address of the investor |
 | `investorEmail` | string | Yes | Email of the investor |
-| `paymentTokenSymbol` | string | Yes | Symbol of the payment token (USDT, USDC, etc.) |
 
 ## Example Request
 
@@ -23,11 +24,12 @@ Prepares unsigned transactions for making an investment in a Security Token Offe
 {
   "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
-  "stoId": "sto-123",
+  "method": "newInvest",
+  "tokenSymbol": "PROP1",
+  "paymentTokenSymbol": "USDT",
   "amount": "1000",
   "investorAddress": "0x456...",
-  "investorEmail": "investor@example.com",
-  "paymentTokenSymbol": "USDT"
+  "investorEmail": "investor@example.com"
 }
 ```
 

@@ -11,6 +11,7 @@ Prepares unsigned transactions for minting tokens to specified users. This endpo
 |-----------|------|----------|-------------|
 | `signerAddress` | string | Yes | Address that will sign the transaction |
 | `chainId` | string | Yes | Blockchain network identifier (hex format) |
+| `method` | string | Yes | Transaction method type (should be "mintToken") |
 | `tokenSymbol` | string | Yes | Symbol of the token to mint |
 | `userToMint` | array | Yes | Array of users to mint tokens to |
 | `gasLimit` | string | No | Optional gas limit |
@@ -31,7 +32,8 @@ Prepares unsigned transactions for minting tokens to specified users. This endpo
 {
   "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
-  "tokenSymbol": "EXMPL",
+  "method": "mintToken",
+  "tokenSymbol": "PROP1",
   "userToMint": [
     {
       "email": "investor@example.com",

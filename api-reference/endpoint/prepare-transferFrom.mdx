@@ -11,6 +11,7 @@ Prepares unsigned transactions for transferring tokens from one address to anoth
 |-----------|------|----------|-------------|
 | `signerAddress` | string | Yes | Address that will sign the transaction |
 | `chainId` | string | Yes | Blockchain network identifier (hex format) |
+| `method` | string | Yes | Transaction method type (should be "transferFrom") |
 | `tokenSymbol` | string | Yes | Symbol of the token to transfer |
 | `from` | string | Yes | Source address for the transfer |
 | `to` | string | Yes | Destination address for the transfer |
@@ -22,7 +23,8 @@ Prepares unsigned transactions for transferring tokens from one address to anoth
 {
   "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
-  "tokenSymbol": "EXMPL",
+  "method": "transferFrom",
+  "tokenSymbol": "PROP1",
   "from": "0x123...",
   "to": "0x456...",
   "amount": "100"

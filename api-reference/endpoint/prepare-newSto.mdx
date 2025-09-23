@@ -11,16 +11,15 @@ Prepares unsigned transactions for creating a new Security Token Offering (STO).
 |-----------|------|----------|-------------|
 | `signerAddress` | string | Yes | Address that will sign the transaction |
 | `chainId` | string | Yes | Blockchain network identifier (hex format) |
-| `tokenizerEmail` | string | Yes | Email of the tokenizer |
-| `tokenAmount` | string | Yes | Amount of tokens for the STO |
-| `offeringName` | string | Yes | Name of the STO offering |
-| `startDate` | string | Yes | Start date of the STO (ISO format) |
-| `endDate` | string | Yes | End date of the STO (ISO format) |
-| `acceptedCoin` | string | Yes | Accepted payment token symbol |
-| `minRaiseUSD` | string | Yes | Minimum raise amount in USD |
-| `maxRaiseUSD` | string | Yes | Maximum raise amount in USD |
+| `method` | string | Yes | Transaction method type (should be "newSto") |
+| `tokenSymbol` | string | Yes | Symbol of the token for the STO |
+| `paymentTokenSymbol` | string | Yes | Symbol of the payment token |
+| `price` | string | Yes | Price per token |
 | `minInvestment` | string | Yes | Minimum investment amount |
 | `maxInvestment` | string | Yes | Maximum investment amount |
+| `startDate` | string | Yes | STO start date (ISO format) |
+| `endDate` | string | Yes | STO end date (ISO format) |
+| `tokenizerEmail` | string | Yes | Email of the tokenizer |
 
 ## Example Request
 
@@ -28,16 +27,15 @@ Prepares unsigned transactions for creating a new Security Token Offering (STO).
 {
   "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
-  "tokenizerEmail": "tokenizer@example.com",
-  "tokenAmount": "1000",
-  "offeringName": "Example STO",
-  "startDate": "2025-08-26T17:30:00.000Z",
-  "endDate": "2025-10-02T00:00:00.000Z",
-  "acceptedCoin": "USDT",
-  "minRaiseUSD": "10000",
-  "maxRaiseUSD": "100000",
-  "minInvestment": "100",
-  "maxInvestment": "10000"
+  "method": "newSto",
+  "tokenSymbol": "PROP1",
+  "paymentTokenSymbol": "USDT",
+  "price": "1.0",
+  "minInvestment": "1000",
+  "maxInvestment": "50000",
+  "startDate": "2024-01-01T00:00:00Z",
+  "endDate": "2024-12-31T23:59:59Z",
+  "tokenizerEmail": "tokenizer@example.com"
 }
 ```
 
