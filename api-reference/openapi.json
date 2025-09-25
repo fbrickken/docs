@@ -36,7 +36,7 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** This endpoint prepares unsigned transactions for various blockchain operations. The operation is determined by the `method` field in the request body. Supported methods include: `newTokenization`, `mintToken`, `whitelist`, `burnToken`, `approve`, `transferTo`, `transferFrom`, `dividendDistribution`, `newSto`, `newInvest`, `closeOffer` and `claimTokens`.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY`\n- `Content-Type`: `application/json`\n\n**Common Request Body Parameters:**\n- `method` (string): Operation to perform.\n- `signerAddress` (string): Address initiating the transaction.\n- `chainId` (string): Chain ID in hex (e.g., \"aa36a7\").\n- `gasLimit` (string, optional): Optional gas limit.\n- `rpcUrl` (string, optional): Optional RPC URL.\n\n---\n\n**Method: `newTokenization`**\nPrepares a new tokenization transaction.\n\n**Additional Request Body Parameters:**\n- `url` (string): Token documentation URL.\n- `name` (string): Token name.\n- `symbol` (string): Token symbol (max 5 characters).\n- `tokenizerEmail` (string): The email of the tokenizer.\n- `supplyCap` (string, optional): Max token supply.\n- `preMints` (array, optional): Pre-mint configurations.\n- `initialHolders` (array, optional): Initial holder configurations.\n\n---\n\n**Method: `mintToken`**\nPrepares minting tokens to users.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `userToMint` (array of objects): Each object includes:\n  - `email` (string)\n  - `investorAddress` (string)\n  - `amount` (string)\n  - `needWhitelist` (boolean)\n\n---\n\n**Method: `whitelist`**\nWhitelists or blacklists users.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `userToWhitelist` (array of objects): Each includes:\n  - `whitelistStatus` (string): \"true\" or \"false\".\n  - `investorAddress` (string)\n\n---\n\n**Method: `burnToken`**\nBurns tokens from the signer’s balance.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `amount` (string): Amount to burn.\n\n---\n\n**Method: `transferFrom`**\nTransfers tokens from one address to another (with prior approval).\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `from` (string): Sender address.\n- `to` (string): Receiver address.\n- `amount` (string): Amount to transfer.\n\n---\n\n**Method: `transferTo`**\nTransfers tokens from `signerAddress` to another address.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `to` (string): Receiver address.\n- `amount` (string): Amount to transfer.\n\n---\n\n**Method: `approve`**\nApproves a spender to use tokens.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Token to approve (can include BKN, USDT, USDC).\n- `spenderAddress` (string): Address being approved.\n- `amount` (string): Allowance amount.\n\n---\n\n**Method: `dividendDistribution`**\nDistributes `paymentToken` dividends to holders of `tokenSymbol`.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string)\n- `amount` (string): Amount of payment token to distribute.\n\n**Note:** Amounts are in whole units (e.g., 10 for 10 USDT).\n\n---\n\n**Method: `newSto`**\nCreates a new STO (Security Token Offering).\n\n**Additional Request Body Parameters:**\n- `tokenizerEmail` (string)\n- `tokenAmount` (string)\n- `offeringName` (string)\n- `startDate` (string)\n- `endDate` (string)\n- `acceptedCoin` (string)\n- `minRaiseUSD` (string)\n- `maxRaiseUSD` (string)\n- `minInvestment` (string)\n- `maxInvestment` (string)\n- `signerAddress` (string)",
+        "description": "**Description:** This endpoint prepares unsigned transactions for various blockchain operations. The operation is determined by the `method` field in the request body. Supported methods include: `newTokenization`, `mintToken`, `whitelist`, `burnToken`, `approve`, `transferTo`, `transferFrom`, `dividendDistribution`, `newSto`, `newInvest`, `closeOffer` and `claimTokens`.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY`\n- `Content-Type`: `application/json`\n\n**Common Request Body Parameters:**\n- `method` (string): Operation to perform.\n- `signerAddress` (string): Address initiating the transaction.\n- `chainId` (string): Chain ID in hex (e.g., \"aa36a7\").\n- `gasLimit` (string, optional): Optional gas limit.\n- `rpcUrl` (string, optional): Optional RPC URL.\n\n---\n\n**Method: `newTokenization`**\nPrepares a new tokenization transaction.\n\n**Additional Request Body Parameters:**\n- `url` (string): Token documentation URL.\n- `name` (string): Token name.\n- `symbol` (string): Token symbol (max 5 characters).\n- `tokenizerEmail` (string): The email of the tokenizer.\n- `supplyCap` (string, optional): Max token supply.\n- `preMints` (array, optional): Pre-mint configurations.\n- `initialHolders` (array, optional): Initial holder configurations.\n\n---\n\n**Method: `mintToken`**\nPrepares minting tokens to users.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `userToMint` (array of objects): Each object includes:\n  - `email` (string)\n  - `investorAddress` (string)\n  - `amount` (string)\n  - `needWhitelist` (boolean)\n\n---\n\n**Method: `whitelist`**\nWhitelists or blacklists users.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `userToWhitelist` (array of objects): Each includes:\n  - `whitelistStatus` (string): \"true\" or \"false\".\n  - `investorAddress` (string)\n\n---\n\n**Method: `burnToken`**\nBurns tokens from the signer\u2019s balance.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `amount` (string): Amount to burn.\n\n---\n\n**Method: `transferFrom`**\nTransfers tokens from one address to another (with prior approval).\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `from` (string): Sender address.\n- `to` (string): Receiver address.\n- `amount` (string): Amount to transfer.\n\n---\n\n**Method: `transferTo`**\nTransfers tokens from `signerAddress` to another address.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `to` (string): Receiver address.\n- `amount` (string): Amount to transfer.\n\n---\n\n**Method: `approve`**\nApproves a spender to use tokens.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Token to approve (can include BKN, USDT, USDC).\n- `spenderAddress` (string): Address being approved.\n- `amount` (string): Allowance amount.\n\n---\n\n**Method: `dividendDistribution`**\nDistributes `paymentToken` dividends to holders of `tokenSymbol`.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string)\n- `amount` (string): Amount of payment token to distribute.\n\n**Note:** Amounts are in whole units (e.g., 10 for 10 USDT).\n\n---\n\n**Method: `newSto`**\nCreates a new STO (Security Token Offering).\n\n**Additional Request Body Parameters:**\n- `tokenizerEmail` (string)\n- `tokenAmount` (string)\n- `offeringName` (string)\n- `startDate` (string)\n- `endDate` (string)\n- `acceptedCoin` (string)\n- `minRaiseUSD` (string)\n- `maxRaiseUSD` (string)\n- `minInvestment` (string)\n- `maxInvestment` (string)\n- `signerAddress` (string)",
         "security": [
           {
             "apiKeyAuth": []
@@ -52,7 +52,20 @@
                   "method": {
                     "type": "string",
                     "example": "newTokenization",
-                    "enum": ["newTokenization", "newSto", "newInvest", "claimTokens", "mintToken", "whitelist", "approve", "burnToken", "transferFrom", "transferTo", "dividendDistribution", "closeOffer"],
+                    "enum": [
+                      "newTokenization",
+                      "newSto",
+                      "newInvest",
+                      "claimTokens",
+                      "mintToken",
+                      "whitelist",
+                      "approve",
+                      "burnToken",
+                      "transferFrom",
+                      "transferTo",
+                      "dividendDistribution",
+                      "closeOffer"
+                    ],
                     "description": "The operation to be performed. Supported methods: newTokenization (create tokenized asset), newSto (create STO), newInvest (invest in STO), claimTokens (claim from completed STO), mintToken (mint additional tokens), whitelist (manage whitelist), approve (approve spending), burnToken (burn tokens), transferFrom (transfer with approval), transferTo (transfer from signer), dividendDistribution (distribute dividends), closeOffer (close active STO)."
                   },
                   "signerAddress": {
@@ -72,7 +85,16 @@
                   },
                   "tokenType": {
                     "type": "string",
-                    "enum": ["EQUITY", "DEBT", "BILL_FACTORING", "ICO", "STABLECOIN", "REVENUE_SHARE", "RWA_TOKEN", "PROFIT_SHARING"],
+                    "enum": [
+                      "EQUITY",
+                      "DEBT",
+                      "BILL_FACTORING",
+                      "ICO",
+                      "STABLECOIN",
+                      "REVENUE_SHARE",
+                      "RWA_TOKEN",
+                      "PROFIT_SHARING"
+                    ],
                     "example": "EQUITY",
                     "description": "Type of token. Allowed values: EQUITY, DEBT, BILL_FACTORING, ICO, STABLECOIN, REVENUE_SHARE, RWA_TOKEN, PROFIT_SHARING."
                   },
@@ -112,8 +134,12 @@
                     "items": {
                       "type": "object",
                       "properties": {
-                        "email": {"type": "string"},
-                        "percentage": {"type": "number"}
+                        "email": {
+                          "type": "string"
+                        },
+                        "percentage": {
+                          "type": "number"
+                        }
                       }
                     },
                     "description": "Array of initial token holders (used in newTokenization)."
@@ -187,10 +213,18 @@
                     "items": {
                       "type": "object",
                       "properties": {
-                        "email": {"type": "string"},
-                        "investorAddress": {"type": "string"},
-                        "amount": {"type": "string"},
-                        "needWhitelist": {"type": "boolean"}
+                        "email": {
+                          "type": "string"
+                        },
+                        "investorAddress": {
+                          "type": "string"
+                        },
+                        "amount": {
+                          "type": "string"
+                        },
+                        "needWhitelist": {
+                          "type": "boolean"
+                        }
                       }
                     },
                     "description": "Array of pre-mint configurations (used in newTokenization)."
@@ -241,10 +275,18 @@
                     "items": {
                       "type": "object",
                       "properties": {
-                        "email": {"type": "string"},
-                        "investorAddress": {"type": "string"},
-                        "amount": {"type": "string"},
-                        "needWhitelist": {"type": "boolean"}
+                        "email": {
+                          "type": "string"
+                        },
+                        "investorAddress": {
+                          "type": "string"
+                        },
+                        "amount": {
+                          "type": "string"
+                        },
+                        "needWhitelist": {
+                          "type": "boolean"
+                        }
                       }
                     },
                     "description": "Array of users to mint tokens to (used in mintToken)."
@@ -254,8 +296,12 @@
                     "items": {
                       "type": "object",
                       "properties": {
-                        "whitelistStatus": {"type": "boolean"},
-                        "investorAddress": {"type": "string"}
+                        "whitelistStatus": {
+                          "type": "boolean"
+                        },
+                        "investorAddress": {
+                          "type": "string"
+                        }
                       }
                     },
                     "description": "Array of users to whitelist/blacklist (used in whitelist)."
@@ -359,7 +405,10 @@
                       "example": "0x46adea7bdf49c576a760102e0d6bc9ecd650b3998588cd3d7f576a7973426aad"
                     }
                   },
-                  "required": ["transactions", "txId"]
+                  "required": [
+                    "transactions",
+                    "txId"
+                  ]
                 }
               }
             }
@@ -369,14 +418,16 @@
     },
     "/prepare-transactions/newTokenization": {
       "post": {
-        "summary": "newTokenization",
+        "summary": "newTokenization (DEPRECATED - Use /prepare-transactions)",
         "tags": [
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "Prepares unsigned transactions for the newTokenization method. Equivalent to POST /prepare-transactions with method=newTokenization.",
+        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"newTokenization\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to newTokenization\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"newTokenization\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
         "security": [
-          { "apiKeyAuth": [] }
+          {
+            "apiKeyAuth": []
+          }
         ],
         "requestBody": {
           "required": true,
@@ -386,19 +437,67 @@
                 "type": "object",
                 "description": "Same request body as /prepare-transactions for method=newTokenization. The method is implied by the path.",
                 "properties": {
-                  "signerAddress": {"type": "string", "description": "Address initiating the transaction."},
-                  "chainId": {"type": "string", "description": "Chain ID in hex."},
-                  "method": {"type": "string", "description": "Transaction method type (should be \"newTokenization\")"},
-                  "gasLimit": {"type": "string", "description": "Optional gas limit."},
-                  "rpcUrl": {"type": "string", "description": "Optional RPC URL."},
-                  "tokenizerEmail": {"type": "string"},
-                  "url": {"type": "string"},
-                  "name": {"type": "string"},
-                  "tokenSymbol": {"type": "string"},
-                  "tokenType": {"type": "string", "enum": ["EQUITY", "DEBT", "BILL_FACTORING", "ICO", "STABLECOIN", "REVENUE_SHARE", "RWA_TOKEN", "PROFIT_SHARING"], "description": "Type of token."},
-                  "supplyCap": {"type": "string"},
-                  "preMints": {"type": "array", "items": {"type": "object"}},
-                  "initialHolders": {"type": "array", "items": {"type": "object"}}
+                  "signerAddress": {
+                    "type": "string",
+                    "description": "Address initiating the transaction."
+                  },
+                  "chainId": {
+                    "type": "string",
+                    "description": "Chain ID in hex."
+                  },
+                  "method": {
+                    "type": "string",
+                    "description": "Transaction method type (should be \"newTokenization\")"
+                  },
+                  "gasLimit": {
+                    "type": "string",
+                    "description": "Optional gas limit."
+                  },
+                  "rpcUrl": {
+                    "type": "string",
+                    "description": "Optional RPC URL."
+                  },
+                  "tokenizerEmail": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "tokenSymbol": {
+                    "type": "string"
+                  },
+                  "tokenType": {
+                    "type": "string",
+                    "enum": [
+                      "EQUITY",
+                      "DEBT",
+                      "BILL_FACTORING",
+                      "ICO",
+                      "STABLECOIN",
+                      "REVENUE_SHARE",
+                      "RWA_TOKEN",
+                      "PROFIT_SHARING"
+                    ],
+                    "description": "Type of token."
+                  },
+                  "supplyCap": {
+                    "type": "string"
+                  },
+                  "preMints": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "initialHolders": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
                 }
               }
             }
@@ -412,128 +511,870 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "transactions": {"type": "array", "items": {"type": "object"}},
-                    "txId": {"type": "string"}
+                    "transactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "txId": {
+                      "type": "string"
+                    }
                   },
-                  "required": ["transactions", "txId"]
+                  "required": [
+                    "transactions",
+                    "txId"
+                  ]
                 }
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/prepare-transactions/mintToken": {
       "post": {
-        "summary": "mintToken",
-        "tags": ["Endpoints", "Prepare Transactions"],
-        "description": "Prepares unsigned transactions for the mintToken method. Equivalent to POST /prepare-transactions with method=mintToken.",
-        "security": [{"apiKeyAuth": []}],
+        "summary": "mintToken (DEPRECATED - Use /prepare-transactions)",
+        "tags": [
+          "Endpoints",
+          "Prepare Transactions"
+        ],
+        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"mintToken\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to mintToken\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"mintToken\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
-          "content": {"application/json": {"schema": {"type": "object", "description": "Same request body as /prepare-transactions for method=mintToken. The method is implied by the path.", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"mintToken\")"}, "gasLimit": {"type": "string"}, "rpcUrl": {"type": "string"}, "tokenSymbol": {"type": "string"}, "userToMint": {"type": "array", "items": {"type": "object"}}}}}}
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Same request body as /prepare-transactions for method=mintToken. The method is implied by the path.",
+                "properties": {
+                  "signerAddress": {
+                    "type": "string"
+                  },
+                  "chainId": {
+                    "type": "string"
+                  },
+                  "method": {
+                    "type": "string",
+                    "description": "Transaction method type (should be \"mintToken\")"
+                  },
+                  "gasLimit": {
+                    "type": "string"
+                  },
+                  "rpcUrl": {
+                    "type": "string"
+                  },
+                  "tokenSymbol": {
+                    "type": "string"
+                  },
+                  "userToMint": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
         },
-        "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "txId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "transactions",
+                    "txId"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
       }
     },
     "/prepare-transactions/whitelist": {
       "post": {
-        "summary": "whitelist",
-        "tags": ["Endpoints", "Prepare Transactions"],
-        "description": "Prepares unsigned transactions for the whitelist method. Equivalent to POST /prepare-transactions with method=whitelist.",
-        "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "description": "Same request body as /prepare-transactions for method=whitelist. The method is implied by the path.", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"whitelist\")"}, "gasLimit": {"type": "string"}, "rpcUrl": {"type": "string"}, "tokenSymbol": {"type": "string"}, "userToWhitelist": {"type": "array", "items": {"type": "object"}}, "newInvestor": {"type": "object"}}}}}},
-        "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
+        "summary": "whitelist (DEPRECATED - Use /prepare-transactions)",
+        "tags": [
+          "Endpoints",
+          "Prepare Transactions"
+        ],
+        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"whitelist\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to whitelist\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"whitelist\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Same request body as /prepare-transactions for method=whitelist. The method is implied by the path.",
+                "properties": {
+                  "signerAddress": {
+                    "type": "string"
+                  },
+                  "chainId": {
+                    "type": "string"
+                  },
+                  "method": {
+                    "type": "string",
+                    "description": "Transaction method type (should be \"whitelist\")"
+                  },
+                  "gasLimit": {
+                    "type": "string"
+                  },
+                  "rpcUrl": {
+                    "type": "string"
+                  },
+                  "tokenSymbol": {
+                    "type": "string"
+                  },
+                  "userToWhitelist": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "newInvestor": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "txId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "transactions",
+                    "txId"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
       }
     },
     "/prepare-transactions/burnToken": {
       "post": {
-        "summary": "burnToken",
-        "tags": ["Endpoints", "Prepare Transactions"],
-        "description": "Prepares unsigned transactions for the burnToken method. Equivalent to POST /prepare-transactions with method=burnToken.",
-        "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"burnToken\")"}, "tokenSymbol": {"type": "string"}, "amount": {"type": "string"}, "investorEmail": {"type": "string", "description": "Email of the investor"}}}}}},
-        "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
+        "summary": "burnToken (DEPRECATED - Use /prepare-transactions)",
+        "tags": [
+          "Endpoints",
+          "Prepare Transactions"
+        ],
+        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"burnToken\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to burnToken\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"burnToken\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "signerAddress": {
+                    "type": "string"
+                  },
+                  "chainId": {
+                    "type": "string"
+                  },
+                  "method": {
+                    "type": "string",
+                    "description": "Transaction method type (should be \"burnToken\")"
+                  },
+                  "tokenSymbol": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "string"
+                  },
+                  "investorEmail": {
+                    "type": "string",
+                    "description": "Email of the investor"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "txId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "transactions",
+                    "txId"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
       }
     },
     "/prepare-transactions/transferFrom": {
       "post": {
-        "summary": "transferFrom",
-        "tags": ["Endpoints", "Prepare Transactions"],
-        "description": "Prepares unsigned transactions for the transferFrom method. Equivalent to POST /prepare-transactions with method=transferFrom.",
-        "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"transferFrom\")"}, "tokenSymbol": {"type": "string"}, "from": {"type": "string"}, "to": {"type": "string"}, "amount": {"type": "string"}}}}}},
-        "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
+        "summary": "transferFrom (DEPRECATED - Use /prepare-transactions)",
+        "tags": [
+          "Endpoints",
+          "Prepare Transactions"
+        ],
+        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"transferFrom\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to transferFrom\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"transferFrom\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "signerAddress": {
+                    "type": "string"
+                  },
+                  "chainId": {
+                    "type": "string"
+                  },
+                  "method": {
+                    "type": "string",
+                    "description": "Transaction method type (should be \"transferFrom\")"
+                  },
+                  "tokenSymbol": {
+                    "type": "string"
+                  },
+                  "from": {
+                    "type": "string"
+                  },
+                  "to": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "txId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "transactions",
+                    "txId"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
       }
     },
     "/prepare-transactions/transferTo": {
       "post": {
-        "summary": "transferTo",
-        "tags": ["Endpoints", "Prepare Transactions"],
-        "description": "Prepares unsigned transactions for the transferTo method. Equivalent to POST /prepare-transactions with method=transferTo.",
-        "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"transferTo\")"}, "tokenSymbol": {"type": "string"}, "to": {"type": "string"}, "amount": {"type": "string"}}}}}},
-        "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
+        "summary": "transferTo (DEPRECATED - Use /prepare-transactions)",
+        "tags": [
+          "Endpoints",
+          "Prepare Transactions"
+        ],
+        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"transferTo\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to transferTo\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"transferTo\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "signerAddress": {
+                    "type": "string"
+                  },
+                  "chainId": {
+                    "type": "string"
+                  },
+                  "method": {
+                    "type": "string",
+                    "description": "Transaction method type (should be \"transferTo\")"
+                  },
+                  "tokenSymbol": {
+                    "type": "string"
+                  },
+                  "to": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "txId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "transactions",
+                    "txId"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
       }
     },
     "/prepare-transactions/approve": {
       "post": {
-        "summary": "approve",
-        "tags": ["Endpoints", "Prepare Transactions"],
-        "description": "Prepares unsigned transactions for the approve method. Equivalent to POST /prepare-transactions with method=approve.",
-        "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"approve\")"}, "tokenSymbol": {"type": "string"}, "spenderAddress": {"type": "string"}, "amount": {"type": "string"}}}}}},
-        "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
+        "summary": "approve (DEPRECATED - Use /prepare-transactions)",
+        "tags": [
+          "Endpoints",
+          "Prepare Transactions"
+        ],
+        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"approve\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to approve\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"approve\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "signerAddress": {
+                    "type": "string"
+                  },
+                  "chainId": {
+                    "type": "string"
+                  },
+                  "method": {
+                    "type": "string",
+                    "description": "Transaction method type (should be \"approve\")"
+                  },
+                  "tokenSymbol": {
+                    "type": "string"
+                  },
+                  "spenderAddress": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "txId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "transactions",
+                    "txId"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
       }
     },
     "/prepare-transactions/dividendDistribution": {
       "post": {
-        "summary": "dividendDistribution",
-        "tags": ["Endpoints", "Prepare Transactions"],
-        "description": "Prepares unsigned transactions for the dividendDistribution method. Equivalent to POST /prepare-transactions with method=dividendDistribution.",
-        "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"dividendDistribution\")"}, "tokenSymbol": {"type": "string"}, "amount": {"type": "string"}}}}}},
-        "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
+        "summary": "dividendDistribution (DEPRECATED - Use /prepare-transactions)",
+        "tags": [
+          "Endpoints",
+          "Prepare Transactions"
+        ],
+        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"dividendDistribution\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to dividendDistribution\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"dividendDistribution\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "signerAddress": {
+                    "type": "string"
+                  },
+                  "chainId": {
+                    "type": "string"
+                  },
+                  "method": {
+                    "type": "string",
+                    "description": "Transaction method type (should be \"dividendDistribution\")"
+                  },
+                  "tokenSymbol": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "txId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "transactions",
+                    "txId"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
       }
     },
     "/prepare-transactions/newSto": {
       "post": {
-        "summary": "newSto",
-        "tags": ["Endpoints", "Prepare Transactions"],
-        "description": "Prepares unsigned transactions for the newSto method. Equivalent to POST /prepare-transactions with method=newSto.",
-        "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"signerAddress": {"type": "string"}, "chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"newSto\")"}, "tokenizerEmail": {"type": "string"}, "tokenAmount": {"type": "string"}, "offeringName": {"type": "string"}, "startDate": {"type": "string", "format": "date-time"}, "endDate": {"type": "string", "format": "date-time"}, "acceptedCoin": {"type": "string"}, "minRaiseUSD": {"type": "string"}, "maxRaiseUSD": {"type": "string"}, "minInvestment": {"type": "string"}, "maxInvestment": {"type": "string"}}}}}},
-        "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
+        "summary": "newSto (DEPRECATED - Use /prepare-transactions)",
+        "tags": [
+          "Endpoints",
+          "Prepare Transactions"
+        ],
+        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"newSto\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to newSto\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"newSto\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "signerAddress": {
+                    "type": "string"
+                  },
+                  "chainId": {
+                    "type": "string"
+                  },
+                  "method": {
+                    "type": "string",
+                    "description": "Transaction method type (should be \"newSto\")"
+                  },
+                  "tokenizerEmail": {
+                    "type": "string"
+                  },
+                  "tokenAmount": {
+                    "type": "string"
+                  },
+                  "offeringName": {
+                    "type": "string"
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "acceptedCoin": {
+                    "type": "string"
+                  },
+                  "minRaiseUSD": {
+                    "type": "string"
+                  },
+                  "maxRaiseUSD": {
+                    "type": "string"
+                  },
+                  "minInvestment": {
+                    "type": "string"
+                  },
+                  "maxInvestment": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "txId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "transactions",
+                    "txId"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
       }
     },
     "/prepare-transactions/newInvest": {
       "post": {
-        "summary": "newInvest",
-        "tags": ["Endpoints", "Prepare Transactions"],
-        "description": "Prepares unsigned transactions for the newInvest method. Equivalent to POST /prepare-transactions with method=newInvest.",
-        "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"chainId": {"type": "string"}, "method": {"type": "string", "description": "Transaction method type (should be \"newInvest\")"}, "investorAddress": {"type": "string"}, "tokenSymbol": {"type": "string"}, "investorEmail": {"type": "string"}, "investmentAmount": {"type": "string"}, "paymentTokenSymbol": {"type": "string"}}}}}},
-        "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
+        "summary": "newInvest (DEPRECATED - Use /prepare-transactions)",
+        "tags": [
+          "Endpoints",
+          "Prepare Transactions"
+        ],
+        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"newInvest\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to newInvest\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"newInvest\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "chainId": {
+                    "type": "string"
+                  },
+                  "method": {
+                    "type": "string",
+                    "description": "Transaction method type (should be \"newInvest\")"
+                  },
+                  "investorAddress": {
+                    "type": "string"
+                  },
+                  "tokenSymbol": {
+                    "type": "string"
+                  },
+                  "investorEmail": {
+                    "type": "string"
+                  },
+                  "investmentAmount": {
+                    "type": "string"
+                  },
+                  "paymentTokenSymbol": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "txId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "transactions",
+                    "txId"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
       }
     },
     "/prepare-transactions/claimTokens": {
       "post": {
-        "summary": "claimTokens",
-        "tags": ["Endpoints", "Prepare Transactions"],
-        "description": "Prepares unsigned transactions for the claimTokens method. Equivalent to POST /prepare-transactions with method=claimTokens.",
-        "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"chainId": {"type": "string"}, "investorAddress": {"type": "string"}, "tokenSymbol": {"type": "string"}, "investorEmail": {"type": "string"}, "paymentTokenSymbol": {"type": "string"}}}}}},
-        "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
+        "summary": "claimTokens (DEPRECATED - Use /prepare-transactions)",
+        "tags": [
+          "Endpoints",
+          "Prepare Transactions"
+        ],
+        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"claimTokens\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to claimTokens\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"claimTokens\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "chainId": {
+                    "type": "string"
+                  },
+                  "investorAddress": {
+                    "type": "string"
+                  },
+                  "tokenSymbol": {
+                    "type": "string"
+                  },
+                  "investorEmail": {
+                    "type": "string"
+                  },
+                  "paymentTokenSymbol": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "txId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "transactions",
+                    "txId"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
       }
     },
     "/prepare-transactions/closeOffer": {
       "post": {
-        "summary": "closeOffer",
-        "tags": ["Endpoints", "Prepare Transactions"],
-        "description": "Prepares unsigned transactions for the closeOffer method. Equivalent to POST /prepare-transactions with method=closeOffer.",
-        "security": [{"apiKeyAuth": []}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"chainId": {"type": "string"}, "signerAddress": {"type": "string"}, "tokenSymbol": {"type": "string"}}}}}},
-        "responses": {"200": {"description": "Successful response", "content": {"application/json": {"schema": {"type": "object", "properties": {"transactions": {"type": "array", "items": {"type": "object"}}, "txId": {"type": "string"}}, "required": ["transactions", "txId"]}}}}}
+        "summary": "closeOffer (DEPRECATED - Use /prepare-transactions)",
+        "tags": [
+          "Endpoints",
+          "Prepare Transactions"
+        ],
+        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"closeOffer\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to closeOffer\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"closeOffer\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "chainId": {
+                    "type": "string"
+                  },
+                  "signerAddress": {
+                    "type": "string"
+                  },
+                  "tokenSymbol": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "txId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "transactions",
+                    "txId"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
       }
     },
     "/send-transactions": {
