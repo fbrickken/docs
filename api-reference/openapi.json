@@ -418,12 +418,12 @@
     },
     "/prepare-transactions/newTokenization": {
       "post": {
-        "summary": "newTokenization (DEPRECATED - Use /prepare-transactions)",
+        "summary": "newTokenization",
         "tags": [
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"newTokenization\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to newTokenization\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"newTokenization\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "description": "Prepares unsigned transactions for the newTokenization method.\n\n**This endpoint is active and functional.** It accepts the same parameters as the main `/prepare-transactions` endpoint but with the method pre-specified.\n\n**Request Body:**\nThe request body should contain all the parameters needed for the `newTokenization` method, except the `method` field which is automatically set to `\"newTokenization\"`.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions/newTokenization \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add newTokenization-specific parameters\n  }'\n```\n\n**Note:** You can also use the main `/prepare-transactions` endpoint with `\"method\": \"newTokenization\"` in the request body for the same functionality.\n\n**Important:** The `method` parameter is automatically set to `\"newTokenization\"` for this endpoint and should NOT be included in your request body.",
         "security": [
           {
             "apiKeyAuth": []
@@ -435,7 +435,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "description": "Same request body as /prepare-transactions for method=newTokenization. The method is implied by the path.",
+                "description": "Request body for newTokenization method. The 'method' field is automatically set to 'newTokenization' and should not be included in the request.",
                 "properties": {
                   "signerAddress": {
                     "type": "string",
@@ -444,10 +444,6 @@
                   "chainId": {
                     "type": "string",
                     "description": "Chain ID in hex."
-                  },
-                  "method": {
-                    "type": "string",
-                    "description": "Transaction method type (should be \"newTokenization\")"
                   },
                   "gasLimit": {
                     "type": "string",
@@ -529,18 +525,17 @@
               }
             }
           }
-        },
-        "deprecated": true
+        }
       }
     },
     "/prepare-transactions/mintToken": {
       "post": {
-        "summary": "mintToken (DEPRECATED - Use /prepare-transactions)",
+        "summary": "mintToken",
         "tags": [
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"mintToken\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to mintToken\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"mintToken\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "description": "Prepares unsigned transactions for the mintToken method.\n\n**This endpoint is active and functional.** It accepts the same parameters as the main `/prepare-transactions` endpoint but with the method pre-specified.\n\n**Request Body:**\nThe request body should contain all the parameters needed for the `mintToken` method, except the `method` field which is automatically set to `\"mintToken\"`.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions/mintToken \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add mintToken-specific parameters\n  }'\n```\n\n**Note:** You can also use the main `/prepare-transactions` endpoint with `\"method\": \"mintToken\"` in the request body for the same functionality.\n\n**Important:** The `method` parameter is automatically set to `\"mintToken\"` for this endpoint and should NOT be included in your request body.",
         "security": [
           {
             "apiKeyAuth": []
@@ -552,17 +547,13 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "description": "Same request body as /prepare-transactions for method=mintToken. The method is implied by the path.",
+                "description": "Request body for mintToken method. The 'method' field is automatically set to 'mintToken' and should not be included in the request.",
                 "properties": {
                   "signerAddress": {
                     "type": "string"
                   },
                   "chainId": {
                     "type": "string"
-                  },
-                  "method": {
-                    "type": "string",
-                    "description": "Transaction method type (should be \"mintToken\")"
                   },
                   "gasLimit": {
                     "type": "string"
@@ -610,18 +601,17 @@
               }
             }
           }
-        },
-        "deprecated": true
+        }
       }
     },
     "/prepare-transactions/whitelist": {
       "post": {
-        "summary": "whitelist (DEPRECATED - Use /prepare-transactions)",
+        "summary": "whitelist",
         "tags": [
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"whitelist\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to whitelist\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"whitelist\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "description": "Prepares unsigned transactions for the whitelist method.\n\n**This endpoint is active and functional.** It accepts the same parameters as the main `/prepare-transactions` endpoint but with the method pre-specified.\n\n**Request Body:**\nThe request body should contain all the parameters needed for the `whitelist` method, except the `method` field which is automatically set to `\"whitelist\"`.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions/whitelist \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add whitelist-specific parameters\n  }'\n```\n\n**Note:** You can also use the main `/prepare-transactions` endpoint with `\"method\": \"whitelist\"` in the request body for the same functionality.\n\n**Important:** The `method` parameter is automatically set to `\"whitelist\"` for this endpoint and should NOT be included in your request body.",
         "security": [
           {
             "apiKeyAuth": []
@@ -633,17 +623,13 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "description": "Same request body as /prepare-transactions for method=whitelist. The method is implied by the path.",
+                "description": "Request body for whitelist method. The 'method' field is automatically set to 'whitelist' and should not be included in the request.",
                 "properties": {
                   "signerAddress": {
                     "type": "string"
                   },
                   "chainId": {
                     "type": "string"
-                  },
-                  "method": {
-                    "type": "string",
-                    "description": "Transaction method type (should be \"whitelist\")"
                   },
                   "gasLimit": {
                     "type": "string"
@@ -694,18 +680,17 @@
               }
             }
           }
-        },
-        "deprecated": true
+        }
       }
     },
     "/prepare-transactions/burnToken": {
       "post": {
-        "summary": "burnToken (DEPRECATED - Use /prepare-transactions)",
+        "summary": "burnToken",
         "tags": [
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"burnToken\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to burnToken\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"burnToken\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "description": "Prepares unsigned transactions for the burnToken method.\n\n**This endpoint is active and functional.** It accepts the same parameters as the main `/prepare-transactions` endpoint but with the method pre-specified.\n\n**Request Body:**\nThe request body should contain all the parameters needed for the `burnToken` method, except the `method` field which is automatically set to `\"burnToken\"`.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions/burnToken \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add burnToken-specific parameters\n  }'\n```\n\n**Note:** You can also use the main `/prepare-transactions` endpoint with `\"method\": \"burnToken\"` in the request body for the same functionality.\n\n**Important:** The `method` parameter is automatically set to `\"burnToken\"` for this endpoint and should NOT be included in your request body.",
         "security": [
           {
             "apiKeyAuth": []
@@ -724,10 +709,6 @@
                   "chainId": {
                     "type": "string"
                   },
-                  "method": {
-                    "type": "string",
-                    "description": "Transaction method type (should be \"burnToken\")"
-                  },
                   "tokenSymbol": {
                     "type": "string"
                   },
@@ -738,7 +719,8 @@
                     "type": "string",
                     "description": "Email of the investor"
                   }
-                }
+                },
+                "description": "Request body for burnToken method. The 'method' field is automatically set to 'burnToken' and should not be included in the request."
               }
             }
           }
@@ -769,18 +751,17 @@
               }
             }
           }
-        },
-        "deprecated": true
+        }
       }
     },
     "/prepare-transactions/transferFrom": {
       "post": {
-        "summary": "transferFrom (DEPRECATED - Use /prepare-transactions)",
+        "summary": "transferFrom",
         "tags": [
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"transferFrom\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to transferFrom\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"transferFrom\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "description": "Prepares unsigned transactions for the transferFrom method.\n\n**This endpoint is active and functional.** It accepts the same parameters as the main `/prepare-transactions` endpoint but with the method pre-specified.\n\n**Request Body:**\nThe request body should contain all the parameters needed for the `transferFrom` method, except the `method` field which is automatically set to `\"transferFrom\"`.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions/transferFrom \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add transferFrom-specific parameters\n  }'\n```\n\n**Note:** You can also use the main `/prepare-transactions` endpoint with `\"method\": \"transferFrom\"` in the request body for the same functionality.\n\n**Important:** The `method` parameter is automatically set to `\"transferFrom\"` for this endpoint and should NOT be included in your request body.",
         "security": [
           {
             "apiKeyAuth": []
@@ -798,10 +779,6 @@
                   },
                   "chainId": {
                     "type": "string"
-                  },
-                  "method": {
-                    "type": "string",
-                    "description": "Transaction method type (should be \"transferFrom\")"
                   },
                   "tokenSymbol": {
                     "type": "string"
@@ -815,7 +792,8 @@
                   "amount": {
                     "type": "string"
                   }
-                }
+                },
+                "description": "Request body for transferFrom method. The 'method' field is automatically set to 'transferFrom' and should not be included in the request."
               }
             }
           }
@@ -846,18 +824,17 @@
               }
             }
           }
-        },
-        "deprecated": true
+        }
       }
     },
     "/prepare-transactions/transferTo": {
       "post": {
-        "summary": "transferTo (DEPRECATED - Use /prepare-transactions)",
+        "summary": "transferTo",
         "tags": [
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"transferTo\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to transferTo\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"transferTo\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "description": "Prepares unsigned transactions for the transferTo method.\n\n**This endpoint is active and functional.** It accepts the same parameters as the main `/prepare-transactions` endpoint but with the method pre-specified.\n\n**Request Body:**\nThe request body should contain all the parameters needed for the `transferTo` method, except the `method` field which is automatically set to `\"transferTo\"`.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions/transferTo \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add transferTo-specific parameters\n  }'\n```\n\n**Note:** You can also use the main `/prepare-transactions` endpoint with `\"method\": \"transferTo\"` in the request body for the same functionality.\n\n**Important:** The `method` parameter is automatically set to `\"transferTo\"` for this endpoint and should NOT be included in your request body.",
         "security": [
           {
             "apiKeyAuth": []
@@ -875,10 +852,6 @@
                   },
                   "chainId": {
                     "type": "string"
-                  },
-                  "method": {
-                    "type": "string",
-                    "description": "Transaction method type (should be \"transferTo\")"
                   },
                   "tokenSymbol": {
                     "type": "string"
@@ -889,7 +862,8 @@
                   "amount": {
                     "type": "string"
                   }
-                }
+                },
+                "description": "Request body for transferTo method. The 'method' field is automatically set to 'transferTo' and should not be included in the request."
               }
             }
           }
@@ -920,18 +894,17 @@
               }
             }
           }
-        },
-        "deprecated": true
+        }
       }
     },
     "/prepare-transactions/approve": {
       "post": {
-        "summary": "approve (DEPRECATED - Use /prepare-transactions)",
+        "summary": "approve",
         "tags": [
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"approve\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to approve\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"approve\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "description": "Prepares unsigned transactions for the approve method.\n\n**This endpoint is active and functional.** It accepts the same parameters as the main `/prepare-transactions` endpoint but with the method pre-specified.\n\n**Request Body:**\nThe request body should contain all the parameters needed for the `approve` method, except the `method` field which is automatically set to `\"approve\"`.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions/approve \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add approve-specific parameters\n  }'\n```\n\n**Note:** You can also use the main `/prepare-transactions` endpoint with `\"method\": \"approve\"` in the request body for the same functionality.\n\n**Important:** The `method` parameter is automatically set to `\"approve\"` for this endpoint and should NOT be included in your request body.",
         "security": [
           {
             "apiKeyAuth": []
@@ -949,10 +922,6 @@
                   },
                   "chainId": {
                     "type": "string"
-                  },
-                  "method": {
-                    "type": "string",
-                    "description": "Transaction method type (should be \"approve\")"
                   },
                   "tokenSymbol": {
                     "type": "string"
@@ -963,7 +932,8 @@
                   "amount": {
                     "type": "string"
                   }
-                }
+                },
+                "description": "Request body for approve method. The 'method' field is automatically set to 'approve' and should not be included in the request."
               }
             }
           }
@@ -994,18 +964,17 @@
               }
             }
           }
-        },
-        "deprecated": true
+        }
       }
     },
     "/prepare-transactions/dividendDistribution": {
       "post": {
-        "summary": "dividendDistribution (DEPRECATED - Use /prepare-transactions)",
+        "summary": "dividendDistribution",
         "tags": [
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"dividendDistribution\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to dividendDistribution\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"dividendDistribution\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "description": "Prepares unsigned transactions for the dividendDistribution method.\n\n**This endpoint is active and functional.** It accepts the same parameters as the main `/prepare-transactions` endpoint but with the method pre-specified.\n\n**Request Body:**\nThe request body should contain all the parameters needed for the `dividendDistribution` method, except the `method` field which is automatically set to `\"dividendDistribution\"`.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions/dividendDistribution \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add dividendDistribution-specific parameters\n  }'\n```\n\n**Note:** You can also use the main `/prepare-transactions` endpoint with `\"method\": \"dividendDistribution\"` in the request body for the same functionality.\n\n**Important:** The `method` parameter is automatically set to `\"dividendDistribution\"` for this endpoint and should NOT be included in your request body.",
         "security": [
           {
             "apiKeyAuth": []
@@ -1023,10 +992,6 @@
                   },
                   "chainId": {
                     "type": "string"
-                  },
-                  "method": {
-                    "type": "string",
-                    "description": "Transaction method type (should be \"dividendDistribution\")"
                   },
                   "tokenSymbol": {
                     "type": "string"
@@ -1034,7 +999,8 @@
                   "amount": {
                     "type": "string"
                   }
-                }
+                },
+                "description": "Request body for dividendDistribution method. The 'method' field is automatically set to 'dividendDistribution' and should not be included in the request."
               }
             }
           }
@@ -1065,18 +1031,17 @@
               }
             }
           }
-        },
-        "deprecated": true
+        }
       }
     },
     "/prepare-transactions/newSto": {
       "post": {
-        "summary": "newSto (DEPRECATED - Use /prepare-transactions)",
+        "summary": "newSto",
         "tags": [
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"newSto\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to newSto\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"newSto\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "description": "Prepares unsigned transactions for the newSto method.\n\n**This endpoint is active and functional.** It accepts the same parameters as the main `/prepare-transactions` endpoint but with the method pre-specified.\n\n**Request Body:**\nThe request body should contain all the parameters needed for the `newSto` method, except the `method` field which is automatically set to `\"newSto\"`.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions/newSto \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add newSto-specific parameters\n  }'\n```\n\n**Note:** You can also use the main `/prepare-transactions` endpoint with `\"method\": \"newSto\"` in the request body for the same functionality.\n\n**Important:** The `method` parameter is automatically set to `\"newSto\"` for this endpoint and should NOT be included in your request body.",
         "security": [
           {
             "apiKeyAuth": []
@@ -1094,10 +1059,6 @@
                   },
                   "chainId": {
                     "type": "string"
-                  },
-                  "method": {
-                    "type": "string",
-                    "description": "Transaction method type (should be \"newSto\")"
                   },
                   "tokenizerEmail": {
                     "type": "string"
@@ -1131,7 +1092,8 @@
                   "maxInvestment": {
                     "type": "string"
                   }
-                }
+                },
+                "description": "Request body for newSto method. The 'method' field is automatically set to 'newSto' and should not be included in the request."
               }
             }
           }
@@ -1162,18 +1124,17 @@
               }
             }
           }
-        },
-        "deprecated": true
+        }
       }
     },
     "/prepare-transactions/newInvest": {
       "post": {
-        "summary": "newInvest (DEPRECATED - Use /prepare-transactions)",
+        "summary": "newInvest",
         "tags": [
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"newInvest\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to newInvest\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"newInvest\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "description": "Prepares unsigned transactions for the newInvest method.\n\n**This endpoint is active and functional.** It accepts the same parameters as the main `/prepare-transactions` endpoint but with the method pre-specified.\n\n**Request Body:**\nThe request body should contain all the parameters needed for the `newInvest` method, except the `method` field which is automatically set to `\"newInvest\"`.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions/newInvest \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add newInvest-specific parameters\n  }'\n```\n\n**Note:** You can also use the main `/prepare-transactions` endpoint with `\"method\": \"newInvest\"` in the request body for the same functionality.\n\n**Important:** The `method` parameter is automatically set to `\"newInvest\"` for this endpoint and should NOT be included in your request body.",
         "security": [
           {
             "apiKeyAuth": []
@@ -1188,10 +1149,6 @@
                 "properties": {
                   "chainId": {
                     "type": "string"
-                  },
-                  "method": {
-                    "type": "string",
-                    "description": "Transaction method type (should be \"newInvest\")"
                   },
                   "investorAddress": {
                     "type": "string"
@@ -1208,7 +1165,8 @@
                   "paymentTokenSymbol": {
                     "type": "string"
                   }
-                }
+                },
+                "description": "Request body for newInvest method. The 'method' field is automatically set to 'newInvest' and should not be included in the request."
               }
             }
           }
@@ -1239,18 +1197,17 @@
               }
             }
           }
-        },
-        "deprecated": true
+        }
       }
     },
     "/prepare-transactions/claimTokens": {
       "post": {
-        "summary": "claimTokens (DEPRECATED - Use /prepare-transactions)",
+        "summary": "claimTokens",
         "tags": [
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"claimTokens\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to claimTokens\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"claimTokens\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "description": "Prepares unsigned transactions for the claimTokens method.\n\n**This endpoint is active and functional.** It accepts the same parameters as the main `/prepare-transactions` endpoint but with the method pre-specified.\n\n**Request Body:**\nThe request body should contain all the parameters needed for the `claimTokens` method, except the `method` field which is automatically set to `\"claimTokens\"`.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions/claimTokens \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add claimTokens-specific parameters\n  }'\n```\n\n**Note:** You can also use the main `/prepare-transactions` endpoint with `\"method\": \"claimTokens\"` in the request body for the same functionality.\n\n**Important:** The `method` parameter is automatically set to `\"claimTokens\"` for this endpoint and should NOT be included in your request body.",
         "security": [
           {
             "apiKeyAuth": []
@@ -1278,7 +1235,8 @@
                   "paymentTokenSymbol": {
                     "type": "string"
                   }
-                }
+                },
+                "description": "Request body for claimTokens method. The 'method' field is automatically set to 'claimTokens' and should not be included in the request."
               }
             }
           }
@@ -1309,18 +1267,17 @@
               }
             }
           }
-        },
-        "deprecated": true
+        }
       }
     },
     "/prepare-transactions/closeOffer": {
       "post": {
-        "summary": "closeOffer (DEPRECATED - Use /prepare-transactions)",
+        "summary": "closeOffer",
         "tags": [
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "\u26a0\ufe0f **DEPRECATED**: This endpoint path is deprecated and will return a 403 Forbidden error.\n\n**Use the main endpoint instead:**\n```\nPOST /prepare-transactions\n```\n\n**Correct request body:**\n```json\n{\n  \"method\": \"closeOffer\",\n  \"signerAddress\": \"0xYourAddress\",\n  \"chainId\": \"aa36a7\",\n  // ... other parameters specific to closeOffer\n}\n```\n\n**Example curl:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"closeOffer\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add method-specific parameters\n  }'\n```\n\nThis endpoint documentation is kept for reference only. All functionality is available through the main `/prepare-transactions` endpoint with the appropriate `method` parameter.",
+        "description": "Prepares unsigned transactions for the closeOffer method.\n\n**This endpoint is active and functional.** It accepts the same parameters as the main `/prepare-transactions` endpoint but with the method pre-specified.\n\n**Request Body:**\nThe request body should contain all the parameters needed for the `closeOffer` method, except the `method` field which is automatically set to `\"closeOffer\"`.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions/closeOffer \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\"\n    // ... add closeOffer-specific parameters\n  }'\n```\n\n**Note:** You can also use the main `/prepare-transactions` endpoint with `\"method\": \"closeOffer\"` in the request body for the same functionality.\n\n**Important:** The `method` parameter is automatically set to `\"closeOffer\"` for this endpoint and should NOT be included in your request body.",
         "security": [
           {
             "apiKeyAuth": []
@@ -1342,7 +1299,8 @@
                   "tokenSymbol": {
                     "type": "string"
                   }
-                }
+                },
+                "description": "Request body for closeOffer method. The 'method' field is automatically set to 'closeOffer' and should not be included in the request."
               }
             }
           }
@@ -1373,8 +1331,7 @@
               }
             }
           }
-        },
-        "deprecated": true
+        }
       }
     },
     "/send-transactions": {
