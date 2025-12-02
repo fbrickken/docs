@@ -13,10 +13,13 @@ Prepares unsigned transactions for creating a new Security Token Offering (STO).
 | `chainId` | string | Yes | Blockchain network identifier (hex format) |
 | `method` | string | Yes | Transaction method type (should be "newSto") |
 | `tokenSymbol` | string | Yes | Symbol of the token for the STO |
-| `paymentTokenSymbol` | string | Yes | Symbol of the payment token |
-| `price` | string | Yes | Price per token |
-| `minInvestment` | string | Yes | Minimum investment amount |
-| `maxInvestment` | string | Yes | Maximum investment amount |
+| `acceptedCoin` | string | Yes | Accepted payment coin (e.g., USDT, USDC, or NATIVE) |
+| `tokenAmount` | string | Yes | Total number of tokens offered in the STO |
+| `offeringName` | string | Yes | Name of the STO offering |
+| `minRaiseUSD` | string | No | Minimum raise amount in USD |
+| `maxRaiseUSD` | string | No | Maximum raise amount in USD |
+| `minInvestment` | string | Yes | Minimum investment amount in payment token units |
+| `maxInvestment` | string | Yes | Maximum investment amount in payment token units |
 | `startDate` | string | Yes | STO start date (ISO format) |
 | `endDate` | string | Yes | STO end date (ISO format) |
 | `tokenizerEmail` | string | Yes | Email of the tokenizer |
@@ -29,8 +32,11 @@ Prepares unsigned transactions for creating a new Security Token Offering (STO).
   "chainId": "aa36a7",
   "method": "newSto",
   "tokenSymbol": "PROP1",
-  "paymentTokenSymbol": "USDT",
-  "price": "1.0",
+  "acceptedCoin": "USDT",
+  "tokenAmount": "1000000",
+  "offeringName": "Series A",
+  "minRaiseUSD": "10000",
+  "maxRaiseUSD": "1000000",
   "minInvestment": "1000",
   "maxInvestment": "50000",
   "startDate": "2024-01-01T00:00:00Z",

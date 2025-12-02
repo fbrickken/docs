@@ -8,22 +8,12 @@ Retrieves information about Security Token Offerings (STOs).
 ## Query Parameters
 
 - `tokenSymbol` (optional): Filter by specific token symbol
-- `id` (optional): Get specific STO by ID
-- `chainId` (required): Blockchain network ID
 
-## Example - Get all STOs
+## Example
 
 ```bash
 curl --request GET \
-  --url 'https://api.sandbox.brickken.com/get-stos?chainId=0x89' \
-  --header 'x-api-key: YOUR_API_KEY'
-```
-
-## Example - Get specific STO by ID
-
-```bash
-curl --request GET \
-  --url 'https://api.sandbox.brickken.com/get-stos?id=123&chainId=0x89' \
+  --url 'https://api.sandbox.brickken.com/get-stos' \
   --header 'x-api-key: YOUR_API_KEY'
 ```
 

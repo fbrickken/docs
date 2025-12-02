@@ -13,6 +13,7 @@ Prepares unsigned transactions for closing an active Security Token Offering (ST
 | `chainId` | string | Yes | Blockchain network identifier (hex format) |
 | `method` | string | Yes | Transaction method type (should be "closeOffer") |
 | `tokenSymbol` | string | Yes | Symbol of the token for the offer to close |
+| `tokenizerEmail` | string | Yes | Email of the tokenizer |
 
 ## Example Request
 
@@ -21,7 +22,8 @@ Prepares unsigned transactions for closing an active Security Token Offering (ST
   "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
   "chainId": "aa36a7",
   "method": "closeOffer",
-  "tokenSymbol": "PROP1"
+  "tokenSymbol": "PROP1",
+  "tokenizerEmail": "tokenizer@example.com"
 }
 ```
 

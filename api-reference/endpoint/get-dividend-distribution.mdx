@@ -1,0 +1,32 @@
+---
+title: 'Get Dividend Distribution Info'
+openapi: 'GET /get-dividend-distribution'
+---
+
+Retrieves information about dividend distributions for a token.
+
+## Query Parameters
+
+- `tokenSymbol` (required): Token symbol
+
+## Example
+
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-dividend-distribution?tokenSymbol=EXMPL' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
+## Response
+
+```json
+{
+  "distributions": [
+    {
+      "amount": "1000",
+      "timestamp": 1234567890,
+      "tokenSymbol": "USDT"
+    }
+  ]
+}
+```

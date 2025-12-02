@@ -1,4 +1,29 @@
 ---
 title: 'Get Investors Information'
-openapi: 'GET /get-investors-info'
+openapi: 'GET /get-investor-info'
 ---
+
+Retrieves information about a specific investor.
+
+## Query Parameters
+
+- `tokenSymbol` (required): Token symbol
+- `email` (required): Investor email
+
+## Example
+
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-investor-info?tokenSymbol=EXMPL&email=investor@example.com' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
+## Response
+
+```json
+{
+  "email": "investor@example.com",
+  "kycStatus": "approved",
+  "whitelistStatus": true
+}
+```

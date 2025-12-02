@@ -15,6 +15,7 @@ Prepares unsigned transactions for approving a spender to use tokens on behalf o
 | `tokenSymbol` | string | Yes | Symbol of the token to approve (BKN, USDT, USDC, etc.) |
 | `spenderAddress` | string | Yes | Address of the spender being approved |
 | `amount` | string | Yes | Allowance amount to approve |
+| `tokenizerAddress` | string | No | Tokenizer address (required for approve in certain flows) |
 
 ## Example Request
 
@@ -25,7 +26,8 @@ Prepares unsigned transactions for approving a spender to use tokens on behalf o
   "method": "approve",
   "tokenSymbol": "USDT",
   "spenderAddress": "0x456...",
-  "amount": "1000"
+  "amount": "1000",
+  "tokenizerAddress": "0x789..."
 }
 ```
 

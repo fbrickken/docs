@@ -10,13 +10,12 @@ Retrieves the allowance amount for a spender.
 - `tokenSymbol` (required): Token symbol
 - `ownerAddress` (required): Token owner address
 - `spenderAddress` (required): Spender address
-- `chainId` (required): Blockchain network ID
 
 ## Example
 
 ```bash
 curl --request GET \
-  --url 'https://api.sandbox.brickken.com/get-allowance?tokenSymbol=EXMPL&ownerAddress=0x123...&spenderAddress=0x456...&chainId=0x89' \
+  --url 'https://api.sandbox.brickken.com/get-allowance?tokenSymbol=EXMPL&ownerAddress=0x123...&spenderAddress=0x456...' \
   --header 'x-api-key: YOUR_API_KEY'
 ```
 

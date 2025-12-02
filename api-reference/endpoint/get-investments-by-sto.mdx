@@ -1,4 +1,33 @@
 ---
 title: 'Get Investments by STO'
-openapi: 'GET /get-investments-by-sto'
+openapi: 'GET /get-investments-by-sto-id'
 ---
+
+Retrieves investments for a specific STO.
+
+## Query Parameters
+
+- `tokenSymbol` (required): Token symbol
+- `id` (required): STO ID
+
+## Example
+
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-investments-by-sto-id?tokenSymbol=EXMPL&id=123' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
+## Response
+
+```json
+{
+  "investments": [
+    {
+      "investorAddress": "0x...",
+      "amount": "1000",
+      "timestamp": 1234567890
+    }
+  ]
+}
+```
