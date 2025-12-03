@@ -98,7 +98,7 @@ Creates a new tokenized asset.
 | `url` | string | Yes | URL for token documentation |
 | `name` | string | Yes | Name of the token |
 | `tokenSymbol` | string | Yes | Token symbol (max 5 characters) |
-| `tokenType` | string | Yes | Type of token. Allowed values: EQUITY, DEBT, BILL_FACTORING, ICO, STABLECOIN, REVENUE_SHARE, RWA_TOKEN, PROFIT_SHARING |
+| `tokenType` | string | Yes | Type of token. Allowed values: EQUITY, DEBT, PRIVATE_CREDIT, FUNDS, RWA_TOKEN, PROFIT_SHARING |
 | `supplyCap` | string | No | Maximum token supply cap |
 | `preMints` | array | No | Pre-mint configurations |
 | `initialHolders` | array | No | Initial holder configurations |

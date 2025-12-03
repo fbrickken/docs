@@ -88,15 +88,13 @@
                     "enum": [
                       "EQUITY",
                       "DEBT",
-                      "BILL_FACTORING",
-                      "ICO",
-                      "STABLECOIN",
-                      "REVENUE_SHARE",
+                      "PRIVATE_CREDIT",
+                      "FUNDS",
                       "RWA_TOKEN",
                       "PROFIT_SHARING"
                     ],
                     "example": "EQUITY",
-                    "description": "Type of token. Allowed values: EQUITY, DEBT, BILL_FACTORING, ICO, STABLECOIN, REVENUE_SHARE, RWA_TOKEN, PROFIT_SHARING."
+                    "description": "Type of token. Allowed values: EQUITY, DEBT, PRIVATE_CREDIT, FUNDS, RWA_TOKEN, PROFIT_SHARING."
                   },
                   "tokenizerEmail": {
                     "type": "string",
@@ -475,10 +473,8 @@
                     "enum": [
                       "EQUITY",
                       "DEBT",
-                      "BILL_FACTORING",
-                      "ICO",
-                      "STABLECOIN",
-                      "REVENUE_SHARE",
+                      "PRIVATE_CREDIT",
+                      "FUNDS",
                       "RWA_TOKEN",
                       "PROFIT_SHARING"
                     ],
