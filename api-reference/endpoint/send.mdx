@@ -9,17 +9,33 @@ Submits signed transactions to the blockchain. This endpoint works uniformly for
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `signedTransactions` | string[] | Yes | Array of signed transaction hex strings |
-| `txId` | string | Yes | Transaction ID from prepare-transactions response |
+| `signedTransactions` | string \| string[] | Yes | Signed transaction hex string(s) starting with `0x`. Can be a single string (legacy) or an array of strings |
+| `txId` | string \| string[] | Yes | Transaction ID(s) from prepare-transactions response. Must match the format of `signedTransactions` (both strings or both arrays) |
+
+> [!IMPORTANT]
+> `signedTransactions` must be a hex string (starting with `0x`), **not** an object or array of objects. Both `txId` and `signedTransactions` must use the same format (both strings or both arrays).
 
 ## Request Body
+
+### Legacy Format (Single Transaction)
+
+```json
+{
+  "signedTransactions": "0x02f8b1018203e8843b9aca00850ba43b740082520894742d35cc6634c0532925a3b8d4c9db96c4b4d8b80b844a9059cbb000000000000000000000000456789abcdef...",
+  "txId": "0x11769b5c2028a8ed0a3bdc7599e244aee68e2cae80261d8954e44c3b5cb621a4"
+}
+```
+
+### Array Format (Multiple Transactions)
 
 ```json
 {
   "signedTransactions": [
     "0x02f8b1018203e8843b9aca00850ba43b740082520894742d35cc6634c0532925a3b8d4c9db96c4b4d8b80b844a9059cbb000000000000000000000000456789abcdef..."
   ],
-  "txId": "tx_abc123def456"
+  "txId": [
+    "0x11769b5c2028a8ed0a3bdc7599e244aee68e2cae80261d8954e44c3b5cb621a4"
+  ]
 }
 ```
 
