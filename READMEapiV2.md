@@ -212,7 +212,7 @@ Mints additional tokens to specified addresses.
   "tokenSymbol": "EXMPL",
   "userToMint": [
     {
-      "email": "user@example.com",
+      "investorEmail": "user@example.com",
       "investorAddress": "0x789...",
       "amount": "500",
       "needWhitelist": true

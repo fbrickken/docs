@@ -273,7 +273,7 @@
                     "items": {
                       "type": "object",
                       "properties": {
-                        "email": {
+                        "investorEmail": {
                           "type": "string"
                         },
                         "investorAddress": {
@@ -536,7 +536,7 @@
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "Prepares unsigned transactions for the mintToken method.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"mintToken\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\",\n    \"tokenSymbol\": \"EXMPL\",\n    \"userToMint\": [\n      {\n        \"email\": \"investor@example.com\",\n        \"investorAddress\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\",\n        \"amount\": \"100\",\n        \"needWhitelist\": true\n      }\n    ]\n  }'\n```",
+        "description": "Prepares unsigned transactions for the mintToken method.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"mintToken\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\",\n    \"tokenSymbol\": \"EXMPL\",\n    \"userToMint\": [\n      {\n        \"investorEmail\": \"investor@example.com\",\n        \"investorAddress\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\",\n        \"amount\": \"100\",\n        \"needWhitelist\": true\n      }\n    ]\n  }'\n```",
         "security": [
           {
             "apiKeyAuth": []
