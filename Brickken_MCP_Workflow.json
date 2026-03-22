@@ -1,0 +1,1133 @@
+{
+  "name": "Brickken MCP Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "43bc6315-e664-41b6-a447-ca00e103da42"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        -96
+      ],
+      "id": "15dd9a7d-9f45-410b-a395-c70ec28aa9cc",
+      "name": "MCP Server Trigger",
+      "webhookId": "43bc6315-e664-41b6-a447-ca00e103da42"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sandbox.brickken.com/prepare-transactions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('request_body', 'JSON object matching schema: {\"method\": {\"type\": \"string\", \"example\": \"newTokenization\", \"enum\": [\"newTokenization\", \"newSto\", \"newInvest\", \"claimTokens\", \"mintToken\", \"whitelist\", \"approve\", \"burnToken\", \"transferFrom\", \"transferTo\", \"dividendDistribution\", \"closeOffer\"], \"description\": \"The operation to be performed. Supported methods: newTokenization (create tokenized asset), newSto (create STO), newInvest (invest in STO), claimTokens (claim from completed STO), mintToken (mint additional tokens), whitelist (manage whitelist), approve (approve spending), burnToken (burn tokens), transferFrom (transfer with approval), transferTo (transfer from signer), dividendDistribution (distribute dividends), closeOffer (close active STO).\"}, \"signerAddress\": {\"type\": \"string\", \"example\": \"0xSignerAddress\", \"description\": \"The address of the user initiating the transaction.\"}, \"chainId\": {\"type\": \"string\", \"example\": \"aa36a7\", \"description\": \"The blockchain network's chain ID in hexadecimal format (e.g., \\\"aa36a7\\\" for Sepolia testnet).\"}, \"tokenSymbol\": {\"type\": \"string\", \"example\": \"BKN\", \"description\": \"The token symbol (max 5 characters).\"}, \"tokenType\": {\"type\": \"string\", \"enum\": [\"EQUITY\", \"DEBT\", \"PRIVATE_CREDIT\", \"FUNDS\", \"RWA_TOKEN\", \"PROFIT_SHARING\"], \"example\": \"EQUITY\", \"description\": \"Type of token. Allowed values: EQUITY, DEBT, PRIVATE_CREDIT, FUNDS, RWA_TOKEN, PROFIT_SHARING.\"}, \"tokenizerEmail\": {\"type\": \"string\", \"example\": \"tokenizer.email@example.com\", \"description\": \"The email of the user.\"}, \"acceptedCoin\": {\"type\": \"string\", \"example\": \"USDT\", \"description\": \"Accepted payment token symbol (used in newSto).\"}, \"amount\": {\"type\": \"string\", \"example\": \"100\", \"description\": \"Amount for various operations (approve, burnToken, transferFrom, transferTo, dividendDistribution).\"}, \"endDate\": {\"type\": \"string\", \"format\": \"date-time\", \"example\": \"2025-10-02T00:00:00.000Z\", \"description\": \"End date of the STO (used in newSto).\"}, \"from\": {\"type\": \"string\", \"example\": \"0x123...\", \"description\": \"Source address for transfer (used in transferFrom).\"}, \"gasLimit\": {\"type\": \"string\", \"example\": \"2000000 but can be omitted\", \"description\": \"An amount of gas units as limits. If not specified, it will be automatically estimated.\"}, \"initialHolders\": {\"type\": \"array\", \"items\": {\"type\": \"object\", \"properties\": {\"email\": {\"type\": \"string\"}, \"percentage\": {\"type\": \"number\"}}}, \"description\": \"Array of initial token holders (used in newTokenization).\"}, \"investmentAmount\": {\"type\": \"string\", \"example\": \"10\", \"description\": \"Amount to invest (used in newInvest).\"}, \"investorAddress\": {\"type\": \"string\", \"example\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\", \"description\": \"Address of the investor (used in newInvest, claimTokens, mintToken).\"}, \"investorEmail\": {\"type\": \"string\", \"example\": \"investor@example.com\", \"description\": \"Email of the investor (used in newInvest, claimTokens, whitelist).\"}, \"maxInvestment\": {\"type\": \"string\", \"example\": \"100\", \"description\": \"Maximum investment amount (used in newSto).\"}, \"maxRaiseUSD\": {\"type\": \"string\", \"example\": \"100\", \"description\": \"Maximum raise amount in USD (used in newSto).\"}, \"minInvestment\": {\"type\": \"string\", \"example\": \"10\", \"description\": \"Minimum investment amount (used in newSto).\"}, \"minRaiseUSD\": {\"type\": \"string\", \"example\": \"10\", \"description\": \"Minimum raise amount in USD (used in newSto).\"}, \"name\": {\"type\": \"string\", \"example\": \"Brickken\", \"description\": \"Name of the token.\"}, \"newInvestor\": {\"type\": \"object\", \"properties\": {\"name\": {\"type\": \"string\", \"example\": \"John\"}, \"surname\": {\"type\": \"string\", \"example\": \"Doe\"}}, \"description\": \"New investor information (used in whitelist and mintToken).\"}, \"offeringName\": {\"type\": \"string\", \"example\": \"FE Test STO 5\", \"description\": \"Name of the STO offering (used in newSto).\"}, \"paymentTokenSymbol\": {\"type\": \"string\", \"example\": \"USDT\", \"description\": \"Symbol of the payment token (used in newInvest, claimTokens).\"}, \"preMints\": {\"type\": \"array\", \"items\": {\"type\": \"object\", \"properties\": {\"email\": {\"type\": \"string\"}, \"investorAddress\": {\"type\": \"string\"}, \"amount\": {\"type\": \"string\"}, \"needWhitelist\": {\"type\": \"boolean\"}}}, \"description\": \"Array of pre-mint configurations (used in newTokenization).\"}, \"rpcUrl\": {\"type\": \"string\", \"example\": \"{URL_TO_RPC} but can be omitted\", \"description\": \"The RPC URL of the blockchain network. If not provided, a default RPC URL for the specified chain ID will be used.\"}, \"spenderAddress\": {\"type\": \"string\", \"example\": \"0x456...\", \"description\": \"Address of the spender being approved (used in approve).\"}, \"startDate\": {\"type\": \"string\", \"format\": \"date-time\", \"example\": \"2025-08-26T17:30:00.000Z\", \"description\": \"Start date of the STO (used in newSto).\"}, \"supplyCap\": {\"type\": \"string\", \"example\": \"10\", \"description\": \"Max token supply.\"}, \"to\": {\"type\": \"string\", \"example\": \"0x456...\", \"description\": \"Destination address for transfer (used in transferFrom, transferTo).\"}, \"tokenAmount\": {\"type\": \"string\", \"example\": \"1000\", \"description\": \"Amount of tokens for STO (used in newSto).\"}, \"tokenizerAddress\": {\"type\": \"string\", \"example\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\", \"description\": \"The address of the tokenizer (used in newTokenization).\"}, \"url\": {\"type\": \"string\", \"example\": \"https://example.com/token-docs\", \"description\": \"URL associated with tokenization documents (required for newTokenization).\"}, \"userToMint\": {\"type\": \"array\", \"items\": {\"type\": \"object\", \"properties\": {\"investorEmail\": {\"type\": \"string\"}, \"investorAddress\": {\"type\": \"string\"}, \"amount\": {\"type\": \"string\"}, \"needWhitelist\": {\"type\": \"boolean\"}}}, \"description\": \"Array of users to mint tokens to (used in mintToken).\"}, \"userToWhitelist\": {\"type\": \"array\", \"items\": {\"type\": \"object\", \"properties\": {\"whitelistStatus\": {\"type\": \"boolean\"}, \"investorAddress\": {\"type\": \"string\"}}}, \"description\": \"Array of users to whitelist/blacklist (used in whitelist).\"}}'.replace(\"'\", \"\\'\"), 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        -100
+      ],
+      "id": "5a890098-7fdc-470b-aa2e-8519deca1469",
+      "name": "Prepare Transactions 0"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sandbox.brickken.com/prepare-transactions/newTokenization",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('request_body', 'JSON object matching schema: {\"method\": {\"type\": \"string\", \"example\": \"newTokenization\", \"description\": \"The operation to be performed.\"}, \"signerAddress\": {\"type\": \"string\", \"description\": \"Address initiating the transaction.\"}, \"chainId\": {\"type\": \"string\", \"description\": \"Chain ID in hex.\"}, \"gasLimit\": {\"type\": \"string\", \"description\": \"Optional gas limit.\"}, \"rpcUrl\": {\"type\": \"string\", \"description\": \"Optional RPC URL.\"}, \"tokenizerEmail\": {\"type\": \"string\"}, \"url\": {\"type\": \"string\"}, \"name\": {\"type\": \"string\"}, \"tokenSymbol\": {\"type\": \"string\"}, \"tokenType\": {\"type\": \"string\", \"enum\": [\"EQUITY\", \"DEBT\", \"PRIVATE_CREDIT\", \"FUNDS\", \"RWA_TOKEN\", \"PROFIT_SHARING\"], \"description\": \"Type of token.\"}, \"supplyCap\": {\"type\": \"string\"}, \"preMints\": {\"type\": \"array\", \"items\": {\"type\": \"object\"}}, \"initialHolders\": {\"type\": \"array\", \"items\": {\"type\": \"object\"}}}'.replace(\"'\", \"\\'\"), 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        50
+      ],
+      "id": "8c717801-1cd2-4768-84ae-294697089bbf",
+      "name": "newTokenization 1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sandbox.brickken.com/prepare-transactions/mintToken",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('request_body', 'JSON object matching schema: {\"method\": {\"type\": \"string\", \"example\": \"mintToken\", \"description\": \"The operation to be performed.\"}, \"signerAddress\": {\"type\": \"string\"}, \"chainId\": {\"type\": \"string\"}, \"gasLimit\": {\"type\": \"string\"}, \"rpcUrl\": {\"type\": \"string\"}, \"tokenSymbol\": {\"type\": \"string\"}, \"userToMint\": {\"type\": \"array\", \"items\": {\"type\": \"object\"}}}'.replace(\"'\", \"\\'\"), 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        200
+      ],
+      "id": "b35e89ae-4ab6-41cd-b452-f9f9954aae7d",
+      "name": "mintToken 2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sandbox.brickken.com/prepare-transactions/whitelist",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('request_body', 'JSON object matching schema: {\"method\": {\"type\": \"string\", \"example\": \"whitelist\", \"description\": \"The operation to be performed.\"}, \"signerAddress\": {\"type\": \"string\"}, \"chainId\": {\"type\": \"string\"}, \"gasLimit\": {\"type\": \"string\"}, \"rpcUrl\": {\"type\": \"string\"}, \"tokenSymbol\": {\"type\": \"string\"}, \"userToWhitelist\": {\"type\": \"array\", \"items\": {\"type\": \"object\"}}, \"newInvestor\": {\"type\": \"object\"}}'.replace(\"'\", \"\\'\"), 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        350
+      ],
+      "id": "86d86bd8-22ee-41e3-af31-961f73686dbd",
+      "name": "whitelist 3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sandbox.brickken.com/prepare-transactions/burnToken",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('request_body', 'JSON object matching schema: {\"method\": {\"type\": \"string\", \"example\": \"burnToken\", \"description\": \"The operation to be performed.\"}, \"signerAddress\": {\"type\": \"string\"}, \"chainId\": {\"type\": \"string\"}, \"tokenSymbol\": {\"type\": \"string\"}, \"amount\": {\"type\": \"string\"}, \"investorEmail\": {\"type\": \"string\", \"description\": \"Email of the investor\"}}'.replace(\"'\", \"\\'\"), 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        500
+      ],
+      "id": "cbb6d7e4-9380-4593-8366-3c8ae2deb56e",
+      "name": "burnToken 4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sandbox.brickken.com/prepare-transactions/transferFrom",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('request_body', 'JSON object matching schema: {\"method\": {\"type\": \"string\", \"example\": \"transferFrom\", \"description\": \"The operation to be performed.\"}, \"signerAddress\": {\"type\": \"string\"}, \"chainId\": {\"type\": \"string\"}, \"tokenSymbol\": {\"type\": \"string\"}, \"from\": {\"type\": \"string\"}, \"to\": {\"type\": \"string\"}, \"amount\": {\"type\": \"string\"}}'.replace(\"'\", \"\\'\"), 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        650
+      ],
+      "id": "c78e907c-d14a-471a-b0b9-b8819209fe25",
+      "name": "transferFrom 5"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sandbox.brickken.com/prepare-transactions/transferTo",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('request_body', 'JSON object matching schema: {\"method\": {\"type\": \"string\", \"example\": \"transferTo\", \"description\": \"The operation to be performed.\"}, \"signerAddress\": {\"type\": \"string\"}, \"chainId\": {\"type\": \"string\"}, \"tokenSymbol\": {\"type\": \"string\"}, \"to\": {\"type\": \"string\"}, \"amount\": {\"type\": \"string\"}}'.replace(\"'\", \"\\'\"), 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        800
+      ],
+      "id": "77e6f105-d980-4662-8192-a69336d9fb0c",
+      "name": "transferTo 6"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sandbox.brickken.com/prepare-transactions/approve",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('request_body', 'JSON object matching schema: {\"method\": {\"type\": \"string\", \"example\": \"approve\", \"description\": \"The operation to be performed.\"}, \"signerAddress\": {\"type\": \"string\"}, \"chainId\": {\"type\": \"string\"}, \"tokenSymbol\": {\"type\": \"string\"}, \"spenderAddress\": {\"type\": \"string\"}, \"amount\": {\"type\": \"string\"}}'.replace(\"'\", \"\\'\"), 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        950
+      ],
+      "id": "d81fd72b-e781-4bb5-9d68-07ee49e26829",
+      "name": "approve 7"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sandbox.brickken.com/prepare-transactions/dividendDistribution",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('request_body', 'JSON object matching schema: {\"method\": {\"type\": \"string\", \"example\": \"dividendDistribution\", \"description\": \"The operation to be performed.\"}, \"signerAddress\": {\"type\": \"string\"}, \"chainId\": {\"type\": \"string\"}, \"tokenSymbol\": {\"type\": \"string\"}, \"amount\": {\"type\": \"string\"}}'.replace(\"'\", \"\\'\"), 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        1100
+      ],
+      "id": "d695c557-3109-4e22-8660-10cdea6a220f",
+      "name": "dividendDistribution 8"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sandbox.brickken.com/prepare-transactions/newSto",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('request_body', 'JSON object matching schema: {\"method\": {\"type\": \"string\", \"example\": \"newSto\", \"description\": \"The operation to be performed.\"}, \"signerAddress\": {\"type\": \"string\"}, \"chainId\": {\"type\": \"string\"}, \"tokenizerEmail\": {\"type\": \"string\"}, \"tokenAmount\": {\"type\": \"string\"}, \"offeringName\": {\"type\": \"string\"}, \"startDate\": {\"type\": \"string\", \"format\": \"date-time\"}, \"endDate\": {\"type\": \"string\", \"format\": \"date-time\"}, \"acceptedCoin\": {\"type\": \"string\"}, \"minRaiseUSD\": {\"type\": \"string\"}, \"maxRaiseUSD\": {\"type\": \"string\"}, \"minInvestment\": {\"type\": \"string\"}, \"maxInvestment\": {\"type\": \"string\"}}'.replace(\"'\", \"\\'\"), 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        1250
+      ],
+      "id": "217bf90e-2584-4d95-8a30-743575cb6e7a",
+      "name": "newSto 9"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sandbox.brickken.com/prepare-transactions/newInvest",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('request_body', 'JSON object matching schema: {\"method\": {\"type\": \"string\", \"example\": \"newInvest\", \"description\": \"The operation to be performed.\"}, \"chainId\": {\"type\": \"string\"}, \"investorAddress\": {\"type\": \"string\"}, \"tokenSymbol\": {\"type\": \"string\"}, \"investorEmail\": {\"type\": \"string\"}, \"investmentAmount\": {\"type\": \"string\"}, \"paymentTokenSymbol\": {\"type\": \"string\"}}'.replace(\"'\", \"\\'\"), 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        1400
+      ],
+      "id": "27f0e0b4-f155-4a25-94c8-40a5c293e460",
+      "name": "newInvest 10"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sandbox.brickken.com/prepare-transactions/claimTokens",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('request_body', 'JSON object matching schema: {\"method\": {\"type\": \"string\", \"example\": \"claimTokens\", \"description\": \"The operation to be performed.\"}, \"chainId\": {\"type\": \"string\"}, \"investorAddress\": {\"type\": \"string\"}, \"tokenSymbol\": {\"type\": \"string\"}, \"investorEmail\": {\"type\": \"string\"}, \"paymentTokenSymbol\": {\"type\": \"string\"}}'.replace(\"'\", \"\\'\"), 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        1550
+      ],
+      "id": "d44a3e92-097d-4706-aee7-6b6f939f54f0",
+      "name": "claimTokens 11"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sandbox.brickken.com/prepare-transactions/closeOffer",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('request_body', 'JSON object matching schema: {\"method\": {\"type\": \"string\", \"example\": \"closeOffer\", \"description\": \"The operation to be performed.\"}, \"chainId\": {\"type\": \"string\"}, \"signerAddress\": {\"type\": \"string\"}, \"tokenSymbol\": {\"type\": \"string\"}}'.replace(\"'\", \"\\'\"), 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        1700
+      ],
+      "id": "724b1022-8042-47e2-adc5-718133436266",
+      "name": "closeOffer 12"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sandbox.brickken.com/send-transactions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('request_body', 'JSON object matching schema: {\"signedTransactions\": {\"oneOf\": [{\"type\": \"string\", \"description\": \"Legacy format: Single signed transaction hex string starting with 0x.\", \"example\": \"0x02f8b1018203e8843b9aca00850ba43b740082520894742d35cc6634c0532925a3b8d4c9db96c4b4d8b80b844a9059cbb000000000000000000000000456789abcdef...\"}, {\"type\": \"array\", \"items\": {\"type\": \"string\"}, \"description\": \"Array format: Array of signed transaction hex strings starting with 0x.\", \"example\": [\"0x02f8b1018203e8843b9aca00850ba43b740082520894742d35cc6634c0532925a3b8d4c9db96c4b4d8b80b844a9059cbb000000000000000000000000456789abcdef...\"]}], \"description\": \"Signed transaction hex string(s) starting with 0x. Can be a single string (legacy) or an array of strings. Must NOT be an object or array of objects.\"}, \"txId\": {\"oneOf\": [{\"type\": \"string\", \"description\": \"Legacy format: Single transaction ID.\", \"example\": \"0x11769b5c2028a8ed0a3bdc7599e244aee68e2cae80261d8954e44c3b5cb621a4\"}, {\"type\": \"array\", \"items\": {\"type\": \"string\"}, \"description\": \"Array format: Array of transaction IDs.\", \"example\": [\"0x11769b5c2028a8ed0a3bdc7599e244aee68e2cae80261d8954e44c3b5cb621a4\"]}], \"description\": \"Transaction ID(s) from prepare-transactions response. Must match the format of signedTransactions (both strings or both arrays).\"}}'.replace(\"'\", \"\\'\"), 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        1850
+      ],
+      "id": "3903fd14-5568-40ca-87bb-e32938e6bcae",
+      "name": "Submit Signed Transactions 13"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "https://api.sandbox.brickken.com/update-docs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('request_body', 'JSON object matching schema: '.replace(\"'\", \"\\'\"), 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        2000
+      ],
+      "id": "62ef9899-1b6b-48d7-ac76-37d99aba415b",
+      "name": "Update Token Documentation 14"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.sandbox.brickken.com/get-offers",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        2150
+      ],
+      "id": "f7bc93aa-2fe9-4722-b7bd-71e2c67d5c10",
+      "name": "Get all stos by TokenSymbol 15"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.sandbox.brickken.com/get-sto-by-id/{id}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        2300
+      ],
+      "id": "fe165df2-d84e-41eb-ab37-573162eb3f77",
+      "name": "Get a specific STO by its UUID 16"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.sandbox.brickken.com/get-sto-balance",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        2450
+      ],
+      "id": "2972b08c-223b-4d19-827d-0f948d9e55e5",
+      "name": "Get STO balance and status information 17"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.sandbox.brickken.com/get-investors-info",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        2600
+      ],
+      "id": "21806837-fc53-4c0c-83bd-d8f21108d777",
+      "name": "Get investors information 18"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.sandbox.brickken.com/get-investments-by-sto",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        2750
+      ],
+      "id": "d367e900-9e68-44fc-a83c-297154c0c0cb",
+      "name": "Get investments associated with a specific STO ID 19"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.sandbox.brickken.com/get-transaction-status",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        2900
+      ],
+      "id": "0603d9f0-5c30-4aa4-978a-4e5c74c101a7",
+      "name": "Check Transaction Status 20"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.sandbox.brickken.com/get-allowance",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        3050
+      ],
+      "id": "86185812-c454-4415-b6f0-ab9db50be37f",
+      "name": "Get Allowance 21"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.sandbox.brickken.com/get-balance-whitelist",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        3200
+      ],
+      "id": "51fd3a9e-88ca-440a-80f5-dc1356459d99",
+      "name": "Get Balance and Whitelist Status 22"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.sandbox.brickken.com/get-network-info",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        3350
+      ],
+      "id": "1efecfc0-6940-4efa-9722-7e0da6ce4104",
+      "name": "Get Network Information 23"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.sandbox.brickken.com/get-token-info",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        3500
+      ],
+      "id": "6b593da4-ba4e-4c74-94fb-4e4838908317",
+      "name": "Get Token Information 24"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.sandbox.brickken.com/get-tokenizer-info",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        3650
+      ],
+      "id": "048555c6-321b-45b1-a37f-1de0160f23f0",
+      "name": "Get Tokenizer Information 25"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.sandbox.brickken.com/get-whitelist-status",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apiKey', 'x-api-key for authentication', 'string') }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        200,
+        3800
+      ],
+      "id": "078ece78-afb2-4948-8f8c-53e79a46397b",
+      "name": "Get Whitelist Status 26"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Prepare Transactions 0": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "newTokenization 1": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mintToken 2": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "whitelist 3": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "burnToken 4": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "transferFrom 5": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "transferTo 6": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "approve 7": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "dividendDistribution 8": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "newSto 9": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "newInvest 10": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "claimTokens 11": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "closeOffer 12": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submit Signed Transactions 13": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Token Documentation 14": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all stos by TokenSymbol 15": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a specific STO by its UUID 16": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get STO balance and status information 17": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get investors information 18": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get investments associated with a specific STO ID 19": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Transaction Status 20": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Allowance 21": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Balance and Whitelist Status 22": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Network Information 23": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Token Information 24": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Tokenizer Information 25": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Whitelist Status 26": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "bc4a291a-94d9-4048-9c0d-7d4a6ebe6091",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5a6e6685cf6d89727172dea80f69e32e7d69d39e85532619aed38139b31f35ee"
+  },
+  "id": "brickkenMCP123",
+  "tags": []
+}
