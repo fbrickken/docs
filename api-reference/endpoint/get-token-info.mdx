@@ -3,18 +3,13 @@ title: 'Get Token Information'
 openapi: 'GET /get-token-info'
 ---
 
-Retrieves detailed information about a token.
-
-## Query Parameters
-
-- `tokenSymbol` (required): Token symbol
-- `chainId` (required): Blockchain network ID
+Retrieves the list of token symbols available for the current API key.
 
 ## Example
 
 ```bash
 curl --request GET \
-  --url 'https://api.sandbox.brickken.com/get-token-info?tokenSymbol=EXMPL&chainId=0x89' \
+  --url 'https://api.sandbox.brickken.com/get-token-info' \
   --header 'x-api-key: YOUR_API_KEY'
 ```
 
@@ -22,10 +17,22 @@ curl --request GET \
 
 ```json
 {
-  "name": "Example Token",
-  "symbol": "EXMPL",
-  "totalSupply": "1000000000000000000000",
-  "decimals": 18,
-  "contractAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b"
+  "tokenSymbols": [
+    "EXMPL"
+  ],
+  "tokenizerEmails": [
+    "tokenizer@example.com"
+  ]
 }
 ```
+
+## Important
+
+`tokenSymbol` may still be accepted in query, but it is currently ignored by backend logic.
+
+`GET /get-token-info` does **not** return wallet balances.
+
+If you need an owner's balance for a token, use `GET /get-balance-whitelist` with:
+
+- `tokenSymbol`
+- `investorEmail` (the owner/investor email associated with that wallet)

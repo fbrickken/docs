@@ -3,12 +3,12 @@ title: 'Get Balance and Whitelist Status'
 openapi: 'GET /get-balance-whitelist'
 ---
 
-Retrieves token balance and whitelist status for an address.
+Retrieves token balance data for an investor/owner associated with an email.
 
 ## Query Parameters
 
 - `tokenSymbol` (required): Token symbol
-- `investorEmail` (required): Email of the investor
+- `investorEmail` (required): Email of the investor/owner
 
 ## Example
 
@@ -22,7 +22,7 @@ curl --request GET \
 
 ```json
 {
-  "balance": "500000000000000000",
-  "isWhitelisted": true
+  "bknFees": "0",
+  "senderBalance": "500000000000000000"
 }
 ```

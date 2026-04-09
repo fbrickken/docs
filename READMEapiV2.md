@@ -555,56 +555,55 @@ curl --request GET \
 
 ### GET /get-token-info
 
-Retrieves detailed information about a token.
+Lists token symbols associated with the current API key.
 
 **Query Parameters:**
-- `tokenSymbol` (required): Token symbol
-- `chainId` (required): Blockchain network ID
+- `tokenSymbol` (optional): Currently ignored by backend (kept for backward compatibility)
 
 **Example:**
 ```bash
 curl --request GET \
-  --url 'https://api.sandbox.brickken.com/get-token-info?tokenSymbol=EXMPL&chainId=0x89' \
+  --url 'https://api.sandbox.brickken.com/get-token-info' \
   --header 'x-api-key: YOUR_API_KEY'
 ```
 
 **Response:**
 ```json
 {
-  "name": "Example Token",
-  "symbol": "EXMPL",
-  "totalSupply": "1000000000000000000000",
-  "decimals": 18,
-  "contractAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b"
+  "tokenSymbols": [
+    "EXMPL",
+    "EXMPL2"
+  ],
+  "tokenizerEmails": [
+    "tokenizer@example.com"
+  ]
 }
 ```
 
+> Note: This endpoint does not return owner/investor balances. Use `GET /get-balance-whitelist` for balance lookup.
+
 ### GET /get-tokenizer-info
 
-Retrieves information about a tokenizer.
+Retrieves tokenizer and contract addresses for a specific token.
 
 **Query Parameters:**
-- `tokenizerEmail` (required): Tokenizer email address
+- `tokenSymbol` (required): Token symbol
 
 **Example:**
 ```bash
 curl --request GET \
-  --url 'https://api.sandbox.brickken.com/get-tokenizer-info?tokenizerEmail=tokenizer@example.com' \
+  --url 'https://api.sandbox.brickken.com/get-tokenizer-info?tokenSymbol=EXMPL2' \
   --header 'x-api-key: YOUR_API_KEY'
 ```
 
 **Response:**
 ```json
 {
-  "email": "tokenizer@example.com",
-  "companyName": "Example Corp",
-  "tokens": [
-    {
-      "symbol": "EXMPL",
-      "name": "Example Token",
-      "chainId": "0x89"
-    }
-  ]
+  "companyWalletAddress": "0x0000000000000000000000000000000000000001",
+  "paymentTokenAddress": "0x0000000000000000000000000000000000000001",
+  "escrowAddress": "0x0000000000000000000000000000000000000002",
+  "chainId": "aa36a7",
+  "email": "tokenizer@example.com"
 }
 ```
 
