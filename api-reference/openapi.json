@@ -2280,7 +2280,7 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** This endpoint retrieves the status of a transaction submitted through `/send-transactions`.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `hash` (string, optional): On-chain transaction hash returned after the transaction is sent. Use the exact hash value starting with `0x`.\n- `txId` (string, optional): Internal transaction ID returned by `/prepare-transactions`. Use this when the on-chain transaction hash is not available yet.\n\nAt least one of `hash` or `txId` is required. Do not send a request body, because this endpoint only accepts `GET`. The `hash` value must not be prefixed with `hash=` or `3D`.",
+        "description": "**Description:** This endpoint retrieves the status of a transaction submitted through `/send-transactions`.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `hash` (string, optional): On-chain transaction hash returned after the transaction is sent. Use the exact hash value starting with `0x`.\n- `txId` (string, optional): Internal transaction ID returned by `/prepare-transactions`. Use this when the on-chain transaction hash is not available yet.\n\nAt least one of `hash` or `txId` is required. Do not send a request body, because this endpoint only accepts `GET`.",
         "security": [
           {
             "apiKeyAuth": []

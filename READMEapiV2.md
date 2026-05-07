@@ -461,7 +461,7 @@ Retrieves the status of a transaction submitted through `/send-transactions`.
 - `hash` (optional): On-chain transaction hash returned after the transaction is sent. Use the exact hash value starting with `0x`.
 - `txId` (optional): Internal transaction ID returned by `/prepare-transactions`. Use this when the on-chain transaction hash is not available yet.
 
-At least one of `hash` or `txId` is required. Do not include `--data` in the request, because this endpoint only accepts `GET`. The `hash` value must not be prefixed with `hash=` or `3D`.
+At least one of `hash` or `txId` is required. Do not include `--data` in the request, because this endpoint only accepts `GET`.
 
 **Example:**
 ```bash
