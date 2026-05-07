@@ -44,6 +44,12 @@
             ]
           },
           {
+            "group": "Agentic Methods (x402)",
+            "pages": [
+              "api-reference/endpoint/agentic-methods-x402"
+            ]
+          },
+          {
             "group": "On Behalf Endpoints",
             "pages": [
               "api-reference/endpoint/create-token-on-behalf"

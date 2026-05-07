@@ -21,6 +21,8 @@ Brickken API V2 is your comprehensive interface for tokenizing real-world assets
 
 - **Unified Endpoints**: All transaction methods handled through `prepare-transactions`
 - **Simplified Workflow**: 3-step process (prepare, sign, send) or 1-step with "on behalf"
+- **Agentic Methods**: ERC-8004 agent registration, reputation, and agent token operations
+- **x402 Payments**: Eligible agentic methods can be paid through x402 instead of API-key credits
 - **Multi-Network Support**: Ethereum, Polygon, Base, and BNB Smart Chain
 - **Complete Asset Management**: From tokenization to dividend distribution
 
@@ -81,6 +83,8 @@ x-api-key: your-api-key-here
 
 Include your unique API key in the `x-api-key` header of each request. Contact tech@brickken.com to obtain your API key.
 
+Agentic methods can alternatively use x402 payment authentication. For those requests, omit `x-api-key`, read the `PAYMENT-REQUIRED` header from the `402` response, sign the x402 payment locally, and retry with `X-Payment`.
+
 ## Supported Methods
 
 The API supports comprehensive blockchain operations through the `prepare-transactions` endpoint:
@@ -104,6 +108,18 @@ The API supports comprehensive blockchain operations through the `prepare-transa
 ### Advanced Features
 - **whitelist**: Manage address whitelist status
 - **dividendDistribution**: Distribute dividends to token holders
+
+### Agentic Methods
+- **agentRegister**: Register an ERC-8004 agent
+- **agentSetURI**: Publish the final agent profile URI
+- **agentSetMetadata**: Write on-chain agent metadata
+- **agentSetWallet**: Assign the operational agent wallet
+- **agentGiveFeedback**: Submit reputation feedback
+- **agentRevokeFeedback**: Revoke feedback
+- **agentAppendFeedbackResponse**: Respond to feedback
+- **agentCreateToken**: Deploy an agent ERC-20 token
+- **agentMintToken**: Mint agent tokens
+- **agentBurnToken**: Burn agent tokens
 
 ## Environments and Networks
 

@@ -8,6 +8,7 @@ The Brickken API V2 provides a comprehensive interface for tokenizing real-world
 
 - **Simplified Endpoints**: Removed "-api" suffix from all endpoints (e.g., `prepare-api-transactions` → `prepare-transactions`)
 - **New Transaction Methods**: Added `newSto`, `newInvest`, `claimTokens`, and `closeOffer`
+- **Agentic Methods with x402**: Added ERC-8004 agent registration, reputation, and agent-token methods that can use x402 payment authentication
 - **Unified Send Transactions**: The `send-transactions` endpoint now accepts signed transactions and `txId` for all transaction types
 - **On Behalf Endpoints**: Three new endpoints for performing actions on behalf of users:
   - `create-token-on-behalf`: Create tokens on behalf of tokenizers
@@ -21,6 +22,8 @@ All API requests require authentication using an API key provided in the request
 ```http
 x-api-key: your-api-key-here
 ```
+
+Agentic methods can alternatively use x402 payment authentication. Omit `x-api-key`, read the `PAYMENT-REQUIRED` header from the `402` response, sign the x402 payment locally, and retry with `X-Payment`.
 
 ## Supported Networks
 
@@ -342,9 +345,31 @@ Distributes dividends to token holders.
 
 ---
 
+## Agentic Methods with x402
+
+The following ERC-8004 and agent-token methods are available through `POST /prepare-transactions` and can use either `x-api-key` or x402 payment authentication:
+
+| Method | Purpose |
+|-----------|-------------|
+| `newTokenizedAgent` | Legacy alias for agent registration |
+| `agentRegister` | Register an ERC-8004 agent |
+| `agentSetURI` | Publish the final agent URI and registration metadata |
+| `agentSetMetadata` | Write one metadata key/value pair on-chain |
+| `agentSetWallet` | Set the operational wallet for the agent |
+| `agentGiveFeedback` | Submit reputation feedback |
+| `agentRevokeFeedback` | Revoke a feedback entry |
+| `agentAppendFeedbackResponse` | Append a response to a feedback thread |
+| `agentCreateToken` | Deploy an ERC-20 token for the agent |
+| `agentMintToken` | Mint an agent token |
+| `agentBurnToken` | Burn an agent token |
+
+The same transaction flow applies: prepare, sign locally, send, then poll transaction status. For full request fields and x402 flow details, see `api-reference/endpoint/agentic-methods-x402.mdx`.
+
+---
+
 ### POST /send-transactions
 
-Submits signed transactions to the blockchain. This endpoint now works uniformly for all transaction types.
+Submits signed transactions to the blockchain. This endpoint now works uniformly for all transaction types. For x402-eligible agentic prepared transactions, it can also use x402 payment authentication.
 
 #### Parameters
 

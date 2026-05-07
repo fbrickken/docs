@@ -5,6 +5,8 @@ openapi: 'POST /send-transactions'
 
 Submits signed transactions to the blockchain. This endpoint works uniformly for all transaction types prepared using the `/prepare-transactions` endpoint.
 
+For x402-eligible agentic methods, this endpoint can be authenticated with either `x-api-key` or x402 payment. To use x402, omit `x-api-key`, read the `PAYMENT-REQUIRED` header from the `402` response, then retry with `X-Payment`.
+
 ## Parameters
 
 | Parameter | Type | Required | Description |
@@ -92,6 +94,8 @@ This endpoint accepts signed transactions for all methods supported by `/prepare
 ## Transaction Status
 
 After submitting transactions, you can check their status using the `/get-transaction-status` endpoint with the returned transaction hash (`hash`) or the original transaction ID (`txId`) from `/prepare-transactions`.
+
+For x402 sends, the batch must contain only x402-eligible agentic prepared transactions and all transactions must be on the same chain.
 
 ## Security Notes
 

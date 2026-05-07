@@ -1,0 +1,477 @@
+---
+title: 'Agentic Methods with x402'
+description: 'ERC-8004 agent methods available through prepare-transactions, with API key or x402 payment authentication.'
+---
+
+Agentic methods are ERC-8004 and agent-token operations exposed through the standard transaction flow:
+
+1. Call `POST /prepare-transactions`.
+2. Sign the returned transaction locally.
+3. Call `POST /send-transactions`.
+4. Poll `GET /get-transaction-status`.
+
+Private keys never leave the client. These methods can be authenticated with either an `x-api-key` header or an x402 payment. Non-agentic methods still require `x-api-key`.
+
+## x402 Authentication
+
+For x402, omit `x-api-key` and call the same endpoint. If payment is required, the API returns `402 Payment Required` with a `PAYMENT-REQUIRED` response header containing a base64-encoded x402 payment request.
+
+The client signs the x402 payment locally and retries the request with one of these headers:
+
+```http
+X-Payment: BASE64_ENCODED_X402_PAYMENT_PAYLOAD
+```
+
+or:
+
+```http
+payment-signature: BASE64_ENCODED_X402_PAYMENT_PAYLOAD
+```
+
+When settlement succeeds, the API includes a `PAYMENT-RESPONSE` header. The payment rail uses USDC with EIP-3009 authorization. The exact price, payment chain, asset, and recipient must be read from `PAYMENT-REQUIRED`; do not hardcode them client-side.
+
+## Eligible Methods
+
+| Method | Purpose |
+| --- | --- |
+| `newTokenizedAgent` | Legacy alias for agent registration |
+| `agentRegister` | Register an ERC-8004 agent |
+| `agentSetURI` | Publish the final agent URI and registration metadata |
+| `agentSetMetadata` | Write one metadata key/value pair on-chain |
+| `agentSetWallet` | Set the operational wallet for the agent |
+| `agentGiveFeedback` | Submit reputation feedback |
+| `agentRevokeFeedback` | Revoke a feedback entry |
+| `agentAppendFeedbackResponse` | Append a response to a feedback thread |
+| `agentCreateToken` | Deploy an ERC-20 token for the agent |
+| `agentMintToken` | Mint an agent token |
+| `agentBurnToken` | Burn an agent token |
+
+## Common Prepare Request
+
+All methods are prepared through `POST /prepare-transactions`.
+
+```bash
+curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
+  --header 'Content-Type: application/json' \
+  --header 'x-api-key: YOUR_API_KEY' \
+  --data '{
+    "chainId": "11155111",
+    "method": "agentRegister",
+    "signerAddress": "0xYourWallet"
+  }'
+```
+
+For x402, use the same JSON body but omit `x-api-key`. If the first response is `402`, retry with `X-Payment`.
+
+Common fields:
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `chainId` | string | Yes | Target chain ID. Decimal and hex values are accepted |
+| `method` | string | Yes | One of the eligible method names |
+| `signerAddress` | string | Yes | Wallet that signs the prepared blockchain transaction |
+| `gasLimit` | string or number | No | Optional explicit gas limit |
+| `nonce` | number | No | Optional explicit nonce when managing nonces manually |
+| `privateRpcUrl` | string | No | Optional RPC override |
+
+Prepare response shape:
+
+```json
+{
+  "transactions": [
+    {
+      "from": "0x...",
+      "to": "0x...",
+      "data": "0x...",
+      "nonce": 42,
+      "chainId": 11155111,
+      "type": 2
+    }
+  ],
+  "txId": "0xabc123...",
+  "info": {}
+}
+```
+
+`transactions` can be either an object or an array depending on the method. Normalize it before signing.
+
+## Send with x402
+
+Use `POST /send-transactions` after signing the prepared transaction.
+
+```bash
+curl --request POST 'https://api.sandbox.brickken.com/send-transactions' \
+  --header 'Content-Type: application/json' \
+  --header 'x-api-key: YOUR_API_KEY' \
+  --data '{
+    "txId": "0xabc123...",
+    "signedTransactions": ["0xSignedRawTransaction"]
+  }'
+```
+
+For x402, omit `x-api-key` and follow the same `PAYMENT-REQUIRED` -> `X-Payment` retry flow. `send-transactions` x402 batches must contain only x402-eligible prepared transactions, and all transactions in the batch must be on the same chain.
+
+## agentRegister
+
+Registers a new AI agent on the ERC-8004 Identity Registry. It uploads a draft registration file to IPFS, stores a draft `TokenizedAgent` record, and prepares an on-chain `register()` transaction.
+
+Required fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `method` | string | Must be `agentRegister` |
+| `ownerEmail` | string | Email of the tokenizer account that owns the agent |
+| `signerAddress` | string | Tokenizer wallet address |
+| `name` | string | Agent display name |
+| `description` | string | Agent description |
+| `image` | string | Agent image URL or IPFS URI |
+| `services` | array | Non-empty service descriptors |
+
+Optional fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `supportedTrust` | string[] | Trust capabilities declared by the agent |
+| `x402Support` | boolean | Whether the agent itself supports x402 payments |
+| `active` | boolean | Agent active status. Defaults to `true` |
+| `metadata` | object | Arbitrary metadata stored in the registration file |
+| `aiModelName` | string | Stored under `metadata.ai.modelName` |
+| `aiModelProvider` | string | Stored under `metadata.ai.provider` |
+| `tags` | string[] | Discovery tags |
+| `version` | string | Agent version |
+| `documentation` | string | Documentation URL |
+| `sourceCode` | string | Source code URL |
+| `license` | string | License identifier |
+| `agentType` | string | Agent type category |
+| `registrations` | array | Additional registry registrations |
+
+Example:
+
+```json
+{
+  "chainId": "11155111",
+  "method": "agentRegister",
+  "ownerEmail": "owner@example.com",
+  "signerAddress": "0xYourWallet",
+  "name": "Research Agent",
+  "description": "An autonomous research agent",
+  "image": "ipfs://QmAgentImage",
+  "services": [
+    {
+      "name": "A2A",
+      "endpoint": "https://agent.example/.well-known/agent-card.json",
+      "version": "0.3.0"
+    }
+  ],
+  "aiModelName": "gpt-4o",
+  "aiModelProvider": "openai",
+  "x402Support": true,
+  "active": true
+}
+```
+
+The prepare response includes `info.agentUuid`. Save it for later mutation calls.
+
+`newTokenizedAgent` is a legacy alias that uses the same request body as `agentRegister`.
+
+## agentSetURI
+
+Updates the agent's on-chain `agentURI` after the registration transaction has been mined. It rebuilds the registration file, injects the real on-chain `agentId`, uploads the final file to IPFS, and prepares `setAgentURI(agentId, newURI)`.
+
+Required fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `method` | string | Must be `agentSetURI` |
+| `signerAddress` | string | Must match the stored owner wallet |
+| `agentUuid` or `agentId` | string | Stored agent reference |
+
+Optional profile override fields include `name`, `description`, `image`, `services`, `metadata`, `aiModelName`, `aiModelProvider`, `tags`, `version`, `documentation`, `sourceCode`, `license`, `agentType`, `supportedTrust`, `x402Support`, `active`, and `registrations`.
+
+Example:
+
+```json
+{
+  "chainId": "11155111",
+  "method": "agentSetURI",
+  "signerAddress": "0xOwnerWallet",
+  "agentUuid": "YOUR_AGENT_UUID"
+}
+```
+
+## agentSetMetadata
+
+Writes a single key/value pair to the ERC-8004 metadata store by preparing `setMetadata(agentId, key, encodedValue)`.
+
+Required fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `method` | string | Must be `agentSetMetadata` |
+| `signerAddress` | string | Must match the stored owner wallet |
+| `agentUuid` or `agentId` | string | Stored agent reference |
+| `metadataKey` or `aiModelName` | string | Metadata key, or shorthand for `modelName` |
+
+Optional fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `metadataValue` | any | Raw value to encode. If omitted, `aiModelName` is used |
+| `metadataEncoding` | string | `string` by default, or `json` / `hex` |
+| `aiModelProvider` | string | Stored in local profile context |
+
+Example:
+
+```json
+{
+  "chainId": "11155111",
+  "method": "agentSetMetadata",
+  "signerAddress": "0xOwnerWallet",
+  "agentUuid": "YOUR_AGENT_UUID",
+  "metadataKey": "modelName",
+  "metadataValue": "gpt-4o"
+}
+```
+
+## agentSetWallet
+
+Sets the agent's operational wallet in the ERC-8004 Identity Registry. The new wallet must sign an authorization before the owner submits the update.
+
+Required fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `method` | string | Must be `agentSetWallet` |
+| `signerAddress` | string | Must match the stored owner wallet |
+| `agentUuid` or `agentId` | string | Stored agent reference |
+| `newWallet` | string | Wallet to assign as agent wallet |
+| `signature` | string | Hex signature from the new wallet |
+| `deadline` | number | Unix timestamp deadline for the signature |
+
+Example:
+
+```json
+{
+  "chainId": "11155111",
+  "method": "agentSetWallet",
+  "signerAddress": "0xOwnerWallet",
+  "agentUuid": "YOUR_AGENT_UUID",
+  "newWallet": "0xNewAgentWallet",
+  "signature": "0xSignatureFromNewWallet",
+  "deadline": 1800000000
+}
+```
+
+## agentGiveFeedback
+
+Writes a feedback entry to the ERC-8004 Reputation Registry.
+
+Required fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `method` | string | Must be `agentGiveFeedback` |
+| `signerAddress` | string | Reviewer wallet |
+| `agentUuid` or `agentId` | string | Target agent |
+| `value` | string or number | Feedback value |
+| `valueDecimals` | string or number | Decimals used to interpret `value` |
+
+Conditionally required:
+
+| Field | Description |
+| --- | --- |
+| `email` | Required when the API cannot infer tracking context from `agentUuid` |
+
+Optional fields are `tag1`, `tag2`, `endpoint`, `feedbackURI`, and `feedbackHash`. `feedbackHash` defaults to the zero hash when omitted.
+
+Example:
+
+```json
+{
+  "chainId": "11155111",
+  "method": "agentGiveFeedback",
+  "signerAddress": "0xReviewerWallet",
+  "agentId": "7",
+  "email": "reviewer@example.com",
+  "value": "9500",
+  "valueDecimals": 2,
+  "tag1": "quality",
+  "endpoint": "https://agent.example/.well-known/agent-card.json"
+}
+```
+
+## agentRevokeFeedback
+
+Revokes a previously submitted feedback entry.
+
+Required fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `method` | string | Must be `agentRevokeFeedback` |
+| `signerAddress` | string | Original reviewer wallet |
+| `agentId` | string or number | Target agent ID |
+| `feedbackIndex` | string or number | Feedback index to revoke |
+| `email` | string | Email for local tracking |
+
+Example:
+
+```json
+{
+  "chainId": "11155111",
+  "method": "agentRevokeFeedback",
+  "signerAddress": "0xReviewerWallet",
+  "agentId": "7",
+  "feedbackIndex": 0,
+  "email": "reviewer@example.com"
+}
+```
+
+## agentAppendFeedbackResponse
+
+Appends a response to an existing feedback thread.
+
+Required fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `method` | string | Must be `agentAppendFeedbackResponse` |
+| `signerAddress` | string | Agent owner wallet |
+| `agentId` | string or number | Target agent ID |
+| `clientAddress` | string | Reviewer wallet tied to the feedback |
+| `feedbackIndex` | string or number | Feedback index to update |
+| `responseURI` | string | URI of the off-chain response payload |
+| `email` | string | Email for local tracking |
+
+Optional field: `responseHash`, a 32-byte content hash. It defaults to the zero hash when omitted.
+
+Example:
+
+```json
+{
+  "chainId": "11155111",
+  "method": "agentAppendFeedbackResponse",
+  "signerAddress": "0xOwnerWallet",
+  "agentId": "7",
+  "clientAddress": "0xReviewerWallet",
+  "feedbackIndex": 0,
+  "responseURI": "ipfs://QmResponseCID",
+  "email": "owner@example.com"
+}
+```
+
+## agentCreateToken
+
+Deploys a new ERC-20 token for the agent through the Agent Token Factory.
+
+Required fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `method` | string | Must be `agentCreateToken` |
+| `ownerEmail` or `email` | string | Tokenizer email |
+| `signerAddress` | string | Wallet that signs and pays gas |
+| `name` | string | Token name |
+| `symbol` | string | Token ticker, 2-11 uppercase alphanumeric characters |
+| `agentWallet` | string | Agent wallet that will own the token |
+
+Optional fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `premint` | string | Human-readable amount minted to `agentWallet`. Defaults to `0` |
+| `decimals` | number | Token decimals, 0-255. Defaults to `18` |
+
+Example:
+
+```json
+{
+  "chainId": "11155111",
+  "method": "agentCreateToken",
+  "ownerEmail": "owner@example.com",
+  "signerAddress": "0xOwnerWallet",
+  "name": "My Agent Token",
+  "symbol": "MAT",
+  "agentWallet": "0xAgentOperationalWallet",
+  "premint": "1000000",
+  "decimals": 18
+}
+```
+
+After `send-transactions` succeeds, read the deployed `tokenAddress` from the send result.
+
+## agentMintToken
+
+Mints additional tokens by calling `mint(to, amount)` on the deployed agent token.
+
+Required fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `method` | string | Must be `agentMintToken` |
+| `ownerEmail` or `email` | string | Tokenizer email |
+| `signerAddress` | string | Must be the configured `agentWallet` |
+| `tokenAddress` | string | Deployed ERC-20 token address |
+| `to` | string | Recipient wallet |
+| `amount` | string | Human-readable amount to mint |
+
+Optional field: `decimals`, defaulting to `18`.
+
+Example:
+
+```json
+{
+  "chainId": "11155111",
+  "method": "agentMintToken",
+  "ownerEmail": "owner@example.com",
+  "signerAddress": "0xAgentOperationalWallet",
+  "tokenAddress": "0xDeployedTokenAddress",
+  "to": "0xRecipientAddress",
+  "amount": "500",
+  "decimals": 18
+}
+```
+
+## agentBurnToken
+
+Burns tokens by calling `burn(from, amount)` on the deployed agent token.
+
+Required fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `method` | string | Must be `agentBurnToken` |
+| `ownerEmail` or `email` | string | Tokenizer email |
+| `signerAddress` | string | Must be the configured `agentWallet` |
+| `tokenAddress` | string | Deployed ERC-20 token address |
+| `from` | string | Address to burn from |
+| `amount` | string | Human-readable amount to burn |
+
+Optional field: `decimals`, defaulting to `18`.
+
+Example:
+
+```json
+{
+  "chainId": "11155111",
+  "method": "agentBurnToken",
+  "ownerEmail": "owner@example.com",
+  "signerAddress": "0xAgentOperationalWallet",
+  "tokenAddress": "0xDeployedTokenAddress",
+  "from": "0xAddressToBurnFrom",
+  "amount": "100",
+  "decimals": 18
+}
+```
+
+## Nonce Ordering
+
+For multi-step agent workflows, wait for each transaction to be mined before preparing the next one. Preparing multiple dependent agent transactions before the first one is mined can produce nonce conflicts.
+
+The canonical profile flow is:
+
+1. `agentRegister`
+2. Wait for the registration transaction to be mined and processed.
+3. `agentSetURI`
+4. Wait for the URI transaction to be mined and processed.
+5. `agentSetMetadata`

@@ -21,6 +21,12 @@
         "type": "apiKey",
         "in": "header",
         "name": "x-api-key"
+      },
+      "x402Payment": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Payment",
+        "description": "Base64-encoded x402 payment payload. Only supported for x402-eligible agentic methods on /prepare-transactions and /send-transactions."
       }
     }
   },
@@ -36,10 +42,13 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** This endpoint prepares unsigned transactions for various blockchain operations. The operation is determined by the `method` field in the request body. Supported methods include: `newTokenization`, `mintToken`, `whitelist`, `burnToken`, `approve`, `transferTo`, `transferFrom`, `dividendDistribution`, `newSto`, `newInvest`, `closeOffer` and `claimTokens`.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY`\n- `Content-Type`: `application/json`\n\n**Common Request Body Parameters:**\n- `method` (string): Operation to perform.\n- `signerAddress` (string): Address initiating the transaction.\n- `chainId` (string): Chain ID in hex (e.g., \"aa36a7\").\n- `gasLimit` (string, optional): Optional gas limit.\n- `rpcUrl` (string, optional): Optional RPC URL.\n\n---\n\n**Method: `newTokenization`**\nPrepares a new tokenization transaction.\n\n**Additional Request Body Parameters:**\n- `url` (string): Token documentation URL.\n- `name` (string): Token name.\n- `symbol` (string): Token symbol (max 5 characters).\n- `tokenizerEmail` (string): The email of the tokenizer.\n- `supplyCap` (string, optional): Max token supply.\n- `preMints` (array, optional): Pre-mint configurations.\n- `initialHolders` (array, optional): Initial holder configurations.\n\n---\n\n**Method: `mintToken`**\nPrepares minting tokens to users.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `userToMint` (array of objects): Each object includes:\n  - `email` (string)\n  - `investorAddress` (string)\n  - `amount` (string)\n  - `needWhitelist` (boolean)\n\n---\n\n**Method: `whitelist`**\nWhitelists or blacklists users.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `userToWhitelist` (array of objects): Each includes:\n  - `whitelistStatus` (string): \"true\" or \"false\".\n  - `investorAddress` (string)\n\n---\n\n**Method: `burnToken`**\nBurns tokens from the signer\u2019s balance.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `amount` (string): Amount to burn.\n\n---\n\n**Method: `transferFrom`**\nTransfers tokens from one address to another (with prior approval).\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `from` (string): Sender address.\n- `to` (string): Receiver address.\n- `amount` (string): Amount to transfer.\n\n---\n\n**Method: `transferTo`**\nTransfers tokens from `signerAddress` to another address.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `to` (string): Receiver address.\n- `amount` (string): Amount to transfer.\n\n---\n\n**Method: `approve`**\nApproves a spender to use tokens.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Token to approve (can include BKN, USDT, USDC).\n- `spenderAddress` (string): Address being approved.\n- `amount` (string): Allowance amount.\n\n---\n\n**Method: `dividendDistribution`**\nDistributes `paymentToken` dividends to holders of `tokenSymbol`.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string)\n- `amount` (string): Amount of payment token to distribute.\n\n**Note:** Amounts are in whole units (e.g., 10 for 10 USDT).\n\n---\n\n**Method: `newSto`**\nCreates a new STO (Security Token Offering).\n\n**Additional Request Body Parameters:**\n- `tokenizerEmail` (string)\n- `tokenAmount` (string)\n- `offeringName` (string)\n- `startDate` (string)\n- `endDate` (string)\n- `acceptedCoin` (string)\n- `minRaiseUSD` (string)\n- `maxRaiseUSD` (string)\n- `minInvestment` (string)\n- `maxInvestment` (string)\n- `signerAddress` (string)",
+        "description": "**Description:** This endpoint prepares unsigned transactions for various blockchain operations. The operation is determined by the `method` field in the request body. Supported methods include standard tokenization methods (`newTokenization`, `mintToken`, `whitelist`, `burnToken`, `approve`, `transferTo`, `transferFrom`, `dividendDistribution`, `newSto`, `newInvest`, `closeOffer`, `claimTokens`) and x402-eligible agentic methods (`newTokenizedAgent`, `agentRegister`, `agentSetURI`, `agentSetMetadata`, `agentSetWallet`, `agentGiveFeedback`, `agentRevokeFeedback`, `agentAppendFeedbackResponse`, `agentCreateToken`, `agentMintToken`, `agentBurnToken`).\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY` for API-key auth, or `X-Payment` for x402 retries on eligible agentic methods\n- `Content-Type`: `application/json`\n\n**Common Request Body Parameters:**\n- `method` (string): Operation to perform.\n- `signerAddress` (string): Address initiating the transaction.\n- `chainId` (string): Chain ID in hex (e.g., \"aa36a7\").\n- `gasLimit` (string, optional): Optional gas limit.\n- `privateRpcUrl` (string, optional): Optional private RPC URL. `rpcUrl` is kept for backward compatibility in older examples.\n\n---\n\n**Method: `newTokenization`**\nPrepares a new tokenization transaction.\n\n**Additional Request Body Parameters:**\n- `url` (string): Token documentation URL.\n- `name` (string): Token name.\n- `symbol` (string): Token symbol (max 5 characters).\n- `tokenizerEmail` (string): The email of the tokenizer.\n- `supplyCap` (string, optional): Max token supply.\n- `preMints` (array, optional): Pre-mint configurations.\n- `initialHolders` (array, optional): Initial holder configurations.\n\n---\n\n**Method: `mintToken`**\nPrepares minting tokens to users.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `userToMint` (array of objects): Each object includes:\n  - `email` (string)\n  - `investorAddress` (string)\n  - `amount` (string)\n  - `needWhitelist` (boolean)\n\n---\n\n**Method: `whitelist`**\nWhitelists or blacklists users.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `userToWhitelist` (array of objects): Each includes:\n  - `whitelistStatus` (string): \"true\" or \"false\".\n  - `investorAddress` (string)\n\n---\n\n**Method: `burnToken`**\nBurns tokens from the signer\u2019s balance.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `amount` (string): Amount to burn.\n\n---\n\n**Method: `transferFrom`**\nTransfers tokens from one address to another (with prior approval).\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `from` (string): Sender address.\n- `to` (string): Receiver address.\n- `amount` (string): Amount to transfer.\n\n---\n\n**Method: `transferTo`**\nTransfers tokens from `signerAddress` to another address.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `to` (string): Receiver address.\n- `amount` (string): Amount to transfer.\n\n---\n\n**Method: `approve`**\nApproves a spender to use tokens.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Token to approve (can include BKN, USDT, USDC).\n- `spenderAddress` (string): Address being approved.\n- `amount` (string): Allowance amount.\n\n---\n\n**Method: `dividendDistribution`**\nDistributes `paymentToken` dividends to holders of `tokenSymbol`.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string)\n- `amount` (string): Amount of payment token to distribute.\n\n**Note:** Amounts are in whole units (e.g., 10 for 10 USDT).\n\n---\n\n**Method: `newSto`**\nCreates a new STO (Security Token Offering).\n\n**Additional Request Body Parameters:**\n- `tokenizerEmail` (string)\n- `tokenAmount` (string)\n- `offeringName` (string)\n- `startDate` (string)\n- `endDate` (string)\n- `acceptedCoin` (string)\n- `minRaiseUSD` (string)\n- `maxRaiseUSD` (string)\n- `minInvestment` (string)\n- `maxInvestment` (string)\n- `signerAddress` (string)",
         "security": [
           {
             "apiKeyAuth": []
+          },
+          {
+            "x402Payment": []
           }
         ],
         "requestBody": {
@@ -64,9 +73,20 @@
                       "transferFrom",
                       "transferTo",
                       "dividendDistribution",
-                      "closeOffer"
+                      "closeOffer",
+                      "newTokenizedAgent",
+                      "agentRegister",
+                      "agentSetURI",
+                      "agentSetMetadata",
+                      "agentSetWallet",
+                      "agentGiveFeedback",
+                      "agentRevokeFeedback",
+                      "agentAppendFeedbackResponse",
+                      "agentCreateToken",
+                      "agentMintToken",
+                      "agentBurnToken"
                     ],
-                    "description": "The operation to be performed. Supported methods: newTokenization (create tokenized asset), newSto (create STO), newInvest (invest in STO), claimTokens (claim from completed STO), mintToken (mint additional tokens), whitelist (manage whitelist), approve (approve spending), burnToken (burn tokens), transferFrom (transfer with approval), transferTo (transfer from signer), dividendDistribution (distribute dividends), closeOffer (close active STO)."
+                    "description": "The operation to be performed. Includes standard tokenization methods and x402-eligible agentic methods: newTokenizedAgent, agentRegister, agentSetURI, agentSetMetadata, agentSetWallet, agentGiveFeedback, agentRevokeFeedback, agentAppendFeedbackResponse, agentCreateToken, agentMintToken, and agentBurnToken."
                   },
                   "signerAddress": {
                     "type": "string",
@@ -232,6 +252,11 @@
                     "example": "{URL_TO_RPC} but can be omitted",
                     "description": "The RPC URL of the blockchain network. If not provided, a default RPC URL for the specified chain ID will be used."
                   },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "example": "https://rpc.example",
+                    "description": "Optional private RPC override used when preparing transactions."
+                  },
                   "spenderAddress": {
                     "type": "string",
                     "example": "0x456...",
@@ -303,6 +328,148 @@
                       }
                     },
                     "description": "Array of users to whitelist/blacklist (used in whitelist)."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "example": "owner@example.com",
+                    "description": "Tokenizer owner email used by agentic methods."
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "reviewer@example.com",
+                    "description": "Tracking email used by feedback and agent token methods."
+                  },
+                  "services": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    },
+                    "description": "Agent service descriptors used by agentRegister."
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "description": "Agent metadata stored in the registration file."
+                  },
+                  "aiModelName": {
+                    "type": "string",
+                    "example": "gpt-4o",
+                    "description": "AI model name for agent registration or metadata updates."
+                  },
+                  "aiModelProvider": {
+                    "type": "string",
+                    "example": "openai",
+                    "description": "AI model provider stored in the agent profile."
+                  },
+                  "agentUuid": {
+                    "type": "string",
+                    "description": "Internal tokenized agent UUID returned by agentRegister."
+                  },
+                  "agentId": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "On-chain ERC-8004 agent ID."
+                  },
+                  "metadataKey": {
+                    "type": "string",
+                    "example": "modelName",
+                    "description": "Metadata key used by agentSetMetadata."
+                  },
+                  "metadataValue": {
+                    "description": "Metadata value used by agentSetMetadata."
+                  },
+                  "metadataEncoding": {
+                    "type": "string",
+                    "enum": [
+                      "string",
+                      "json",
+                      "hex"
+                    ],
+                    "description": "Encoding mode for agentSetMetadata."
+                  },
+                  "newWallet": {
+                    "type": "string",
+                    "description": "Agent wallet assigned by agentSetWallet."
+                  },
+                  "signature": {
+                    "type": "string",
+                    "description": "Hex signature used by agentSetWallet."
+                  },
+                  "deadline": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Signature deadline used by agentSetWallet."
+                  },
+                  "feedbackIndex": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Feedback index used by reputation methods."
+                  },
+                  "clientAddress": {
+                    "type": "string",
+                    "description": "Reviewer/client address used by agentAppendFeedbackResponse."
+                  },
+                  "responseURI": {
+                    "type": "string",
+                    "description": "Off-chain response URI used by agentAppendFeedbackResponse."
+                  },
+                  "feedbackURI": {
+                    "type": "string",
+                    "description": "Off-chain feedback URI used by agentGiveFeedback."
+                  },
+                  "feedbackHash": {
+                    "type": "string",
+                    "description": "Optional 32-byte content hash for feedback."
+                  },
+                  "responseHash": {
+                    "type": "string",
+                    "description": "Optional 32-byte content hash for a feedback response."
+                  },
+                  "agentWallet": {
+                    "type": "string",
+                    "description": "Operational agent wallet used by agentCreateToken."
+                  },
+                  "symbol": {
+                    "type": "string",
+                    "example": "MAT",
+                    "description": "Agent token symbol used by agentCreateToken."
+                  },
+                  "premint": {
+                    "type": "string",
+                    "description": "Human-readable premint amount used by agentCreateToken."
+                  },
+                  "decimals": {
+                    "type": "number",
+                    "description": "Agent token decimals. Defaults to 18."
+                  },
+                  "tokenAddress": {
+                    "type": "string",
+                    "description": "Deployed agent token address used by agentMintToken and agentBurnToken."
+                  },
+                  "x402Support": {
+                    "type": "boolean",
+                    "description": "Whether the registered agent declares x402 support in its profile."
+                  },
+                  "active": {
+                    "type": "boolean",
+                    "description": "Whether the registered agent should appear active."
                   }
                 }
               }
@@ -410,6 +577,9 @@
                 }
               }
             }
+          },
+          "402": {
+            "description": "x402 payment required. The response includes a PAYMENT-REQUIRED header with a base64-encoded x402 payment request."
           }
         }
       }
@@ -1396,10 +1566,13 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** This endpoint submits signed transactions to the blockchain. This endpoint works uniformly for all transaction types prepared using the `/prepare-transactions` endpoint.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY`\n- `Content-Type`: `application/json`\n\n**Workflow:**\n1. **Prepare Transactions**: First, call `/prepare-transactions` with your desired method and parameters\n2. **Sign Transactions**: Sign each transaction in the returned `transactions` array using your preferred wallet or signing method\n3. **Send Transactions**: Submit the signed transactions along with the `txId` to this endpoint\n\n**Supported Transaction Types:**\nThis endpoint accepts signed transactions for all methods supported by `/prepare-transactions`:\n- `newTokenization` - Create new tokenized assets\n- `newSto` - Create Security Token Offerings\n- `newInvest` - Make investments in STOs\n- `claimTokens` - Claim tokens from completed STOs\n- `closeOffer` - Close active STOs\n- `mintToken` - Mint additional tokens\n- `whitelist` - Manage address whitelist status\n- `approve` - Approve token spending\n- `burnToken` - Burn tokens\n- `transferFrom` - Transfer tokens (with approval)\n- `transferTo` - Transfer tokens from signer\n- `dividendDistribution` - Distribute dividends",
+        "description": "**Description:** This endpoint submits signed transactions to the blockchain. This endpoint works uniformly for all transaction types prepared using the `/prepare-transactions` endpoint.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY` for API-key auth, or `X-Payment` for x402 retries when sending x402-eligible agentic prepared transactions\n- `Content-Type`: `application/json`\n\n**Workflow:**\n1. **Prepare Transactions**: First, call `/prepare-transactions` with your desired method and parameters\n2. **Sign Transactions**: Sign each transaction in the returned `transactions` array using your preferred wallet or signing method\n3. **Send Transactions**: Submit the signed transactions along with the `txId` to this endpoint\n\n**Supported Transaction Types:**\nThis endpoint accepts signed transactions for all methods supported by `/prepare-transactions`:\n- `newTokenization` - Create new tokenized assets\n- `newSto` - Create Security Token Offerings\n- `newInvest` - Make investments in STOs\n- `claimTokens` - Claim tokens from completed STOs\n- `closeOffer` - Close active STOs\n- `mintToken` - Mint additional tokens\n- `whitelist` - Manage address whitelist status\n- `approve` - Approve token spending\n- `burnToken` - Burn tokens\n- `transferFrom` - Transfer tokens (with approval)\n- `transferTo` - Transfer tokens from signer\n- `dividendDistribution` - Distribute dividends\n- `newTokenizedAgent` / `agentRegister` - Register ERC-8004 agents\n- `agentSetURI`, `agentSetMetadata`, `agentSetWallet` - Maintain ERC-8004 agent profiles\n- `agentGiveFeedback`, `agentRevokeFeedback`, `agentAppendFeedbackResponse` - Manage reputation entries\n- `agentCreateToken`, `agentMintToken`, `agentBurnToken` - Manage agent ERC-20 tokens\n\nx402 can be used only for x402-eligible agentic prepared transactions. Do not mix x402-eligible and API-key-only transactions in the same send batch.",
         "security": [
           {
             "apiKeyAuth": []
+          },
+          {
+            "x402Payment": []
           }
         ],
         "requestBody": {
@@ -1523,6 +1696,9 @@
                 }
               }
             }
+          },
+          "402": {
+            "description": "x402 payment required. The response includes a PAYMENT-REQUIRED header with a base64-encoded x402 payment request."
           }
         }
       }
