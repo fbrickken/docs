@@ -3,17 +3,19 @@ title: 'Get Transaction Status'
 openapi: 'GET /get-transaction-status'
 ---
 
-Retrieves the status of a transaction.
+Retrieves the status of a transaction submitted through `/send-transactions`.
 
 ## Query Parameters
 
-- `hash` (required): Transaction hash
+- `hash` (optional): On-chain transaction hash returned after the transaction is sent. Use the exact hash value starting with `0x`.
+- `txId` (optional): Internal transaction ID returned by `/prepare-transactions`. Use this when the on-chain transaction hash is not available yet.
+
+At least one of `hash` or `txId` is required. Do not include `--data` in the request, because this endpoint only accepts `GET`. The `hash` value must not be prefixed with `hash=` or `3D`.
 
 ## Example
 
 ```bash
-curl --request GET \
-  --url 'https://api.sandbox.brickken.com/get-transaction-status?hash=0x46f7114878c49ad5af0f1e6f0a2ce9c700c1fdf36455fd956b20f492ee813e80' \
+curl --location --request GET 'https://api.sandbox.brickken.com/get-transaction-status?hash=0x46f7114878c49ad5af0f1e6f0a2ce9c700c1fdf36455fd956b20f492ee813e80' \
   --header 'x-api-key: YOUR_API_KEY'
 ```
 
@@ -21,9 +23,15 @@ curl --request GET \
 
 ```json
 {
-  "status": "success",
-  "txHash": "0x1234567890abcdef...",
-  "blockNumber": 12345678,
-  "gasUsed": "150000"
+  "status": "success"
+}
+```
+
+If the transaction failed, the response includes the stored error:
+
+```json
+{
+  "status": "rejected",
+  "error": "Transaction failed"
 }
 ```
