@@ -48,8 +48,8 @@ This is particularly useful for:
 - **url** (string, required): URL pointing to token documentation or legal documents
 - **name** (string, required): The full name of the token (e.g., "My Company Token")
 - **tokenizerEmail** (string, required): Email address of the token creator for notifications
-- **tokenSymbol** (string, required): The token ticker symbol (maximum 5 characters, e.g., "EXMPL")
-- **tokenType** (string, required): Type of token. Allowed values: `EQUITY`, `DEBT`, `PRIVATE_CREDIT`, `FUNDS`, `RWA_TOKEN`, `PROFIT_SHARING`
+- **tokenSymbol** (string, required): The token ticker symbol (3 to 5 characters, e.g., "EXMPL")
+- **tokenType** (string, required): Type of token. Allowed values: `EQUITY`, `DEBT`, `BILL_FACTORING`, `ICO`, `STABLECOIN`, `REVENUE_SHARE`, `RWA_TOKEN`, `PROFIT_SHARING`
 - **supplyCap** (string, required): Maximum number of tokens that can ever be minted ("0" for unlimited)
 - **preMints** (array, optional): Array of addresses and amounts to mint tokens to immediately upon creation
 - **initialHolders** (array, optional): Array of initial token holders and their allocations
