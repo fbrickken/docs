@@ -1,0 +1,243 @@
+---
+title: 'agent'
+description: 'Manage ERC-8004 agent identity and reputation from the Brickken CLI.'
+---
+
+`brickken agent` groups the ERC-8004 identity and reputation operations. Every subcommand is **prepare-only by default**; add `--execute` to prepare, sign locally, send, and pay through x402 in one step.
+
+For the field-level semantics of each underlying method, see [Agentic Methods with x402](/api-reference/endpoint/agentic-methods-x402).
+
+## Shared options
+
+These options apply to every `agent` subcommand:
+
+| Flag | Description |
+| --- | --- |
+| `--chain <chain>` | Chain identifier (decimal or hex) |
+| `--signer-address <address>` | Signer wallet address |
+| `--gas-limit <value>` | Optional explicit gas limit |
+| `-f, --file <path>` | JSON/YAML input file (merged with CLI flags) |
+| `--execute` | Prepare, sign locally, send, and pay through x402 |
+
+<Note>
+`--owner-email` / `--email` is optional metadata. Agentic operations do not require a tokenizer user in the Brickken database.
+</Note>
+
+## agent register
+
+Prepare or execute an ERC-8004 agent registration → backend method [`agentRegister`](/api-reference/endpoint/agentic-methods-x402#agentregister). The prepare response includes `info.agentUuid`; save it for the follow-up `set-uri` and `set-metadata` calls.
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--name <name>` | string | Yes | Agent display name |
+| `--description <value>` | string | Yes | Agent description |
+| `--image <url>` | string | Yes | Agent image URL or IPFS URI |
+| `--service-name <name>` | string | Yes | Single service name |
+| `--service-endpoint <url>` | string | Yes | Single service endpoint |
+| `--service-version <version>` | string | No | Single service version |
+| `--ai-model-name <name>` | string | No | AI model name |
+| `--ai-model-provider <provider>` | string | No | AI model provider |
+| `--tag <value>` | string | No | Discovery tag (repeatable) |
+| `--version <value>` | string | No | Agent profile version |
+| `--documentation <url>` | string | No | Documentation URL |
+| `--source-code <url>` | string | No | Source code URL |
+| `--license <value>` | string | No | License identifier or URL |
+| `--agent-type <value>` | string | No | Agent type |
+| `--supported-trust <value>` | string | No | Supported trust capability (repeatable) |
+| `--x402-support <value>` | boolean | No | Whether the agent advertises x402 support |
+| `--active <value>` | boolean | No | Whether the agent is active |
+| `--owner-email <email>` | string | No | Tokenizer owner email |
+| `--email <email>` | string | No | Alias for `--owner-email` |
+
+```bash
+brickken agent register \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --name "Research Agent" \
+  --description "On-chain AI research agent" \
+  --image https://example.com/agent.png \
+  --service-name A2A \
+  --service-endpoint https://agent.example/.well-known/agent-card.json \
+  --service-version 0.3.0 \
+  --ai-model-provider OpenAI \
+  --ai-model-name "Research Model" \
+  --x402-support true \
+  --execute \
+  --json | tee register-output.json
+
+export AGENT_UUID="$(jq -r '.prepared.info.agentUuid' register-output.json)"
+```
+
+## agent set-uri
+
+Prepare or execute an agent URI/profile update → [`agentSetURI`](/api-reference/endpoint/agentic-methods-x402#agentseturi). Run this after the registration transaction is mined; it injects the real on-chain `agentId` and publishes the final profile to IPFS.
+
+In addition to the shared options and all `register` profile flags (`--name`, `--description`, `--image`, `--service-*`, `--ai-model-*`, `--tag`, `--version`, `--documentation`, `--source-code`, `--license`, `--agent-type`, `--supported-trust`, `--x402-support`, `--active`):
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--agent-uuid <uuid>` | string | Yes¹ | Stored tokenized agent UUID |
+| `--agent-id <id>` | string | Yes¹ | On-chain ERC-8004 agent ID |
+
+¹ Provide either `--agent-uuid` or `--agent-id`.
+
+```bash
+brickken agent set-uri \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --agent-uuid "$AGENT_UUID" \
+  --name "Research Agent" \
+  --description "On-chain AI research agent" \
+  --tag ai-agent \
+  --documentation https://docs.brickken.com \
+  --source-code https://github.com/Brickken/brickken-api-cli \
+  --license MIT \
+  --agent-type research \
+  --supported-trust feedback \
+  --x402-support true \
+  --active true \
+  --execute \
+  --json
+```
+
+## agent set-metadata
+
+Prepare or execute a metadata update → [`agentSetMetadata`](/api-reference/endpoint/agentic-methods-x402#agentsetmetadata). Writes a single key/value pair on-chain.
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--agent-uuid <uuid>` | string | Yes¹ | Stored tokenized agent UUID |
+| `--agent-id <id>` | string | Yes¹ | On-chain ERC-8004 agent ID |
+| `--metadata-key <key>` | string | Yes² | Metadata key |
+| `--metadata-value <value>` | string | No | Metadata value |
+| `--metadata-encoding <encoding>` | string | No | `string` (default), `json`, or `hex` |
+| `--ai-model-name <name>` | string | No | Shortcut for `metadataKey=modelName` |
+| `--ai-model-provider <provider>` | string | No | AI model provider stored in local profile context |
+
+¹ Provide either `--agent-uuid` or `--agent-id`. &nbsp;² Or supply `--ai-model-name` as the key shortcut.
+
+```bash
+brickken agent set-metadata \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --agent-uuid "$AGENT_UUID" \
+  --metadata-key capabilities \
+  --metadata-value '{"tasks":["research","summarization","token-operations"]}' \
+  --metadata-encoding json \
+  --execute \
+  --json
+```
+
+<Tip>
+For complex metadata payloads, prefer a `--file` to avoid shell-quoting issues. See [the raw `tx` flow](/cli/commands/tx) for the file-based pattern.
+</Tip>
+
+## agent set-wallet
+
+Prepare or execute an agent wallet update → [`agentSetWallet`](/api-reference/endpoint/agentic-methods-x402#agentsetwallet). The new wallet must sign an authorization first.
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--agent-uuid <uuid>` | string | Yes¹ | Stored tokenized agent UUID |
+| `--agent-id <id>` | string | Yes¹ | On-chain ERC-8004 agent ID |
+| `--new-wallet <address>` | string | Yes | New agent wallet address |
+| `--signature <signature>` | string | Yes | Authorization signature from the new wallet |
+| `--deadline <value>` | number | Yes | Unix timestamp deadline for the signature |
+
+¹ Provide either `--agent-uuid` or `--agent-id`.
+
+```bash
+brickken agent set-wallet \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --agent-uuid "$AGENT_UUID" \
+  --new-wallet 0xNewAgentWallet \
+  --signature 0xSignatureFromNewWallet \
+  --deadline 1800000000 \
+  --execute \
+  --json
+```
+
+## agent feedback give
+
+Prepare or execute reputation feedback → [`agentGiveFeedback`](/api-reference/endpoint/agentic-methods-x402#agentgivefeedback).
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--agent-uuid <uuid>` | string | Yes¹ | Target agent UUID |
+| `--agent-id <id>` | string | Yes¹ | Target on-chain agent ID |
+| `--value <value>` | string | Yes | Feedback value |
+| `--value-decimals <value>` | string | Yes | Decimals used to interpret `value` |
+| `--email <email>` | string | No² | Feedback owner email |
+| `--tag1 <value>` | string | No | Feedback tag 1 |
+| `--tag2 <value>` | string | No | Feedback tag 2 |
+| `--endpoint <url>` | string | No | Service endpoint related to feedback |
+| `--feedback-uri <uri>` | string | No | Feedback URI |
+| `--feedback-hash <hash>` | string | No | 32-byte feedback hash (defaults to zero hash) |
+
+¹ Provide either `--agent-uuid` or `--agent-id`. &nbsp;² Required when the API cannot infer tracking context from the agent reference.
+
+```bash
+brickken agent feedback give \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --agent-id 7 \
+  --email reviewer@example.com \
+  --value 9500 \
+  --value-decimals 2 \
+  --tag1 quality \
+  --endpoint https://agent.example/.well-known/agent-card.json \
+  --execute \
+  --json
+```
+
+## agent feedback revoke
+
+Prepare or execute feedback revocation → [`agentRevokeFeedback`](/api-reference/endpoint/agentic-methods-x402#agentrevokefeedback).
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--agent-id <id>` | string | Yes | On-chain ERC-8004 agent ID |
+| `--feedback-index <index>` | number | Yes | Feedback index to revoke |
+| `--email <email>` | string | Yes | Feedback owner email |
+
+```bash
+brickken agent feedback revoke \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --agent-id 7 \
+  --feedback-index 0 \
+  --email reviewer@example.com \
+  --execute \
+  --json
+```
+
+## agent feedback respond
+
+Prepare or execute a feedback response → [`agentAppendFeedbackResponse`](/api-reference/endpoint/agentic-methods-x402#agentappendfeedbackresponse).
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--agent-id <id>` | string | Yes | On-chain ERC-8004 agent ID |
+| `--client-address <address>` | string | Yes | Original feedback client address |
+| `--feedback-index <index>` | number | Yes | Feedback index to respond to |
+| `--response-uri <uri>` | string | Yes | URI of the off-chain response payload |
+| `--response-hash <hash>` | string | No | 32-byte response hash (defaults to zero hash) |
+| `--email <email>` | string | Yes | Agent owner email |
+
+```bash
+brickken agent feedback respond \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --agent-id 7 \
+  --client-address 0xReviewerWallet \
+  --feedback-index 0 \
+  --response-uri ipfs://QmResponseCID \
+  --email owner@example.com \
+  --execute \
+  --json
+```
+
+<Warning>
+For multi-step agent flows (`register` → `set-uri` → `set-metadata`), wait for each transaction to be mined before preparing the next one. Preparing dependent transactions before the previous one is mined can produce nonce conflicts. See the [end-to-end guide](/cli/guides/agent-and-token-workflow).
+</Warning>

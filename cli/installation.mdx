@@ -1,0 +1,56 @@
+---
+title: 'Installation'
+description: 'Install the Brickken CLI from npm and verify your setup.'
+---
+
+## Prerequisites
+
+- **Node.js** 18 or newer (the CLI is distributed as an npm package).
+- **`jq`** (optional but recommended) — the examples in these docs use it to read fields such as `agentUuid` and `tokenAddress` out of `--json` output.
+
+## Install from npm
+
+The CLI is published as [`brickken-cli`](https://www.npmjs.com/package/brickken-cli). Install it globally to get the `brickken` command:
+
+<CodeGroup>
+
+```bash npm
+npm install -g brickken-cli
+```
+
+```bash pnpm
+pnpm add -g brickken-cli
+```
+
+```bash yarn
+yarn global add brickken-cli
+```
+
+</CodeGroup>
+
+## Verify the installation
+
+```bash
+brickken --version
+brickken --help
+```
+
+`brickken --version` prints the installed package version. `brickken --help` lists the global options and command groups.
+
+## Build from source
+
+To build a local checkout instead of installing from npm:
+
+```bash
+git clone https://github.com/Brickken/brickken-api-cli.git
+cd brickken-api-cli
+pnpm install
+pnpm build
+node dist/index.js --help
+```
+
+## Next step
+
+<Card title="Authentication" icon="key" href="/cli/authentication">
+  Set up your private key, RPC URL, and target environment before running commands.
+</Card>

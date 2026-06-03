@@ -1,0 +1,77 @@
+---
+title: 'Quickstart'
+description: 'Set up your environment and run your first end-to-end Brickken CLI transaction.'
+---
+
+This quickstart runs a single agentic transaction end-to-end on Sepolia testnet using x402.
+
+## 1. Install and authenticate
+
+If you have not already, [install the CLI](/cli/installation) and set up a private key:
+
+```bash
+npm install -g brickken-cli
+export BRICKKEN_PRIVATE_KEY=0x...
+```
+
+## 2. Set your environment
+
+```bash
+export BRICKKEN_ENV="sandbox"
+export CHAIN="11155111"                 # Sepolia
+export WALLET="0xYourWallet"
+export BRICKKEN_RPC_URL="https://ethereum-sepolia-rpc.publicnode.com"
+```
+
+Fund `WALLET` with a small amount of Sepolia USDC so the wallet can pay x402 fees.
+
+## 3. Sanity checks
+
+```bash
+brickken --version
+test -n "$BRICKKEN_PRIVATE_KEY" && echo "private key ok" || echo "private key missing"
+test -n "$BRICKKEN_RPC_URL"     && echo "rpc ok"          || echo "rpc missing"
+command -v jq
+```
+
+## 4. Deploy a token end-to-end
+
+The `--execute` flag prepares, signs locally, sends, and pays through x402 in one step. The `--json` flag makes the output machine-readable so you can pipe it into `jq`.
+
+```bash
+brickken create-token \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --name "Quickstart Token" \
+  --symbol QST \
+  --agent-wallet "$WALLET" \
+  --premint 1000 \
+  --decimals 18 \
+  --execute \
+  --json | tee create-token-output.json
+```
+
+When `create-token --execute` succeeds, the CLI waits for the deployment receipt and adds `tokenAddress` to the JSON output. Capture it for follow-up commands:
+
+```bash
+export TOKEN_ADDRESS="$(jq -r '.tokenAddress' create-token-output.json)"
+echo "$TOKEN_ADDRESS"
+```
+
+<Tip>
+Echo critical variables such as `TOKEN_ADDRESS` and `AGENT_UUID` before reusing them. If a command seems to "drop" fields, the usual cause is shell expansion or quoting — not `--json`. Quote every value that can contain spaces, and prefer [`--file`](/cli/commands/tx) for nested JSON.
+</Tip>
+
+## What's next
+
+<CardGroup>
+  <Card title="Agent commands" icon="robot" href="/cli/commands/agent">
+    Register an ERC-8004 agent and manage its reputation.
+  </Card>
+  <Card title="Token economics" icon="coins" href="/cli/commands/token-economics">
+    Mint, burn, transfer, and approve agentic tokens.
+  </Card>
+  <Card title="End-to-end guide" icon="diagram-project" href="/cli/guides/agent-and-token-workflow">
+    A full agent registration and token lifecycle walkthrough.
+  </Card>
+</CardGroup>

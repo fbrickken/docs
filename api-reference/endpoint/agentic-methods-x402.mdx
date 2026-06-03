@@ -1,20 +1,20 @@
 ---
 title: 'Agentic Methods with x402'
-description: 'ERC-8004 agent methods available through prepare-transactions, with API key or x402 payment authentication.'
+description: 'ERC-8004 agent methods exposed through x402scan-discoverable facades and prepare-transactions, with API key or x402 payment authentication.'
 ---
 
-Agentic methods are ERC-8004 and agent-token operations exposed through the standard transaction flow:
+Agentic methods are ERC-8004 and agent-token operations. x402scan discovers them as semantic facade endpoints under `/x402/...`; each facade prepares the same unsigned transaction as `POST /prepare-transactions`, but fixes the `method` from the path.
 
-1. Call `POST /prepare-transactions`.
+1. Call one facade endpoint such as `POST /x402/token/create`, or call `POST /prepare-transactions` directly.
 2. Sign the returned transaction locally.
 3. Call `POST /send-transactions`.
 4. Poll `GET /get-transaction-status`.
 
-Private keys never leave the client. These methods can be authenticated with either an `x-api-key` header or an x402 payment. Non-agentic methods still require `x-api-key`.
+Private keys never leave the client. These methods can be authenticated with either an `x-api-key` header or an x402 payment. Non-agentic methods still require `x-api-key`. x402scan lists only the prepare facades; `send-transactions` remains the follow-up submission step because it requires the `txId` and signed transaction returned by prepare.
 
 ## x402 Authentication
 
-For x402, omit `x-api-key` and call the same endpoint. If payment is required, the API returns `402 Payment Required` with a `PAYMENT-REQUIRED` response header containing a base64-encoded x402 payment request.
+For x402, omit `x-api-key` and call either a `/x402/...` facade or `POST /prepare-transactions`. If payment is required, the API returns `402 Payment Required` with a `PAYMENT-REQUIRED` response header containing a base64-encoded x402 payment request.
 
 The client signs the x402 payment locally and retries the request with one of these headers:
 
@@ -30,11 +30,33 @@ payment-signature: BASE64_ENCODED_X402_PAYMENT_PAYLOAD
 
 When settlement succeeds, the API includes a `PAYMENT-RESPONSE` header. The payment rail uses USDC with EIP-3009 authorization. The exact price, payment chain, asset, and recipient must be read from `PAYMENT-REQUIRED`; do not hardcode them client-side.
 
+## x402scan Discovery Endpoints
+
+Use production (`https://api.brickken.com`) as the public x402scan target. Sandbox (`https://api.sandbox.brickken.com`) exposes the same routes for QA. `GET /.well-known/x402` returns the absolute resource URLs, and `GET /openapi.json` serves OpenAPI 3.1 with `x-payment-info` on each facade.
+
+Facade requests use the same body fields as the matching method, except the `method` field is optional and ignored because the path fixes it.
+
+| Facade endpoint | Fixed method |
+| --- | --- |
+| `POST /x402/agent/register` | `agentRegister` |
+| `POST /x402/agent/set-uri` | `agentSetURI` |
+| `POST /x402/agent/set-metadata` | `agentSetMetadata` |
+| `POST /x402/agent/set-wallet` | `agentSetWallet` |
+| `POST /x402/agent/feedback/give` | `agentGiveFeedback` |
+| `POST /x402/agent/feedback/revoke` | `agentRevokeFeedback` |
+| `POST /x402/agent/feedback/respond` | `agentAppendFeedbackResponse` |
+| `POST /x402/token/create` | `agentCreateToken` |
+| `POST /x402/token/mint` | `agentMintToken` |
+| `POST /x402/token/burn` | `agentBurnToken` |
+| `POST /x402/token/transfer` | `agentTransferToken` |
+| `POST /x402/token/transfer-from` | `agentTransferFromToken` |
+| `POST /x402/token/approve` | `agentApproveToken` |
+
 ## Eligible Methods
 
 | Method | Purpose |
 | --- | --- |
-| `newTokenizedAgent` | Legacy alias for agent registration |
+| `newTokenizedAgent` | Legacy alias for agent registration; not published in x402scan discovery |
 | `agentRegister` | Register an ERC-8004 agent |
 | `agentSetURI` | Publish the final agent URI and registration metadata |
 | `agentSetMetadata` | Write one metadata key/value pair on-chain |
@@ -45,10 +67,13 @@ When settlement succeeds, the API includes a `PAYMENT-RESPONSE` header. The paym
 | `agentCreateToken` | Deploy an ERC-20 token for the agent |
 | `agentMintToken` | Mint an agent token |
 | `agentBurnToken` | Burn an agent token |
+| `agentTransferToken` | Transfer an agent token |
+| `agentTransferFromToken` | Transfer an agent token through allowance |
+| `agentApproveToken` | Approve an agent token allowance |
 
 ## Common Prepare Request
 
-All methods are prepared through `POST /prepare-transactions`.
+CLI and advanced integrations can prepare all methods through `POST /prepare-transactions` by passing `method` explicitly.
 
 ```bash
 curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
@@ -61,14 +86,34 @@ curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
   }'
 ```
 
-For x402, use the same JSON body but omit `x-api-key`. If the first response is `402`, retry with `X-Payment`.
+For x402scan and simple resource discovery, call the semantic facade instead and omit `method`:
+
+```bash
+curl --request POST 'https://api.sandbox.brickken.com/x402/agent/register' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "chainId": "11155111",
+    "signerAddress": "0xYourWallet",
+    "name": "Research Agent",
+    "description": "An autonomous research agent",
+    "image": "ipfs://QmAgentImage",
+    "services": [
+      {
+        "name": "A2A",
+        "endpoint": "https://agent.example/.well-known/agent-card.json"
+      }
+    ]
+  }'
+```
+
+For x402, omit `x-api-key`. If the first response is `402`, retry with `X-Payment`.
 
 Common fields:
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `chainId` | string | Yes | Target chain ID. Decimal and hex values are accepted |
-| `method` | string | Yes | One of the eligible method names |
+| `method` | string | Yes for `/prepare-transactions`; no for `/x402/...` facades | One of the eligible method names. Facades derive it from the path |
 | `signerAddress` | string | Yes | Wallet that signs the prepared blockchain transaction |
 | `gasLimit` | string or number | No | Optional explicit gas limit |
 | `nonce` | number | No | Optional explicit nonce when managing nonces manually |
@@ -97,7 +142,7 @@ Prepare response shape:
 
 ## Send with x402
 
-Use `POST /send-transactions` after signing the prepared transaction.
+Use `POST /send-transactions` after signing the prepared transaction. This endpoint is not listed as a separate x402scan resource because it depends on the `txId` and signed payload produced by the prepare step.
 
 ```bash
 curl --request POST 'https://api.sandbox.brickken.com/send-transactions' \
@@ -172,7 +217,7 @@ Example:
 
 The prepare response includes `info.agentUuid`. Save it for later mutation calls.
 
-`newTokenizedAgent` is a legacy alias that uses the same request body as `agentRegister`.
+`newTokenizedAgent` is a legacy alias that uses the same request body as `agentRegister`. It is supported for direct `/prepare-transactions` integrations, but it is not published in the public x402scan discovery list.
 
 ## agentSetURI
 
@@ -460,6 +505,104 @@ Example:
   "tokenAddress": "0xDeployedTokenAddress",
   "from": "0xAddressToBurnFrom",
   "amount": "100",
+  "decimals": 18
+}
+```
+
+## agentTransferToken
+
+Transfers tokens by calling `transfer(to, amount)` on the deployed agent token.
+
+Required fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `method` | string | Must be `agentTransferToken` when using `/prepare-transactions` |
+| `ownerEmail` or `email` | string | Tokenizer email |
+| `signerAddress` | string | Wallet that owns the tokens being transferred |
+| `tokenAddress` | string | Deployed ERC-20 token address |
+| `to` | string | Recipient wallet |
+| `amount` | string | Human-readable amount to transfer |
+
+Optional field: `decimals`, defaulting to `18`.
+
+Example:
+
+```json
+{
+  "chainId": "11155111",
+  "method": "agentTransferToken",
+  "ownerEmail": "owner@example.com",
+  "signerAddress": "0xTokenHolderWallet",
+  "tokenAddress": "0xDeployedTokenAddress",
+  "to": "0xRecipientAddress",
+  "amount": "25",
+  "decimals": 18
+}
+```
+
+## agentTransferFromToken
+
+Transfers tokens through allowance by calling `transferFrom(from, to, amount)` on the deployed agent token.
+
+Required fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `method` | string | Must be `agentTransferFromToken` when using `/prepare-transactions` |
+| `ownerEmail` or `email` | string | Tokenizer email |
+| `signerAddress` | string | Spender wallet that has allowance |
+| `tokenAddress` | string | Deployed ERC-20 token address |
+| `from` | string | Source wallet |
+| `to` | string | Recipient wallet |
+| `amount` | string | Human-readable amount to transfer |
+
+Optional field: `decimals`, defaulting to `18`.
+
+Example:
+
+```json
+{
+  "chainId": "11155111",
+  "method": "agentTransferFromToken",
+  "ownerEmail": "owner@example.com",
+  "signerAddress": "0xApprovedSpenderWallet",
+  "tokenAddress": "0xDeployedTokenAddress",
+  "from": "0xSourceWallet",
+  "to": "0xRecipientAddress",
+  "amount": "25",
+  "decimals": 18
+}
+```
+
+## agentApproveToken
+
+Approves a spender by calling `approve(spenderAddress, amount)` on the deployed agent token.
+
+Required fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `method` | string | Must be `agentApproveToken` when using `/prepare-transactions` |
+| `ownerEmail` or `email` | string | Tokenizer email |
+| `signerAddress` | string | Token owner wallet |
+| `tokenAddress` | string | Deployed ERC-20 token address |
+| `spenderAddress` | string | Wallet receiving allowance |
+| `amount` | string | Human-readable allowance amount |
+
+Optional field: `decimals`, defaulting to `18`.
+
+Example:
+
+```json
+{
+  "chainId": "11155111",
+  "method": "agentApproveToken",
+  "ownerEmail": "owner@example.com",
+  "signerAddress": "0xTokenOwnerWallet",
+  "tokenAddress": "0xDeployedTokenAddress",
+  "spenderAddress": "0xSpenderWallet",
+  "amount": "25",
   "decimals": 18
 }
 ```

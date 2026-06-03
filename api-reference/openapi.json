@@ -1,8 +1,8 @@
 {
-  "openapi": "3.0.0",
+  "openapi": "3.1.0",
   "info": {
     "title": "Brickken API V2",
-    "description": "Welcome to the Brickken API documentation. This API allows customers to create and manage tokenization processes, including creating new tokenizations, minting/burning/transferring tokens, whitelisting users, manage tokens approvals. This documentation provides detailed information on how to use the API, including the necessary endpoints, request formats, and expected responses.</details><details><summary>**Authentication**</summary>All API requests require an API key for authentication. Include your API key in the `x-api-key` header of each request:<pre><code>```\n  x-api-key: YOUR_API_KEY\n```</code></pre>Ensure that your API key is kept secure and not shared publicly. A common parameter for all requests is the `signerAddress`. Such address MUST be whitelisted in our factory. To whitelist an address and/or request an API key either for sandbox/production environment please contact with: support@brickken.com. Once a `signerAddress` performs a `newTokenization` we refer to that address as the tokenizer. The tokenizer will be the only one allowed to mint such token, distribute dividends on such token and whitelist/blacklist investors of such token. Regarding actions like transferring tokens or burning tokens, the `signerAddress` can be any user and not only the tokenizer.</details><details><summary>**Supported Networks & Addresses**</summary><details><summary>Sepolia (sandbox environment only)</summary><pre><code>```\n  Chain Id: \"aa36a7\"\n  Factory Address: \"0x933ABAA95a7Fd0Bc683bDe2adB89f4C5EA64897b\"\n  BKN Address: \"0x97a13487f889dc770Ac925Be2d3b6c833FA7746a\"\n  USDT Address: \"0x28d2B01854D0aBec267a3DDcad9163580E6E8604\"\n  USDC Address: \"0xb10cE8e28aEb1ae27b968Fb3bfed2FD7dd52daCb\"\n```</code></pre></details><details><summary>Ethereum mainnet (production environment only)</summary><pre><code>```\n  Chain Id: \"1\"\n  Factory Address: \"0x91af681C85Ca98Efc5D69C1B62E6F435030969Db\"\n  BKN Address: \"0x0A638F07ACc6969abF392bB009f216D22aDEa36d\"\n  USDT Address: \"0xdac17f958d2ee523a2206206994597c13d831ec7\"\n  USDC Address: \"0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48\"\n```</code></pre></details><details><summary>Base mainnet (production environment only)</summary><pre><code>```\n  Chain Id: \"2105\"\n  Factory Address: \"0x278D7bdc2451B0Fa4087A68ce084a86cB91D4d83\"\n  BKN Address: \"0xddB293BB5C5258F7484A94a0fBd5c8B2F6E4e376\"\n  USDT Address: N/A\n  USDC Address: \"0x833589fcd6edb6e08f4c7c32d4f71b54bda02913\"\n```</code></pre></details><details><summary>BNB Smart Chain mainnet (production environment only)</summary><pre><code>```\n  Chain Id: \"38\"\n  Factory Address: \"0xCe4529Fe88df480BD777d3e32dfD7032e6C685ff\"\n  BKN Address: \"0x0e28bC9B03971E95acF9ae1326E51ecF9C55B498\"\n  USDT Address: \"0x55d398326f99059fF775485246999027B3197955\"\n  USDC Address: \"0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d\"\n```</code></pre></details><details><summary>Avalance C Chain mainnet (production environment only)</summary><pre><code>```\n  Chain Id: \"a86a\"\n  Factory Address: \"0xc6c230FA8F40022dE997727436Fae01caAbcDe61\"\n  BKN Address: \"0xd44E4Dc8bdF7C1c62CfDBb182022097BA42Ac6bC\"\n  USDT Address: \"0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7\"\n  USDC Address: \"0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E\"\n```</code></pre></details></details><details><summary>**Usage Workflow**</summary><details><summary>1. **Prepare Transactions:**</summary>- Use the `POST /prepare-transactions` endpoint with the desired method (e.g., `newTokenization`, `mintToken`, etc...) to prepare the transaction(s).\n- The response will include an array of unsigned transactions that needs to be signed.<details><summary>**Example Of An Endpoint Response:**</summary>```json\n  {\n    \"transactions\": [\n      {\n        \"from\": \"0xSignerAddress\",\n        \"to\": \"0xTargetAddress\",\n        \"value\": {\n          \"type\": \"BigNumber\",\n          \"hex\": \"0x00\"\n        },\n        \"nonce\": 1,\n        \"chainId\": 11155111,\n        \"data\": \"0x...\",\n        \"type\": 2,\n        \"maxPriorityFeePerGas\": {\n          \"type\": \"BigNumber\",\n          \"hex\": \"0x...\"\n        },\n        \"maxFeePerGas\": {\n          \"type\": \"BigNumber\",\n          \"hex\": \"0x...\"\n        },\n        \"gasLimit\": {\n          \"type\": \"BigNumber\",\n          \"hex\": \"0x...\"\n        }\n      }\n    ]\n  }\n```</details></details><details><summary>2. **Sign the Transactions:**</summary>- Use your preferred method or wallet to sign the transaction data provided in the response.\n- Ensure that the signer address matches the `signerAddress` provided in the initial request.<details><summary>**Example Of signing a transaction with typescript and `ethers-js`:**</summary>```typescript\n  const tx = {...} // One of the object in the array returned by the `/prepare-transactions` endpoint\n  const privateKey = process.env.PRIVATE_KEY;\n  const wallet = new ethers.Wallet(privateKey);\n  const signedTx = await wallet.signTransaction(tx);\n  console.log('Signed Transaction:', signedTx);\n```</details>**NOTE:** Be sure to have enough funds in the signer wallet to cover for the transaction cost</details><details><summary>3. **Submit Signed Transactions:**</summary>- Use the `POST /send-transactions` endpoint to submit the signed transaction(s) along with the required parameters.\n- The API will process the transactions, send them to the blockchain, and update the Brickken database accordingly.</details><details><summary>4. **Check Transaction Status:**</summary>- Use the `GET /get-transaction-status` endpoint to check the status of your transaction.\n- Provide either the on-chain transaction hash (`hash`) or the internal transaction ID (`txId`) to retrieve the status.</details></details><details><summary>**Environments**</summary>The API is available in several environments for testing and production purposes:- Sandbox: `https://api.sandbox.brickken.com/`\n- Master (Production): `https://api.brickken.com/`</details>",
+    "description": "Welcome to the Brickken API documentation. This API allows customers to create and manage tokenization processes, including creating new tokenizations, minting/burning/transferring tokens, whitelisting users, manage tokens approvals. This documentation provides detailed information on how to use the API, including the necessary endpoints, request formats, and expected responses.</details><details><summary>**Authentication**</summary>All API requests require an API key for authentication. Include your API key in the `x-api-key` header of each request:<pre><code>```\n  x-api-key: YOUR_API_KEY\n```</code></pre>Ensure that your API key is kept secure and not shared publicly. A common parameter for all requests is the `signerAddress`. Such address MUST be whitelisted in our factory. To whitelist an address and/or request an API key either for sandbox/production environment please contact with: support@brickken.com. Once a `signerAddress` performs a `newTokenization` we refer to that address as the tokenizer. The tokenizer will be the only one allowed to mint such token, distribute dividends on such token and whitelist/blacklist investors of such token. Regarding actions like transferring tokens or burning tokens, the `signerAddress` can be any user and not only the tokenizer.</details><details><summary>**Supported Networks & Addresses**</summary><details><summary>Sepolia (sandbox environment only)</summary><pre><code>```\n  Chain Id: \"aa36a7\"\n  Factory Address: \"0x933ABAA95a7Fd0Bc683bDe2adB89f4C5EA64897b\"\n  BKN Address: \"0x97a13487f889dc770Ac925Be2d3b6c833FA7746a\"\n  USDT Address: \"0x28d2B01854D0aBec267a3DDcad9163580E6E8604\"\n  USDC Address: \"0xb10cE8e28aEb1ae27b968Fb3bfed2FD7dd52daCb\"\n```</code></pre></details><details><summary>Ethereum mainnet (production environment only)</summary><pre><code>```\n  Chain Id: \"1\"\n  Factory Address: \"0x91af681C85Ca98Efc5D69C1B62E6F435030969Db\"\n  BKN Address: \"0x0A638F07ACc6969abF392bB009f216D22aDEa36d\"\n  USDT Address: \"0xdac17f958d2ee523a2206206994597c13d831ec7\"\n  USDC Address: \"0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48\"\n```</code></pre></details><details><summary>Base mainnet (production environment only)</summary><pre><code>```\n  Chain Id: \"2105\"\n  Factory Address: \"0x278D7bdc2451B0Fa4087A68ce084a86cB91D4d83\"\n  BKN Address: \"0xddB293BB5C5258F7484A94a0fBd5c8B2F6E4e376\"\n  USDT Address: N/A\n  USDC Address: \"0x833589fcd6edb6e08f4c7c32d4f71b54bda02913\"\n```</code></pre></details><details><summary>BNB Smart Chain mainnet (production environment only)</summary><pre><code>```\n  Chain Id: \"38\"\n  Factory Address: \"0xCe4529Fe88df480BD777d3e32dfD7032e6C685ff\"\n  BKN Address: \"0x0e28bC9B03971E95acF9ae1326E51ecF9C55B498\"\n  USDT Address: \"0x55d398326f99059fF775485246999027B3197955\"\n  USDC Address: \"0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d\"\n```</code></pre></details><details><summary>Avalance C Chain mainnet (production environment only)</summary><pre><code>```\n  Chain Id: \"a86a\"\n  Factory Address: \"0xc6c230FA8F40022dE997727436Fae01caAbcDe61\"\n  BKN Address: \"0xd44E4Dc8bdF7C1c62CfDBb182022097BA42Ac6bC\"\n  USDT Address: \"0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7\"\n  USDC Address: \"0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E\"\n```</code></pre></details></details><details><summary>**Usage Workflow**</summary><details><summary>1. **Prepare Transactions:**</summary>- Use the `POST /prepare-transactions` endpoint with the desired method (e.g., `newTokenization`, `mintToken`, etc...) to prepare the transaction(s).\n- The response will include an array of unsigned transactions that needs to be signed.<details><summary>**Example Of An Endpoint Response:**</summary>```json\n  {\n    \"transactions\": [\n      {\n        \"from\": \"0xSignerAddress\",\n        \"to\": \"0xTargetAddress\",\n        \"value\": {\n          \"type\": \"BigNumber\",\n          \"hex\": \"0x00\"\n        },\n        \"nonce\": 1,\n        \"chainId\": 11155111,\n        \"data\": \"0x...\",\n        \"type\": 2,\n        \"maxPriorityFeePerGas\": {\n          \"type\": \"BigNumber\",\n          \"hex\": \"0x...\"\n        },\n        \"maxFeePerGas\": {\n          \"type\": \"BigNumber\",\n          \"hex\": \"0x...\"\n        },\n        \"gasLimit\": {\n          \"type\": \"BigNumber\",\n          \"hex\": \"0x...\"\n        }\n      }\n    ]\n  }\n```</details></details><details><summary>2. **Sign the Transactions:**</summary>- Use your preferred method or wallet to sign the transaction data provided in the response.\n- Ensure that the signer address matches the `signerAddress` provided in the initial request.<details><summary>**Example Of signing a transaction with typescript and `ethers-js`:**</summary>```typescript\n  const tx = {...} // One of the object in the array returned by the `/prepare-transactions` endpoint\n  const privateKey = process.env.PRIVATE_KEY;\n  const wallet = new ethers.Wallet(privateKey);\n  const signedTx = await wallet.signTransaction(tx);\n  console.log('Signed Transaction:', signedTx);\n```</details>**NOTE:** Be sure to have enough funds in the signer wallet to cover for the transaction cost</details><details><summary>3. **Submit Signed Transactions:**</summary>- Use the `POST /send-transactions` endpoint to submit the signed transaction(s) along with the required parameters.\n- The API will process the transactions, send them to the blockchain, and update the Brickken database accordingly.</details><details><summary>4. **Check Transaction Status:**</summary>- Use the `GET /get-transaction-status` endpoint to check the status of your transaction.\n- Provide either the on-chain transaction hash (`hash`) or the internal transaction ID (`txId`) to retrieve the status.</details></details><details><summary>**Environments**</summary>The API is available in several environments for testing and production purposes:- Sandbox: `https://api.sandbox.brickken.com/`\n- Master (Production): `https://api.brickken.com/`</details>\n\nThe API also exposes x402scan discovery facade endpoints under /x402/... The public discovery target is https://api.brickken.com, with /.well-known/x402 returning resource URLs and /openapi.json returning the generated OpenAPI 3.1 document.",
     "version": "2.0.0"
   },
   "servers": [
@@ -26,7 +26,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "X-Payment",
-        "description": "Base64-encoded x402 payment payload. Only supported for x402-eligible agentic methods on /prepare-transactions and /send-transactions."
+        "description": "Base64-encoded x402 payment payload. Supported for x402-eligible agentic methods on /x402/... facades, /prepare-transactions, and eligible /send-transactions retries."
       }
     }
   },
@@ -42,7 +42,7 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** This endpoint prepares unsigned transactions for various blockchain operations. The operation is determined by the `method` field in the request body. Supported methods include standard tokenization methods (`newTokenization`, `mintToken`, `whitelist`, `burnToken`, `approve`, `transferTo`, `transferFrom`, `dividendDistribution`, `newSto`, `newInvest`, `closeOffer`, `claimTokens`) and x402-eligible agentic methods (`newTokenizedAgent`, `agentRegister`, `agentSetURI`, `agentSetMetadata`, `agentSetWallet`, `agentGiveFeedback`, `agentRevokeFeedback`, `agentAppendFeedbackResponse`, `agentCreateToken`, `agentMintToken`, `agentBurnToken`).\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY` for API-key auth, or `X-Payment` for x402 retries on eligible agentic methods\n- `Content-Type`: `application/json`\n\n**Common Request Body Parameters:**\n- `method` (string): Operation to perform.\n- `signerAddress` (string): Address initiating the transaction.\n- `chainId` (string): Chain ID in hex (e.g., \"aa36a7\").\n- `gasLimit` (string, optional): Optional gas limit.\n- `privateRpcUrl` (string, optional): Optional private RPC URL. `rpcUrl` is kept for backward compatibility in older examples.\n\n---\n\n**Method: `newTokenization`**\nPrepares a new tokenization transaction.\n\n**Additional Request Body Parameters:**\n- `url` (string): Token documentation URL.\n- `name` (string): Token name.\n- `symbol` (string): Token symbol (3 to 5 characters).\n- `tokenizerEmail` (string): The email of the tokenizer.\n- `supplyCap` (string, optional): Max token supply.\n- `preMints` (array, optional): Pre-mint configurations.\n- `initialHolders` (array, optional): Initial holder configurations.\n\n---\n\n**Method: `mintToken`**\nPrepares minting tokens to users.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `userToMint` (array of objects): Each object includes:\n  - `email` (string)\n  - `investorAddress` (string)\n  - `amount` (string)\n  - `needWhitelist` (boolean)\n\n---\n\n**Method: `whitelist`**\nWhitelists or blacklists users.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `userToWhitelist` (array of objects): Each includes:\n  - `whitelistStatus` (string): \"true\" or \"false\".\n  - `investorAddress` (string)\n\n---\n\n**Method: `burnToken`**\nBurns tokens from the signer\u2019s balance.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `amount` (string): Amount to burn.\n\n---\n\n**Method: `transferFrom`**\nTransfers tokens from one address to another (with prior approval).\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `from` (string): Sender address.\n- `to` (string): Receiver address.\n- `amount` (string): Amount to transfer.\n\n---\n\n**Method: `transferTo`**\nTransfers tokens from `signerAddress` to another address.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `to` (string): Receiver address.\n- `amount` (string): Amount to transfer.\n\n---\n\n**Method: `approve`**\nApproves a spender to use tokens.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Token to approve (can include BKN, USDT, USDC).\n- `spenderAddress` (string): Address being approved.\n- `amount` (string): Allowance amount.\n\n---\n\n**Method: `dividendDistribution`**\nDistributes `paymentToken` dividends to holders of `tokenSymbol`.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string)\n- `amount` (string): Amount of payment token to distribute.\n\n**Note:** Amounts are in whole units (e.g., 10 for 10 USDT).\n\n---\n\n**Method: `newSto`**\nCreates a new STO (Security Token Offering).\n\n**Additional Request Body Parameters:**\n- `tokenizerEmail` (string)\n- `tokenAmount` (string)\n- `offeringName` (string)\n- `startDate` (string)\n- `endDate` (string)\n- `acceptedCoin` (string)\n- `minRaiseUSD` (string)\n- `maxRaiseUSD` (string)\n- `minInvestment` (string)\n- `maxInvestment` (string)\n- `signerAddress` (string)",
+        "description": "**Description:** This endpoint prepares unsigned transactions for various blockchain operations. The operation is determined by the `method` field in the request body. Supported methods include standard tokenization methods (`newTokenization`, `mintToken`, `whitelist`, `burnToken`, `approve`, `transferTo`, `transferFrom`, `dividendDistribution`, `newSto`, `newInvest`, `closeOffer`, `claimTokens`) and x402-eligible agentic methods (`newTokenizedAgent`, `agentRegister`, `agentSetURI`, `agentSetMetadata`, `agentSetWallet`, `agentGiveFeedback`, `agentRevokeFeedback`, `agentAppendFeedbackResponse`, `agentCreateToken`, `agentMintToken`, `agentBurnToken`, `agentTransferToken`, `agentTransferFromToken`, `agentApproveToken`).\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY` for API-key auth, or `X-Payment` for x402 retries on eligible agentic methods\n- `Content-Type`: `application/json`\n\n**Common Request Body Parameters:**\n- `method` (string): Operation to perform.\n- `signerAddress` (string): Address initiating the transaction.\n- `chainId` (string): Chain ID in hex (e.g., \"aa36a7\").\n- `gasLimit` (string, optional): Optional gas limit.\n- `privateRpcUrl` (string, optional): Optional private RPC URL. `rpcUrl` is kept for backward compatibility in older examples.\n\n---\n\n**Method: `newTokenization`**\nPrepares a new tokenization transaction.\n\n**Additional Request Body Parameters:**\n- `url` (string): Token documentation URL.\n- `name` (string): Token name.\n- `symbol` (string): Token symbol (3 to 5 characters).\n- `tokenizerEmail` (string): The email of the tokenizer.\n- `supplyCap` (string, optional): Max token supply.\n- `preMints` (array, optional): Pre-mint configurations.\n- `initialHolders` (array, optional): Initial holder configurations.\n\n---\n\n**Method: `mintToken`**\nPrepares minting tokens to users.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `userToMint` (array of objects): Each object includes:\n  - `email` (string)\n  - `investorAddress` (string)\n  - `amount` (string)\n  - `needWhitelist` (boolean)\n\n---\n\n**Method: `whitelist`**\nWhitelists or blacklists users.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `userToWhitelist` (array of objects): Each includes:\n  - `whitelistStatus` (string): \"true\" or \"false\".\n  - `investorAddress` (string)\n\n---\n\n**Method: `burnToken`**\nBurns tokens from the signer’s balance.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `amount` (string): Amount to burn.\n\n---\n\n**Method: `transferFrom`**\nTransfers tokens from one address to another (with prior approval).\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `from` (string): Sender address.\n- `to` (string): Receiver address.\n- `amount` (string): Amount to transfer.\n\n---\n\n**Method: `transferTo`**\nTransfers tokens from `signerAddress` to another address.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `to` (string): Receiver address.\n- `amount` (string): Amount to transfer.\n\n---\n\n**Method: `approve`**\nApproves a spender to use tokens.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Token to approve (can include BKN, USDT, USDC).\n- `spenderAddress` (string): Address being approved.\n- `amount` (string): Allowance amount.\n\n---\n\n**Method: `dividendDistribution`**\nDistributes `paymentToken` dividends to holders of `tokenSymbol`.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string)\n- `amount` (string): Amount of payment token to distribute.\n\n**Note:** Amounts are in whole units (e.g., 10 for 10 USDT).\n\n---\n\n**Method: `newSto`**\nCreates a new STO (Security Token Offering).\n\n**Additional Request Body Parameters:**\n- `tokenizerEmail` (string)\n- `tokenAmount` (string)\n- `offeringName` (string)\n- `startDate` (string)\n- `endDate` (string)\n- `acceptedCoin` (string)\n- `minRaiseUSD` (string)\n- `maxRaiseUSD` (string)\n- `minInvestment` (string)\n- `maxInvestment` (string)\n- `signerAddress` (string)",
         "security": [
           {
             "apiKeyAuth": []
@@ -84,9 +84,12 @@
                       "agentAppendFeedbackResponse",
                       "agentCreateToken",
                       "agentMintToken",
-                      "agentBurnToken"
+                      "agentBurnToken",
+                      "agentTransferToken",
+                      "agentTransferFromToken",
+                      "agentApproveToken"
                     ],
-                    "description": "The operation to be performed. Includes standard tokenization methods and x402-eligible agentic methods: newTokenizedAgent, agentRegister, agentSetURI, agentSetMetadata, agentSetWallet, agentGiveFeedback, agentRevokeFeedback, agentAppendFeedbackResponse, agentCreateToken, agentMintToken, and agentBurnToken."
+                    "description": "The operation to be performed. Includes standard tokenization methods and x402-eligible agentic methods. Agentic methods can also be addressed through /x402/... facade endpoints, where the method is derived from the path. newTokenizedAgent remains a legacy alias for direct /prepare-transactions calls and is not listed in x402scan discovery."
                   },
                   "signerAddress": {
                     "type": "string",
@@ -1570,7 +1573,7 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** This endpoint submits signed transactions to the blockchain. This endpoint works uniformly for all transaction types prepared using the `/prepare-transactions` endpoint.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY` for API-key auth, or `X-Payment` for x402 retries when sending x402-eligible agentic prepared transactions\n- `Content-Type`: `application/json`\n\n**Workflow:**\n1. **Prepare Transactions**: First, call `/prepare-transactions` with your desired method and parameters\n2. **Sign Transactions**: Sign each transaction in the returned `transactions` array using your preferred wallet or signing method\n3. **Send Transactions**: Submit the signed transactions along with the `txId` to this endpoint\n\n**Supported Transaction Types:**\nThis endpoint accepts signed transactions for all methods supported by `/prepare-transactions`:\n- `newTokenization` - Create new tokenized assets\n- `newSto` - Create Security Token Offerings\n- `newInvest` - Make investments in STOs\n- `claimTokens` - Claim tokens from completed STOs\n- `closeOffer` - Close active STOs\n- `mintToken` - Mint additional tokens\n- `whitelist` - Manage address whitelist status\n- `approve` - Approve token spending\n- `burnToken` - Burn tokens\n- `transferFrom` - Transfer tokens (with approval)\n- `transferTo` - Transfer tokens from signer\n- `dividendDistribution` - Distribute dividends\n- `newTokenizedAgent` / `agentRegister` - Register ERC-8004 agents\n- `agentSetURI`, `agentSetMetadata`, `agentSetWallet` - Maintain ERC-8004 agent profiles\n- `agentGiveFeedback`, `agentRevokeFeedback`, `agentAppendFeedbackResponse` - Manage reputation entries\n- `agentCreateToken`, `agentMintToken`, `agentBurnToken` - Manage agent ERC-20 tokens\n\nx402 can be used only for x402-eligible agentic prepared transactions. Do not mix x402-eligible and API-key-only transactions in the same send batch.",
+        "description": "**Description:** This endpoint submits signed transactions to the blockchain. This endpoint works uniformly for all transaction types prepared using the `/prepare-transactions` endpoint.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY` for API-key auth, or `X-Payment` for x402 retries when sending x402-eligible agentic prepared transactions\n- `Content-Type`: `application/json`\n\n**Workflow:**\n1. **Prepare Transactions**: First, call `/prepare-transactions` with your desired method and parameters\n2. **Sign Transactions**: Sign each transaction in the returned `transactions` array using your preferred wallet or signing method\n3. **Send Transactions**: Submit the signed transactions along with the `txId` to this endpoint\n\n**Supported Transaction Types:**\nThis endpoint accepts signed transactions for all methods supported by `/prepare-transactions`:\n- `newTokenization` - Create new tokenized assets\n- `newSto` - Create Security Token Offerings\n- `newInvest` - Make investments in STOs\n- `claimTokens` - Claim tokens from completed STOs\n- `closeOffer` - Close active STOs\n- `mintToken` - Mint additional tokens\n- `whitelist` - Manage address whitelist status\n- `approve` - Approve token spending\n- `burnToken` - Burn tokens\n- `transferFrom` - Transfer tokens (with approval)\n- `transferTo` - Transfer tokens from signer\n- `dividendDistribution` - Distribute dividends\n- `newTokenizedAgent` / `agentRegister` - Register ERC-8004 agents\n- `agentSetURI`, `agentSetMetadata`, `agentSetWallet` - Maintain ERC-8004 agent profiles\n- `agentGiveFeedback`, `agentRevokeFeedback`, `agentAppendFeedbackResponse` - Manage reputation entries\n- `agentCreateToken`, `agentMintToken`, `agentBurnToken`, `agentTransferToken`, `agentTransferFromToken`, `agentApproveToken` - Manage agent ERC-20 tokens\n\nx402 can be used only for x402-eligible agentic prepared transactions. Do not mix x402-eligible and API-key-only transactions in the same send batch.",
         "security": [
           {
             "apiKeyAuth": []
@@ -2850,6 +2853,2412 @@
                     "whitelistStatus": {
                       "type": "boolean",
                       "description": "Whitelist status of the investor."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x402/agent/register": {
+      "post": {
+        "operationId": "prepareAgentRegister",
+        "summary": "Prepare ERC-8004 agent registration",
+        "description": "Prepare an unsigned ERC-8004 agent registration transaction. The method is fixed by this facade endpoint; do not include a method field.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress",
+                  "name",
+                  "description",
+                  "image",
+                  "services"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "8453",
+                    "examples": [
+                      "8453"
+                    ],
+                    "description": "Target operation chain ID. Use 8453 on production Base or 11155111 on sandbox Sepolia."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Wallet that signs the prepared blockchain transaction."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit nonce when managing nonces manually."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional private RPC URL override."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "services": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "required": [
+                        "name",
+                        "endpoint"
+                      ],
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "endpoint": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "version": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "aiModelName": {
+                    "type": "string"
+                  },
+                  "aiModelProvider": {
+                    "type": "string"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "version": {
+                    "type": "string"
+                  },
+                  "documentation": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "sourceCode": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "license": {
+                    "type": "string"
+                  },
+                  "agentType": {
+                    "type": "string"
+                  },
+                  "supportedTrust": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "x402Support": {
+                    "type": "boolean"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "registrations": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "transactions": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        }
+                      ]
+                    },
+                    "txId": {
+                      "type": "string"
+                    },
+                    "info": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "tags": [
+          "x402 Discovery"
+        ]
+      }
+    },
+    "/x402/agent/set-uri": {
+      "post": {
+        "operationId": "prepareAgentSetUri",
+        "summary": "Prepare ERC-8004 agent URI update",
+        "description": "Prepare an unsigned transaction that publishes the final ERC-8004 agent URI and profile metadata. The method is fixed by this facade endpoint; do not include a method field.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "8453",
+                    "examples": [
+                      "8453"
+                    ],
+                    "description": "Target operation chain ID. Use 8453 on production Base or 11155111 on sandbox Sepolia."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Wallet that signs the prepared blockchain transaction."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit nonce when managing nonces manually."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional private RPC URL override."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  },
+                  "agentUuid": {
+                    "type": "string",
+                    "description": "Stored tokenized agent UUID returned by agentRegister."
+                  },
+                  "agentId": {
+                    "type": "string",
+                    "description": "On-chain ERC-8004 agent ID."
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "services": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "required": [
+                        "name",
+                        "endpoint"
+                      ],
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "endpoint": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "version": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "aiModelName": {
+                    "type": "string"
+                  },
+                  "aiModelProvider": {
+                    "type": "string"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "version": {
+                    "type": "string"
+                  },
+                  "documentation": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "sourceCode": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "license": {
+                    "type": "string"
+                  },
+                  "agentType": {
+                    "type": "string"
+                  },
+                  "supportedTrust": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "x402Support": {
+                    "type": "boolean"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "registrations": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "transactions": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        }
+                      ]
+                    },
+                    "txId": {
+                      "type": "string"
+                    },
+                    "info": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "tags": [
+          "x402 Discovery"
+        ]
+      }
+    },
+    "/x402/agent/set-metadata": {
+      "post": {
+        "operationId": "prepareAgentSetMetadata",
+        "summary": "Prepare ERC-8004 metadata update",
+        "description": "Prepare an unsigned transaction that writes one ERC-8004 agent metadata key/value pair. The method is fixed by this facade endpoint; do not include a method field.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "8453",
+                    "examples": [
+                      "8453"
+                    ],
+                    "description": "Target operation chain ID. Use 8453 on production Base or 11155111 on sandbox Sepolia."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Wallet that signs the prepared blockchain transaction."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit nonce when managing nonces manually."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional private RPC URL override."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  },
+                  "agentUuid": {
+                    "type": "string",
+                    "description": "Stored tokenized agent UUID returned by agentRegister."
+                  },
+                  "agentId": {
+                    "type": "string",
+                    "description": "On-chain ERC-8004 agent ID."
+                  },
+                  "metadataKey": {
+                    "type": "string"
+                  },
+                  "metadataValue": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    ]
+                  },
+                  "metadataEncoding": {
+                    "type": "string",
+                    "enum": [
+                      "string",
+                      "json",
+                      "hex"
+                    ]
+                  },
+                  "aiModelName": {
+                    "type": "string"
+                  },
+                  "aiModelProvider": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "transactions": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        }
+                      ]
+                    },
+                    "txId": {
+                      "type": "string"
+                    },
+                    "info": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "tags": [
+          "x402 Discovery"
+        ]
+      }
+    },
+    "/x402/agent/set-wallet": {
+      "post": {
+        "operationId": "prepareAgentSetWallet",
+        "summary": "Prepare ERC-8004 agent wallet update",
+        "description": "Prepare an unsigned transaction that sets the operational wallet for an ERC-8004 agent. The method is fixed by this facade endpoint; do not include a method field.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress",
+                  "newWallet",
+                  "deadline",
+                  "signature"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "8453",
+                    "examples": [
+                      "8453"
+                    ],
+                    "description": "Target operation chain ID. Use 8453 on production Base or 11155111 on sandbox Sepolia."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Wallet that signs the prepared blockchain transaction."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit nonce when managing nonces manually."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional private RPC URL override."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  },
+                  "agentUuid": {
+                    "type": "string",
+                    "description": "Stored tokenized agent UUID returned by agentRegister."
+                  },
+                  "agentId": {
+                    "type": "string",
+                    "description": "On-chain ERC-8004 agent ID."
+                  },
+                  "newWallet": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "New operational agent wallet address."
+                  },
+                  "deadline": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Signature deadline."
+                  },
+                  "signature": {
+                    "type": "string",
+                    "description": "Agent wallet authorization signature."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "transactions": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        }
+                      ]
+                    },
+                    "txId": {
+                      "type": "string"
+                    },
+                    "info": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "tags": [
+          "x402 Discovery"
+        ]
+      }
+    },
+    "/x402/agent/feedback/give": {
+      "post": {
+        "operationId": "prepareAgentGiveFeedback",
+        "summary": "Prepare ERC-8004 feedback",
+        "description": "Prepare an unsigned ERC-8004 reputation feedback transaction. The method is fixed by this facade endpoint; do not include a method field.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress",
+                  "value",
+                  "valueDecimals"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "8453",
+                    "examples": [
+                      "8453"
+                    ],
+                    "description": "Target operation chain ID. Use 8453 on production Base or 11155111 on sandbox Sepolia."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Wallet that signs the prepared blockchain transaction."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit nonce when managing nonces manually."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional private RPC URL override."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  },
+                  "agentUuid": {
+                    "type": "string",
+                    "description": "Stored tokenized agent UUID returned by agentRegister."
+                  },
+                  "agentId": {
+                    "type": "string",
+                    "description": "On-chain ERC-8004 agent ID."
+                  },
+                  "value": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Feedback value."
+                  },
+                  "valueDecimals": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Feedback value decimals."
+                  },
+                  "tag1": {
+                    "type": "string"
+                  },
+                  "tag2": {
+                    "type": "string"
+                  },
+                  "endpoint": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "feedbackURI": {
+                    "type": "string"
+                  },
+                  "feedbackHash": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "transactions": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        }
+                      ]
+                    },
+                    "txId": {
+                      "type": "string"
+                    },
+                    "info": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "tags": [
+          "x402 Discovery"
+        ]
+      }
+    },
+    "/x402/agent/feedback/revoke": {
+      "post": {
+        "operationId": "prepareAgentRevokeFeedback",
+        "summary": "Prepare ERC-8004 feedback revocation",
+        "description": "Prepare an unsigned transaction that revokes an ERC-8004 feedback entry. The method is fixed by this facade endpoint; do not include a method field.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress",
+                  "agentId",
+                  "feedbackIndex"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "8453",
+                    "examples": [
+                      "8453"
+                    ],
+                    "description": "Target operation chain ID. Use 8453 on production Base or 11155111 on sandbox Sepolia."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Wallet that signs the prepared blockchain transaction."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit nonce when managing nonces manually."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional private RPC URL override."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  },
+                  "agentId": {
+                    "type": "string"
+                  },
+                  "feedbackIndex": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Feedback index to revoke."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "transactions": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        }
+                      ]
+                    },
+                    "txId": {
+                      "type": "string"
+                    },
+                    "info": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "tags": [
+          "x402 Discovery"
+        ]
+      }
+    },
+    "/x402/agent/feedback/respond": {
+      "post": {
+        "operationId": "prepareAgentAppendFeedbackResponse",
+        "summary": "Prepare ERC-8004 feedback response",
+        "description": "Prepare an unsigned transaction that appends a response to an ERC-8004 feedback thread. The method is fixed by this facade endpoint; do not include a method field.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress",
+                  "agentId",
+                  "clientAddress",
+                  "feedbackIndex",
+                  "responseURI"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "8453",
+                    "examples": [
+                      "8453"
+                    ],
+                    "description": "Target operation chain ID. Use 8453 on production Base or 11155111 on sandbox Sepolia."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Wallet that signs the prepared blockchain transaction."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit nonce when managing nonces manually."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional private RPC URL override."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  },
+                  "agentId": {
+                    "type": "string"
+                  },
+                  "clientAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Original feedback client address."
+                  },
+                  "feedbackIndex": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Feedback index to respond to."
+                  },
+                  "responseURI": {
+                    "type": "string"
+                  },
+                  "responseHash": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "transactions": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        }
+                      ]
+                    },
+                    "txId": {
+                      "type": "string"
+                    },
+                    "info": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "tags": [
+          "x402 Discovery"
+        ]
+      }
+    },
+    "/x402/token/create": {
+      "post": {
+        "operationId": "prepareAgentCreateToken",
+        "summary": "Prepare agent ERC-20 deployment",
+        "description": "Prepare an unsigned transaction that deploys an ERC-20 token controlled by an agent wallet. The method is fixed by this facade endpoint; do not include a method field.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress",
+                  "name",
+                  "symbol",
+                  "agentWallet"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "8453",
+                    "examples": [
+                      "8453"
+                    ],
+                    "description": "Target operation chain ID. Use 8453 on production Base or 11155111 on sandbox Sepolia."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Wallet that signs the prepared blockchain transaction."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit nonce when managing nonces manually."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional private RPC URL override."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "symbol": {
+                    "type": "string",
+                    "pattern": "^[A-Z0-9]{2,11}$"
+                  },
+                  "agentWallet": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Wallet that owns and mints the agent token."
+                  },
+                  "premint": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Human-readable premint amount."
+                  },
+                  "decimals": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Token decimals. Defaults to 18 when omitted."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "transactions": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        }
+                      ]
+                    },
+                    "txId": {
+                      "type": "string"
+                    },
+                    "info": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "tags": [
+          "x402 Discovery"
+        ]
+      }
+    },
+    "/x402/token/mint": {
+      "post": {
+        "operationId": "prepareAgentMintToken",
+        "summary": "Prepare agent token mint",
+        "description": "Prepare an unsigned transaction that mints an agent ERC-20 token. The method is fixed by this facade endpoint; do not include a method field.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress",
+                  "tokenAddress",
+                  "to",
+                  "amount"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "8453",
+                    "examples": [
+                      "8453"
+                    ],
+                    "description": "Target operation chain ID. Use 8453 on production Base or 11155111 on sandbox Sepolia."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Wallet that signs the prepared blockchain transaction."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit nonce when managing nonces manually."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional private RPC URL override."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  },
+                  "tokenAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Agent ERC-20 token contract address."
+                  },
+                  "amount": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Human-readable token amount."
+                  },
+                  "decimals": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Token decimals. Defaults to 18 when omitted."
+                  },
+                  "to": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Recipient wallet address."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "transactions": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        }
+                      ]
+                    },
+                    "txId": {
+                      "type": "string"
+                    },
+                    "info": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "tags": [
+          "x402 Discovery"
+        ]
+      }
+    },
+    "/x402/token/burn": {
+      "post": {
+        "operationId": "prepareAgentBurnToken",
+        "summary": "Prepare agent token burn",
+        "description": "Prepare an unsigned transaction that burns an agent ERC-20 token. The method is fixed by this facade endpoint; do not include a method field.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress",
+                  "tokenAddress",
+                  "from",
+                  "amount"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "8453",
+                    "examples": [
+                      "8453"
+                    ],
+                    "description": "Target operation chain ID. Use 8453 on production Base or 11155111 on sandbox Sepolia."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Wallet that signs the prepared blockchain transaction."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit nonce when managing nonces manually."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional private RPC URL override."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  },
+                  "tokenAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Agent ERC-20 token contract address."
+                  },
+                  "amount": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Human-readable token amount."
+                  },
+                  "decimals": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Token decimals. Defaults to 18 when omitted."
+                  },
+                  "from": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Wallet address to burn from."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "transactions": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        }
+                      ]
+                    },
+                    "txId": {
+                      "type": "string"
+                    },
+                    "info": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "tags": [
+          "x402 Discovery"
+        ]
+      }
+    },
+    "/x402/token/transfer": {
+      "post": {
+        "operationId": "prepareAgentTransferToken",
+        "summary": "Prepare agent token transfer",
+        "description": "Prepare an unsigned transaction that transfers an agent ERC-20 token. The method is fixed by this facade endpoint; do not include a method field.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress",
+                  "tokenAddress",
+                  "to",
+                  "amount"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "8453",
+                    "examples": [
+                      "8453"
+                    ],
+                    "description": "Target operation chain ID. Use 8453 on production Base or 11155111 on sandbox Sepolia."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Wallet that signs the prepared blockchain transaction."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit nonce when managing nonces manually."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional private RPC URL override."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  },
+                  "tokenAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Agent ERC-20 token contract address."
+                  },
+                  "amount": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Human-readable token amount."
+                  },
+                  "decimals": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Token decimals. Defaults to 18 when omitted."
+                  },
+                  "to": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Recipient wallet address."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "transactions": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        }
+                      ]
+                    },
+                    "txId": {
+                      "type": "string"
+                    },
+                    "info": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "tags": [
+          "x402 Discovery"
+        ]
+      }
+    },
+    "/x402/token/transfer-from": {
+      "post": {
+        "operationId": "prepareAgentTransferFromToken",
+        "summary": "Prepare agent token transferFrom",
+        "description": "Prepare an unsigned transaction that transfers an agent ERC-20 token through allowance. The method is fixed by this facade endpoint; do not include a method field.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress",
+                  "tokenAddress",
+                  "from",
+                  "to",
+                  "amount"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "8453",
+                    "examples": [
+                      "8453"
+                    ],
+                    "description": "Target operation chain ID. Use 8453 on production Base or 11155111 on sandbox Sepolia."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Wallet that signs the prepared blockchain transaction."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit nonce when managing nonces manually."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional private RPC URL override."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  },
+                  "tokenAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Agent ERC-20 token contract address."
+                  },
+                  "amount": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Human-readable token amount."
+                  },
+                  "decimals": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Token decimals. Defaults to 18 when omitted."
+                  },
+                  "from": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Source wallet address."
+                  },
+                  "to": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Recipient wallet address."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "transactions": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        }
+                      ]
+                    },
+                    "txId": {
+                      "type": "string"
+                    },
+                    "info": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "tags": [
+          "x402 Discovery"
+        ]
+      }
+    },
+    "/x402/token/approve": {
+      "post": {
+        "operationId": "prepareAgentApproveToken",
+        "summary": "Prepare agent token allowance",
+        "description": "Prepare an unsigned transaction that approves an ERC-20 allowance for an agent token. The method is fixed by this facade endpoint; do not include a method field.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress",
+                  "tokenAddress",
+                  "spenderAddress",
+                  "amount"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "8453",
+                    "examples": [
+                      "8453"
+                    ],
+                    "description": "Target operation chain ID. Use 8453 on production Base or 11155111 on sandbox Sepolia."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Wallet that signs the prepared blockchain transaction."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit nonce when managing nonces manually."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional private RPC URL override."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  },
+                  "tokenAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Agent ERC-20 token contract address."
+                  },
+                  "amount": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Human-readable token amount."
+                  },
+                  "decimals": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Token decimals. Defaults to 18 when omitted."
+                  },
+                  "spenderAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Spender wallet address."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "transactions": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        }
+                      ]
+                    },
+                    "txId": {
+                      "type": "string"
+                    },
+                    "info": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "tags": [
+          "x402 Discovery"
+        ]
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "summary": "Get x402 discovery OpenAPI",
+        "tags": [
+          "x402 Discovery"
+        ],
+        "description": "Returns the generated OpenAPI 3.1 document used by x402scan for Brickken agentic facade endpoints.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "OpenAPI 3.1 document for x402 discovery.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/x402": {
+      "get": {
+        "summary": "Get x402 well-known resources",
+        "tags": [
+          "x402 Discovery"
+        ],
+        "description": "Returns the x402 well-known resource list with absolute Brickken facade endpoint URLs.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "x402 well-known resource list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "version",
+                    "resources"
+                  ],
+                  "properties": {
+                    "version": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "resources": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "uri"
+                      }
+                    },
+                    "instructions": {
+                      "type": "string"
                     }
                   }
                 }

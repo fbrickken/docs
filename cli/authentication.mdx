@@ -1,0 +1,97 @@
+---
+title: 'Authentication & Configuration'
+description: 'x402-only authentication, private key signing, environments, and configuration precedence for the Brickken CLI.'
+---
+
+## x402-only model
+
+The CLI is **x402-only**. It does not send an `x-api-key` header, and it ignores `BRICKKEN_API_KEY` / `BKN_API_KEY` if they are set. Instead, every request is paid through x402:
+
+1. The CLI calls a Brickken endpoint (e.g. `/prepare-transactions`).
+2. If payment is required, the API responds `402 Payment Required` with a `PAYMENT-REQUIRED` header.
+3. The CLI signs the x402 payment locally and retries with an `X-Payment` header.
+
+The same private key is used both to **sign blockchain transactions** and to **sign x402 payments**.
+
+<Warning>
+Your private key never leaves your machine. Both transaction signing and x402 payment signing happen locally. Treat the key as a secret: prefer an `.env` file or environment variable over passing `--private-key` inline.
+</Warning>
+
+## Provide a private key
+
+```bash
+export BRICKKEN_PRIVATE_KEY=0x...
+```
+
+`BKN_PRIVATE_KEY` is accepted as an alias.
+
+## Environments and base URLs
+
+Select the environment with `--env` or `BRICKKEN_ENV` (default: `sandbox`):
+
+| Environment | Base URL |
+| --- | --- |
+| `sandbox` (default) | `https://api.sandbox.brickken.com` |
+| `production` | `https://api.brickken.com` |
+
+Override the base URL directly with `--base-url` or `BRICKKEN_BASE_URL` when needed.
+
+<Note>
+The CLI's default sandbox base URL is `https://api.sandbox.brickken.com`. Some older API Reference pages show `https://api-sandbox.brickken.com` — use the value above for the CLI.
+</Note>
+
+## Networks and chain IDs
+
+Pass the target chain with `--chain`. Both decimal and hex forms are accepted, and common decimal IDs are normalized automatically — for example Sepolia can be passed as `11155111` or `aa36a7`.
+
+| Network | Decimal | Hex |
+| --- | --- | --- |
+| Ethereum mainnet | `1` | `0x1` |
+| Base mainnet | `8453` | `0x2105` |
+| BNB Smart Chain | `56` | `0x38` |
+| Polygon mainnet | `137` | `0x89` |
+| Sepolia testnet | `11155111` | `0xaa36a7` |
+| Polygon Amoy testnet | `80002` | `0x13882` |
+
+## RPC URL
+
+Some commands (notably [`create-token`](/cli/commands/token-economics)) wait for the deployment receipt to read back the deployed `tokenAddress`. Sepolia has a built-in public RPC fallback; for other chains set an RPC:
+
+```bash
+export BRICKKEN_RPC_URL="https://ethereum-sepolia-rpc.publicnode.com"
+```
+
+`BKN_RPC_URL` is accepted as an alias, or use `--rpc-url`.
+
+## Configuration precedence
+
+Configuration is resolved in this order (highest priority first):
+
+1. **Command-line flags** — `--env`, `--base-url`, `--private-key`, `--rpc-url`, `--env-file`, `--json`
+2. **Environment variables** — `BRICKKEN_*` or `BKN_*`
+3. **`.env` file** in the current working directory (or the path given by `--env-file`)
+4. **Defaults** — `sandbox` environment, public Sepolia RPC fallback
+
+### Global flags
+
+| Flag | Description |
+| --- | --- |
+| `--env <sandbox\|production>` | Target Brickken environment |
+| `--base-url <url>` | Override the Brickken API base URL |
+| `--private-key <key>` | Private key for local signing and x402 payments |
+| `--rpc-url <url>` | RPC URL used to wait for token deployment receipts |
+| `--env-file <path>` | Env file to load before resolving config |
+| `--json` | Print machine-readable JSON output |
+
+### Environment variables
+
+| Variable | Alias | Purpose |
+| --- | --- | --- |
+| `BRICKKEN_PRIVATE_KEY` | `BKN_PRIVATE_KEY` | Signing and x402 payment key |
+| `BRICKKEN_BASE_URL` | `BKN_BASE_URL` | API base URL |
+| `BRICKKEN_RPC_URL` | `BKN_RPC_URL` | RPC for receipt polling |
+| `BRICKKEN_ENV` | `BKN_ENV` | `sandbox` or `production` |
+
+## Budget note
+
+Both `prepare` and `send` are x402-priced. Budget testnet USDC accordingly — a full run with retries can consume roughly `0.02 USDC` per executed command. Fund the wallet behind `BRICKKEN_PRIVATE_KEY` with enough USDC on the chain you target.

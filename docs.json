@@ -78,6 +78,34 @@
             ]
           }
         ]
+      },
+      {
+        "tab": "CLI",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "cli/introduction",
+              "cli/installation",
+              "cli/authentication",
+              "cli/quickstart"
+            ]
+          },
+          {
+            "group": "Commands",
+            "pages": [
+              "cli/commands/agent",
+              "cli/commands/token-economics",
+              "cli/commands/tx"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "cli/guides/agent-and-token-workflow"
+            ]
+          }
+        ]
       }
     ],
     "global": {

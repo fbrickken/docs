@@ -1,0 +1,183 @@
+---
+title: 'Agent & Token Workflow'
+description: 'An end-to-end walkthrough: register an ERC-8004 agent, then deploy and manage its token with the Brickken CLI.'
+---
+
+This guide runs a full lifecycle on Sepolia testnet: register an agent, finalize its profile and metadata, then deploy and operate its token — all through x402.
+
+## Prerequisites
+
+- The CLI is [installed](/cli/installation) and a private key is set (`BRICKKEN_PRIVATE_KEY`).
+- The wallet holds enough Sepolia USDC to cover x402 fees (≈ `0.02 USDC` per executed command).
+- `jq` is available for reading `--json` output.
+
+```bash
+export BRICKKEN_ENV="sandbox"
+export CHAIN="11155111"
+export WALLET="0xYourWallet"
+export BRICKKEN_RPC_URL="https://ethereum-sepolia-rpc.publicnode.com"
+```
+
+<Warning>
+Each step below depends on the previous transaction being mined. Wait for confirmation before preparing the next dependent transaction — preparing them back-to-back can cause nonce conflicts.
+</Warning>
+
+## Part 1 — Register the agent
+
+### 1. Register
+
+```bash
+brickken agent register \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --name "Research Agent" \
+  --description "On-chain AI research agent" \
+  --image https://example.com/agent.png \
+  --service-name A2A \
+  --service-endpoint https://agent.example/.well-known/agent-card.json \
+  --service-version 0.3.0 \
+  --ai-model-provider OpenAI \
+  --ai-model-name "Research Model" \
+  --x402-support true \
+  --execute \
+  --json | tee register-output.json
+
+export AGENT_UUID="$(jq -r '.prepared.info.agentUuid' register-output.json)"
+echo "$AGENT_UUID"
+```
+
+### 2. Finalize the profile URI
+
+After the registration transaction is mined:
+
+```bash
+brickken agent set-uri \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --agent-uuid "$AGENT_UUID" \
+  --name "Research Agent" \
+  --description "On-chain AI research agent" \
+  --image https://example.com/agent.png \
+  --service-name A2A \
+  --service-endpoint https://agent.example/.well-known/agent-card.json \
+  --service-version 0.3.0 \
+  --tag ai-agent \
+  --documentation https://docs.brickken.com \
+  --source-code https://github.com/Brickken/brickken-api-cli \
+  --license MIT \
+  --agent-type research \
+  --supported-trust feedback \
+  --x402-support true \
+  --active true \
+  --execute \
+  --json
+```
+
+### 3. Set structured metadata
+
+After the URI transaction is mined:
+
+```bash
+brickken agent set-metadata \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --agent-uuid "$AGENT_UUID" \
+  --metadata-key capabilities \
+  --metadata-value '{"tasks":["research","summarization","token-operations"]}' \
+  --metadata-encoding json \
+  --execute \
+  --json
+```
+
+The canonical identity flow is therefore: **`register` → wait → `set-uri` → wait → `set-metadata`**. See the [agent command reference](/cli/commands/agent) for every flag.
+
+## Part 2 — Token lifecycle
+
+### 4. Deploy the agent token
+
+```bash
+brickken create-token \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --name "Research Agent Token" \
+  --symbol RAGT \
+  --agent-wallet "$WALLET" \
+  --premint 1000 \
+  --decimals 18 \
+  --execute \
+  --json | tee create-token-output.json
+
+export TOKEN_ADDRESS="$(jq -r '.tokenAddress' create-token-output.json)"
+echo "$TOKEN_ADDRESS"
+```
+
+<Note>
+Do not continue unless `TOKEN_ADDRESS` is populated. The CLI only adds `tokenAddress` after the deployment receipt is read from the RPC.
+</Note>
+
+### 5. Mint
+
+```bash
+brickken mint \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --token-address "$TOKEN_ADDRESS" \
+  --to 0xRecipientWallet \
+  --amount 100 \
+  --decimals 18 \
+  --execute \
+  --json
+```
+
+### 6. Approve an allowance
+
+```bash
+brickken approve \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --token-address "$TOKEN_ADDRESS" \
+  --spender-address 0xSpenderWallet \
+  --amount 50 \
+  --decimals 18 \
+  --execute \
+  --json
+```
+
+### 7. Transfer
+
+```bash
+brickken transfer \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --token-address "$TOKEN_ADDRESS" \
+  --to 0xRecipientWallet \
+  --amount 10 \
+  --decimals 18 \
+  --execute \
+  --json
+```
+
+## Track a transaction
+
+Check the status of any broadcast transaction by hash:
+
+```bash
+brickken tx status --hash 0xBlockchainTxHash --json
+```
+
+## See also
+
+<CardGroup>
+  <Card title="agent commands" icon="robot" href="/cli/commands/agent">
+    Full reference for identity and reputation operations.
+  </Card>
+  <Card title="Token economics" icon="coins" href="/cli/commands/token-economics">
+    Every token command and flag.
+  </Card>
+  <Card title="Raw tx flow" icon="terminal" href="/cli/commands/tx">
+    Prepare, sign, send, and status for any method.
+  </Card>
+  <Card title="Agentic Methods (x402)" icon="book" href="/api-reference/endpoint/agentic-methods-x402">
+    Backend field-level reference.
+  </Card>
+</CardGroup>

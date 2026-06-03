@@ -1,0 +1,125 @@
+---
+title: 'tx'
+description: 'Raw prepare, sign, send, and status flows for any Brickken API V2 method.'
+---
+
+`brickken tx` exposes the raw [API V2 transaction flow](/api-reference/introduction#api-flow). Use it when you want full control over the payload, need to call a specific backend method directly, or want to inspect the unsigned transaction before broadcasting.
+
+| Subcommand | Purpose |
+| --- | --- |
+| `brickken tx prepare` | Prepare a raw transaction payload (optionally `--execute`) |
+| `brickken tx sign` | Sign a prepared transaction locally |
+| `brickken tx send` | Send signed transaction payloads |
+| `brickken tx status` | Look up a broadcast transaction by hash |
+
+## tx prepare
+
+Prepare a raw transaction for any method. With `--execute`, the CLI prepares with `/prepare-transactions`, signs locally with the configured private key, and sends to `/send-transactions` — paying both steps through x402.
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--method <method>` | string | Yes | Brickken transaction method |
+| `--chain <chain>` | string | No | Chain identifier |
+| `--signer-address <address>` | string | No | Signer wallet address |
+| `-f, --file <path>` | string | No | JSON/YAML input file (merged with CLI flags) |
+| `--execute` | flag | No | Prepare, sign, and send in one step |
+
+Supported agentic token methods include `agentCreateToken`, `agentMintToken`, `agentBurnToken`, `agentTransferToken`, `agentTransferFromToken`, `agentApproveToken` (and the `agentApprove` alias, normalized to `agentApproveToken`). Agent identity and reputation methods (`agentRegister`, `agentSetURI`, `agentSetMetadata`, `agentSetWallet`, `agentGiveFeedback`, `agentRevokeFeedback`, `agentAppendFeedbackResponse`) and other API V2 methods are also accepted. See [Agentic Methods with x402](/api-reference/endpoint/agentic-methods-x402) for each method's fields.
+
+One-shot execution from a file:
+
+```bash
+brickken tx prepare \
+  --method agentCreateToken \
+  --file token.json \
+  --execute \
+  --json
+```
+
+Prepare-only (inspect before signing):
+
+```bash
+brickken tx prepare \
+  --method agentRegister \
+  --file agent-register.json \
+  --json | tee prepared.json
+```
+
+<Tip>
+Prefer `--file` for nested JSON, long text, or values assembled by shell scripts. A file avoids the quoting pitfalls of inline JSON. The file's keys use the backend field names (e.g. `chainId`, `signerAddress`, `metadataValue`).
+</Tip>
+
+Example metadata file:
+
+```json
+{
+  "chainId": "11155111",
+  "signerAddress": "0xYourWallet",
+  "agentUuid": "00000000-0000-0000-0000-000000000000",
+  "metadataKey": "capabilities",
+  "metadataValue": "{\"tasks\":[\"research\",\"summarization\"]}",
+  "metadataEncoding": "json"
+}
+```
+
+## tx sign
+
+Sign a prepared transaction locally with the configured private key.
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `-f, --file <path>` | string | No | File containing the prepared transaction |
+
+```bash
+brickken tx sign --file prepared.json --json | tee signed.json
+```
+
+## tx send
+
+Send signed transactions. `--tx-id` and `--signed-tx` are repeatable for batched sends.
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--tx-id <value>` | string | Yes¹ | Prepared transaction ID (repeatable) |
+| `--signed-tx <value>` | string | Yes¹ | Signed transaction hex (repeatable) |
+| `-f, --file <path>` | string | No | File containing `txId` / `signedTransactions` |
+
+¹ Supply via flags or a `--file`.
+
+```bash
+brickken tx send \
+  --tx-id "$(jq -r '.prepared.txId' prepared.json)" \
+  --signed-tx "$(jq -r '.signedTransaction' signed.json)" \
+  --json
+```
+
+<Note>
+x402 send batches must contain only x402-eligible prepared transactions, and all transactions in a batch must be on the same chain.
+</Note>
+
+## tx status
+
+Look up a broadcast transaction by its on-chain hash. Either `--hash` or `--tx-hash` is required.
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--hash <hash>` | string | Yes¹ | Actual blockchain transaction hash |
+| `--tx-hash <hash>` | string | Yes¹ | Alias for `--hash` |
+
+¹ Provide one of the two.
+
+```bash
+brickken tx status --hash 0xBlockchainTxHash --json
+```
+
+This maps to [`GET /get-transaction-status`](/api-reference/endpoint/get-transaction-status).
+
+## Manual three-step flow
+
+When you want full control over each step:
+
+```bash
+brickken tx prepare --method agentRegister --file agent-register.json --json
+brickken tx sign --file prepared.json --json
+brickken tx send --tx-id 0xPreparedTxId --signed-tx 0xSignedRawTx --json
+```

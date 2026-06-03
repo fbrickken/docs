@@ -1,0 +1,178 @@
+---
+title: 'Token economics'
+description: 'Create, mint, burn, transfer, and approve agentic ERC-20 tokens with the Brickken CLI.'
+---
+
+The token economics commands deploy and manage x402-capable agentic ERC-20 tokens. Each is **prepare-only by default**; add `--execute` to prepare, sign locally, send, and pay through x402 in one step.
+
+Each high-level command maps to a backend agentic method. Field-level semantics for every method are documented under [Agentic Methods with x402](/api-reference/endpoint/agentic-methods-x402).
+
+| Command | Backend method |
+| --- | --- |
+| `brickken create-token` | [`agentCreateToken`](/api-reference/endpoint/agentic-methods-x402#agentcreatetoken) |
+| `brickken mint` | [`agentMintToken`](/api-reference/endpoint/agentic-methods-x402#agentminttoken) |
+| `brickken burn` | [`agentBurnToken`](/api-reference/endpoint/agentic-methods-x402#agentburntoken) |
+| `brickken transfer` | [`agentTransferToken`](/api-reference/endpoint/agentic-methods-x402#agenttransfertoken) |
+| `brickken transfer-from` | [`agentTransferFromToken`](/api-reference/endpoint/agentic-methods-x402#agenttransferfromtoken) |
+| `brickken approve` | [`agentApproveToken`](/api-reference/endpoint/agentic-methods-x402#agentapprovetoken) |
+
+## Shared options
+
+Every command accepts these:
+
+| Flag | Description |
+| --- | --- |
+| `--chain <chain>` | Chain identifier (decimal or hex) |
+| `--signer-address <address>` | Signer wallet address |
+| `--gas-limit <value>` | Optional explicit gas limit |
+| `--owner-email <email>` / `--email <email>` | Optional tokenizer owner email |
+| `--decimals <value>` | Token decimals (defaults to `18`) |
+| `-f, --file <path>` | JSON/YAML input file (merged with CLI flags) |
+| `--execute` | Prepare, sign locally, send, and pay through x402 |
+
+## create-token
+
+Deploy a new agentic ERC-20 token.
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--name <name>` | string | Yes | Token name |
+| `--symbol <symbol>` | string | Yes | Token ticker (2–11 uppercase alphanumeric) |
+| `--token-symbol <symbol>` | string | No | Alias for `--symbol` |
+| `--agent-wallet <address>` | string | Yes | Wallet that owns/mints the token |
+| `--premint <amount>` | string | No | Human-readable amount minted to `agentWallet` (defaults to `0`) |
+
+```bash
+brickken create-token \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --name "Research Agent Token" \
+  --symbol RAGT \
+  --agent-wallet "$WALLET" \
+  --premint 1000 \
+  --decimals 18 \
+  --execute \
+  --json | tee create-token-output.json
+
+export TOKEN_ADDRESS="$(jq -r '.tokenAddress' create-token-output.json)"
+```
+
+<Note>
+When `create-token --execute` succeeds, the CLI waits for the deployment receipt and adds `tokenAddress` to the JSON output. Sepolia has a built-in public RPC fallback; for other chains set `--rpc-url`, `BRICKKEN_RPC_URL`, or `BKN_RPC_URL`. Do not continue into `mint` or `burn` unless `tokenAddress` is present.
+</Note>
+
+## mint
+
+Mint additional tokens. `--signer-address` must be the configured `agentWallet`.
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--token-address <address>` | string | Yes | Deployed ERC-20 token address |
+| `--to <address>` | string | Yes | Recipient wallet |
+| `--recipient-address <address>` | string | No | Alias for `--to` |
+| `--amount <amount>` | string | Yes | Human-readable amount to mint |
+
+```bash
+brickken mint \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --token-address "$TOKEN_ADDRESS" \
+  --to 0xRecipientWallet \
+  --amount 100 \
+  --decimals 18 \
+  --execute \
+  --json
+```
+
+## burn
+
+Burn tokens. `--signer-address` must be the configured `agentWallet`.
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--token-address <address>` | string | Yes | Deployed ERC-20 token address |
+| `--from <address>` | string | Yes | Wallet address to burn from |
+| `--amount <amount>` | string | Yes | Human-readable amount to burn |
+
+```bash
+brickken burn \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --token-address "$TOKEN_ADDRESS" \
+  --from 0xHolderWallet \
+  --amount 25 \
+  --decimals 18 \
+  --execute \
+  --json
+```
+
+## transfer
+
+Transfer tokens from the signer's wallet.
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--token-address <address>` | string | Yes | Deployed ERC-20 token address |
+| `--to <address>` | string | Yes | Recipient wallet |
+| `--recipient-address <address>` | string | No | Alias for `--to` |
+| `--amount <amount>` | string | Yes | Human-readable amount to transfer |
+
+```bash
+brickken transfer \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --token-address "$TOKEN_ADDRESS" \
+  --to 0xRecipientWallet \
+  --amount 10 \
+  --decimals 18 \
+  --execute \
+  --json
+```
+
+## transfer-from
+
+Transfer tokens through an allowance. `--signer-address` is the approved spender.
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--token-address <address>` | string | Yes | Deployed ERC-20 token address |
+| `--from <address>` | string | Yes | Source (token holder) wallet |
+| `--to <address>` | string | Yes | Recipient wallet |
+| `--recipient-address <address>` | string | No | Alias for `--to` |
+| `--amount <amount>` | string | Yes | Human-readable amount to transfer |
+
+```bash
+brickken transfer-from \
+  --chain "$CHAIN" \
+  --signer-address 0xApprovedSpenderWallet \
+  --token-address "$TOKEN_ADDRESS" \
+  --from 0xTokenHolderWallet \
+  --to 0xRecipientWallet \
+  --amount 5 \
+  --decimals 18 \
+  --execute \
+  --json
+```
+
+## approve
+
+Approve a spender allowance.
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--token-address <address>` | string | Yes | Deployed ERC-20 token address |
+| `--spender-address <address>` | string | Yes | Spender wallet receiving the allowance |
+| `--spender <address>` | string | No | Alias for `--spender-address` |
+| `--amount <amount>` | string | Yes | Human-readable allowance amount |
+
+```bash
+brickken approve \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --token-address "$TOKEN_ADDRESS" \
+  --spender-address 0xSpenderWallet \
+  --amount 50 \
+  --decimals 18 \
+  --execute \
+  --json
+```

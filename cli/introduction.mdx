@@ -1,0 +1,56 @@
+---
+title: 'CLI Introduction'
+description: 'The Brickken CLI: an x402-paid command-line tool for agentic API V2 workflows.'
+---
+
+The **Brickken CLI** (`brickken-cli` on npm) is a public, x402-paid command-line tool for the [Brickken agentic API V2](/api-reference/introduction). It runs the same `prepare` → `sign` → `send` workflow documented under [API Reference](/api-reference/endpoint/agentic-methods-x402) directly from your terminal, signing transactions locally and paying each request through [x402](/api-reference/endpoint/agentic-methods-x402).
+
+It covers:
+
+- **ERC-8004 agent identity** — register agents, set their URI, metadata, and operational wallet.
+- **ERC-8004 reputation** — give, revoke, and respond to feedback.
+- **Agentic token economics** — create, mint, burn, transfer, transfer-from, and approve x402-capable ERC-20 tokens.
+- **Raw transaction flow** — prepare, sign, send, and check status of any API V2 method, or run all three steps in one shot.
+
+Repository: [github.com/Brickken/brickken-api-cli](https://github.com/Brickken/brickken-api-cli)
+
+<Warning>
+The CLI is **x402-only**. It does not use API keys — `BRICKKEN_API_KEY` and `BKN_API_KEY` are ignored. You sign and pay every request locally with a private key, which never leaves your machine. See [Authentication](/cli/authentication).
+</Warning>
+
+## How it works
+
+High-level commands are **wallet-first** and **prepare-only by default**. Add `--execute` to prepare, sign locally, send, and pay the API request through x402 in one step.
+
+```bash
+# Prepare only (returns an unsigned transaction, no signing, no send)
+brickken create-token --chain 11155111 --signer-address 0xYourWallet --name "My Token" --symbol MYT --agent-wallet 0xYourWallet
+
+# Prepare, sign, send, and pay through x402 in one step
+brickken create-token --chain 11155111 --signer-address 0xYourWallet --name "My Token" --symbol MYT --agent-wallet 0xYourWallet --execute --json
+```
+
+## Command groups
+
+| Group | Purpose |
+| --- | --- |
+| [`brickken agent`](/cli/commands/agent) | ERC-8004 identity and reputation operations |
+| [`brickken create-token` / `mint` / `burn` / `transfer` / `transfer-from` / `approve`](/cli/commands/token-economics) | Agentic ERC-20 token economics through the x402 flow |
+| [`brickken tx`](/cli/commands/tx) | Raw `prepare` / `sign` / `send` / `status` flows and one-shot execute |
+
+## Next steps
+
+<CardGroup>
+  <Card title="Install the CLI" icon="download" href="/cli/installation">
+    Install `brickken-cli` globally from npm.
+  </Card>
+  <Card title="Authentication" icon="key" href="/cli/authentication">
+    Configure your private key, RPC, and environment.
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/cli/quickstart">
+    Run your first end-to-end x402 transaction.
+  </Card>
+  <Card title="API Reference" icon="book" href="/api-reference/endpoint/agentic-methods-x402">
+    Field-level reference for every agentic method.
+  </Card>
+</CardGroup>
