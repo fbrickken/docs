@@ -1,0 +1,138 @@
+---
+title: 'MCP'
+description: 'Hosted Brickken MCP server for API-key and x402 workflows in MCP-compatible AI agents.'
+---
+
+## Overview
+
+The Brickken MCP server exposes the Brickken dApp API and x402 agentic API as tools for MCP-compatible AI agents.
+
+<CardGroup cols={2}>
+  <Card title="MCP endpoint" icon="plug" href="https://mcp.brickken.com/mcp">
+    Connect agents to `https://mcp.brickken.com/mcp`.
+  </Card>
+  <Card title="Health check" icon="activity" href="https://mcp.brickken.com/health">
+    Check hosted server availability.
+  </Card>
+</CardGroup>
+
+## Connect
+
+Use the hosted endpoint in Claude Code, Codex, or any MCP-compatible client:
+
+```json
+{
+  "mcpServers": {
+    "brickken": {
+      "url": "https://mcp.brickken.com/mcp"
+    }
+  }
+}
+```
+
+## Session Configuration
+
+Every MCP session is isolated. Configure credentials at runtime with the `configure` tool, then use `get_config` to verify the active environment without exposing secrets.
+
+### API-key mode
+
+Use this mode for the [dApp API](/api-reference/introduction).
+
+```json
+{
+  "env": "production",
+  "apiKey": "YOUR_BRICKKEN_API_KEY"
+}
+```
+
+### x402 private-key mode
+
+Use this mode for the [x402 API](/api-reference/endpoint/agentic-methods-x402). The private key is used by the MCP server session for local transaction signing and x402 payment signing.
+
+```json
+{
+  "env": "production",
+  "privateKey": "0xYOUR_PRIVATE_KEY",
+  "apiKey": ""
+}
+```
+
+For sandbox:
+
+```json
+{
+  "env": "sandbox",
+  "privateKey": "0xYOUR_PRIVATE_KEY",
+  "apiKey": ""
+}
+```
+
+<Warning>
+Only configure a private key in MCP clients and environments you trust. `get_config` returns booleans such as `hasApiKey` and `hasPrivateKey`, never the secret values.
+</Warning>
+
+## Configuration Tools
+
+| Tool | Purpose |
+| --- | --- |
+| `configure` | Set `env`, `baseUrl`, `apiKey`, or `privateKey` for the current session. |
+| `get_config` | Inspect `env`, `baseUrl`, `hasApiKey`, and `hasPrivateKey`. |
+
+## Transaction Tools
+
+| Tool | Purpose |
+| --- | --- |
+| `prepare_transactions` | Prepare unsigned transactions for a backend `method`. |
+| `send_transactions` | Submit signed transactions to Brickken. |
+| `get_transaction_status` | Poll a transaction hash. |
+
+## dApp API Tools
+
+These tools map to API-key authenticated dApp flows. If a private key is configured, write tools can prepare, sign, and send automatically; otherwise they return prepared transactions for external signing.
+
+| Area | Tools |
+| --- | --- |
+| Tokenization | `create_tokenization` |
+| STOs | `create_sto`, `invest_in_sto`, `claim_sto`, `close_sto` |
+| Security-token operations | `mint_tokens`, `whitelist_investor`, `burn_tokens`, `transfer_tokens`, `approve_tokens`, `distribute_dividend` |
+| Reads | `get_network_info`, `get_token_info`, `get_tokenizer_info`, `get_stos`, `get_sto_by_id`, `get_investments_by_sto_id`, `get_investor_info`, `get_allowance`, `get_whitelist_status`, `get_balance_whitelist`, `get_sto_balance`, `get_dividend_info` |
+
+## x402 Agent Tools
+
+These tools map to ERC-8004 and agent-token methods. When the session has a private key and no API key, agentic calls are paid through x402.
+
+| Area | Tools |
+| --- | --- |
+| Agent identity | `agent_register`, `agent_set_uri`, `agent_set_metadata`, `agent_set_wallet` |
+| Reputation | `agent_give_feedback`, `agent_revoke_feedback`, `agent_append_feedback_response` |
+| Agent-owned tokens | `agent_create_token`, `agent_mint_token`, `agent_burn_token`, `agent_transfer_token`, `agent_transfer_from_token`, `agent_approve_token` |
+
+## Example
+
+Configure x402 mode, then register an agent:
+
+```json
+{
+  "env": "sandbox",
+  "privateKey": "0xYOUR_PRIVATE_KEY",
+  "apiKey": ""
+}
+```
+
+```json
+{
+  "chainId": "11155111",
+  "signerAddress": "0xYourWallet",
+  "name": "Research Agent",
+  "description": "On-chain AI research agent",
+  "image": "https://example.com/agent.png",
+  "serviceName": "A2A",
+  "serviceEndpoint": "https://agent.example/.well-known/agent-card.json",
+  "aiModelProvider": "OpenAI",
+  "aiModelName": "Research Model",
+  "x402Support": true,
+  "active": true
+}
+```
+
+The `agent_register` result includes prepared transaction data and, when auto-executed, the send result. Save `prepared.info.agentUuid` for later agent updates.

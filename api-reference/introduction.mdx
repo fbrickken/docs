@@ -1,6 +1,6 @@
 ---
-title: 'Introduction'
-description: 'Overview and authentication for the Brickken API V2.'
+title: 'dApp API'
+description: 'API-key authenticated Brickken API for tokenization, STOs, security-token operations, and reads.'
 ---
 <img
   className="block dark:hidden"
@@ -13,142 +13,144 @@ description: 'Overview and authentication for the Brickken API V2.'
   alt="Hero Dark"
 />
 
-## Welcome to Brickken API V2
+## Overview
 
-Brickken API V2 is your comprehensive interface for tokenizing real-world assets on the blockchain. This updated version features streamlined endpoints, unified transaction methods, and enhanced "on behalf" functionality.
+The Brickken dApp API is the API-key authenticated surface for tokenized asset workflows. Use it when your integration owns a Brickken API key and wants to prepare transactions for a wallet to sign, submit signed transactions, or read tokenization and STO data.
 
-### Key Features
+Use the [x402 API](/api-reference/endpoint/agentic-methods-x402), [MCP](/mcp/introduction), or [CLI](/cli/introduction) for private-key based agentic flows.
 
-- **Unified Endpoints**: All transaction methods handled through `prepare-transactions`
-- **Simplified Workflow**: 3-step process (prepare, sign, send) or 1-step with "on behalf"
-- **Agentic Methods**: ERC-8004 agent registration, reputation, and agent token operations
-- **x402 Payments**: Eligible agentic methods can be paid through x402 instead of API-key credits
-- **Multi-Network Support**: Ethereum, Polygon, Base, and BNB Smart Chain
-- **Complete Asset Management**: From tokenization to dividend distribution
+## Base URLs
 
-<Card
-  title="Brickken Sandbox Environment"
-  icon="1"
-  href="https://dapp.sandbox.brickken.com"
->
-  Create an account on Brickken sandbox to get started.
-</Card>
-<Card
-  title="Request Your API Key"
-  icon="2"
-  href="mailto:tech@brickken.com"
->
-  Send us an email to tech@brickken.com with your user (email) to get your API key
-</Card>
-<Card
-  title="Start Your Tokenization Journey!"
-  icon="3"
-  href="/api-reference/endpoint/create"
->
-  You are ready to start using our API V2 in sandbox environment
-</Card>
-<Card
-  title="Ready for Production?"
-  icon="4"
-  href="https://meetings.hubspot.com/ludovico-rossi/t1"
->
-  Schedule a call with us to go live
-</Card>
-<Card
-  title="Prefer the terminal?"
-  icon="terminal"
-  href="/cli/introduction"
->
-  Use the Brickken CLI to run agentic workflows from the command line.
-</Card>
-
-## API Flow
-
-### Standard Workflow (3 Steps)
-
-The typical workflow for blockchain transactions:
-
-1. **Prepare**: Use `POST /prepare-transactions` to prepare unsigned transactions
-2. **Sign**: Sign the returned transactions using your preferred wallet/signing method
-3. **Send**: Submit signed transactions using `POST /send-transactions`
-
-All transaction operations are centralized through the `prepare-transactions` endpoint, which supports multiple methods for different blockchain operations.
-
-### Simplified Workflow (1 Step) - Token Creation Only
-
-For token creation without transaction management:
-
-- **create-token-on-behalf**: Use `POST /create-token-on-behalf` to create tokens automatically. Brickken handles signing and submission, eliminating manual transaction management.
+| Environment | Base URL |
+| --- | --- |
+| Sandbox | `https://api.sandbox.brickken.com` |
+| Production | `https://api.brickken.com` |
 
 ## Authentication
 
-All API requests require authentication using an API key in the request headers:
+Send your API key in every request:
 
 ```http
-x-api-key: your-api-key-here
+x-api-key: YOUR_BRICKKEN_API_KEY
 ```
 
-Include your unique API key in the `x-api-key` header of each request. Contact tech@brickken.com to obtain your API key.
+Request a key from `tech@brickken.com` with the email tied to your Brickken account.
 
-Agentic methods can alternatively use x402 payment authentication. For those requests, omit `x-api-key`, read the `PAYMENT-REQUIRED` header from the `402` response, sign the x402 payment locally, and retry with `X-Payment`.
+## Transaction Flow
+
+Most write operations use the same three-step flow:
+
+1. **Prepare** unsigned transactions with `POST /prepare-transactions`.
+2. **Sign** every returned transaction with the wallet matching `signerAddress`.
+3. **Send** the signed payloads with `POST /send-transactions`, then poll `GET /get-transaction-status`.
+
+```bash
+curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
+  --header 'Content-Type: application/json' \
+  --header 'x-api-key: YOUR_BRICKKEN_API_KEY' \
+  --data '{
+    "chainId": "11155111",
+    "method": "newTokenization",
+    "tokenizerEmail": "issuer@example.com",
+    "signerAddress": "0xYourWallet",
+    "tokenName": "Example Asset",
+    "tokenSymbol": "EXMPL",
+    "tokenType": "RWA_TOKEN",
+    "supplyCap": "1000000",
+    "url": "https://example.com/token-docs"
+  }'
+```
+
+The response includes `txId` and `transactions`. Sign the transaction or transactions locally, then send them:
+
+```bash
+curl --request POST 'https://api.sandbox.brickken.com/send-transactions' \
+  --header 'Content-Type: application/json' \
+  --header 'x-api-key: YOUR_BRICKKEN_API_KEY' \
+  --data '{
+    "txId": "0xPreparedTransactionId",
+    "signedTransactions": ["0xSignedRawTransaction"]
+  }'
+```
+
+## Write Endpoints
+
+| Endpoint | Purpose |
+| --- | --- |
+| `POST /prepare-transactions` | Prepare any supported transaction method by passing `method` in the JSON body. |
+| `POST /prepare-transactions/newTokenization` | Prepare a new tokenized asset. |
+| `POST /prepare-transactions/mintToken` | Prepare token minting. |
+| `POST /prepare-transactions/whitelist` | Prepare whitelist updates. |
+| `POST /prepare-transactions/burnToken` | Prepare token burning. |
+| `POST /prepare-transactions/transferFrom` | Prepare allowance-based token transfer. |
+| `POST /prepare-transactions/transferTo` | Prepare direct token transfer. |
+| `POST /prepare-transactions/approve` | Prepare allowance approval. |
+| `POST /prepare-transactions/dividendDistribution` | Prepare dividend distribution. |
+| `POST /prepare-transactions/newSto` | Prepare a Security Token Offering. |
+| `POST /prepare-transactions/newInvest` | Prepare an STO investment. |
+| `POST /prepare-transactions/claimTokens` | Prepare token claims from an STO. |
+| `POST /prepare-transactions/closeOffer` | Prepare an STO close operation. |
+| `POST /send-transactions` | Submit signed transactions returned by prepare. |
+| `PATCH /patch-token-docs` | Update token documentation and branding files. |
 
 ## Supported Methods
 
-The API supports comprehensive blockchain operations through the `prepare-transactions` endpoint:
+| Area | `method` values |
+| --- | --- |
+| Tokenization | `newTokenization`, `mintToken`, `whitelist`, `burnToken`, `transferFrom`, `transferTo`, `approve`, `dividendDistribution` |
+| STOs | `newSto`, `newInvest`, `claimTokens`, `closeOffer` |
 
-### Token Management
-- **newTokenization**: Create new tokenized assets
-- **mintToken**: Mint additional tokens to addresses
-- **burnToken**: Burn tokens from signer's address
+## On-Behalf Endpoints
 
-### STO Operations
-- **newSto**: Create Security Token Offerings
-- **newInvest**: Make investments in STOs
-- **claimTokens**: Claim tokens from STO investments
-- **closeOffer**: Close active STOs
+Selected partner flows can use Brickken-managed execution:
 
-### Transfer Operations
-- **transferFrom**: Transfer tokens between addresses (requires approval)
-- **transferTo**: Transfer tokens from signer's address
-- **approve**: Approve spending allowances
+| Endpoint | Purpose |
+| --- | --- |
+| `POST /create-token-on-behalf` | Create a tokenization with Brickken-managed transaction signing and submission. |
+| `POST /transaction-on-behalf` | Execute supported API transaction methods on behalf of a user. |
+| `POST /invest-on-behalf` | Execute an investment flow on behalf of a user. |
 
-### Advanced Features
-- **whitelist**: Manage address whitelist status
-- **dividendDistribution**: Distribute dividends to token holders
+<Note>
+On-behalf endpoints are API-key authenticated partner endpoints. Confirm your account is enabled for these flows before integrating them.
+</Note>
 
-### Agentic Methods
-- **agentRegister**: Register an ERC-8004 agent
-- **agentSetURI**: Publish the final agent profile URI
-- **agentSetMetadata**: Write on-chain agent metadata
-- **agentSetWallet**: Assign the operational agent wallet
-- **agentGiveFeedback**: Submit reputation feedback
-- **agentRevokeFeedback**: Revoke feedback
-- **agentAppendFeedbackResponse**: Respond to feedback
-- **agentCreateToken**: Deploy an agent ERC-20 token
-- **agentMintToken**: Mint agent tokens
-- **agentBurnToken**: Burn agent tokens
+## Read Endpoints
 
-## Environments and Networks
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /get-network-info` | Read chain metadata and supported network configuration. |
+| `GET /get-token-info` | Read token information by symbol or chain. |
+| `GET /get-tokenizer-info` | Read tokenizer account information. |
+| `GET /get-stos` | List STOs for a token. |
+| `GET /get-sto-by-id` | Read one STO by ID. |
+| `GET /get-investments-by-sto-id` | List investments for one STO. |
+| `GET /get-investor-info` | Read investor status by token and email. |
+| `GET /get-allowance` | Read allowance between owner and spender. |
+| `GET /get-balance-whitelist` | Read investor balance and whitelist status. |
+| `GET /get-whitelist-status` | Check whether an investor wallet is whitelisted. |
+| `GET /get-sto-balance` | Read STO balance and status. |
+| `GET /get-dividend-distribution` | Read dividend distribution information. |
+| `GET /get-transaction-status` | Poll a submitted blockchain transaction. |
 
-### API Endpoints
-
-- **Sandbox**: `https://api-sandbox.brickken.com`
-- **Production**: `https://api.brickken.com`
-
-### Supported Networks
-
-Specify the network using the `chainId` parameter:
-
-#### Sandbox Environment
-```
-Sepolia testnet: "0xAA36A7"
-Polygon Amoy testnet: "0x13882"
+```bash
+curl --request GET \
+  'https://api.sandbox.brickken.com/get-network-info?chainId=11155111' \
+  --header 'x-api-key: YOUR_BRICKKEN_API_KEY'
 ```
 
-#### Production Environment
-```
-Ethereum mainnet: "0x1"
-Base mainnet: "0x2105"
-BNB Smart Chain Mainnet: "0x38"
-Polygon mainnet: "0x89"
-```
+## Networks
+
+Pass `chainId` as decimal or hex. Client tooling normalizes common values.
+
+| Network | Decimal | Hex |
+| --- | --- | --- |
+| Ethereum mainnet | `1` | `0x1` |
+| Base mainnet | `8453` | `0x2105` |
+| BNB Smart Chain | `56` | `0x38` |
+| Polygon mainnet | `137` | `0x89` |
+| Sepolia testnet | `11155111` | `0xaa36a7` |
+| Polygon Amoy testnet | `80002` | `0x13882` |
+
+<Warning>
+Prepared transactions are on-chain actions. Verify `chainId`, `signerAddress`, token symbol or token address, and all recipient addresses before signing.
+</Warning>

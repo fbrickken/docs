@@ -1,56 +1,163 @@
 ---
-title: 'CLI Introduction'
-description: 'The Brickken CLI: an x402-paid command-line tool for agentic API V2 workflows.'
+title: 'CLI'
+description: 'Public Brickken CLI for x402-paid agentic transaction workflows.'
 ---
 
-The **Brickken CLI** (`brickken-cli` on npm) is a public, x402-paid command-line tool for the [Brickken agentic API V2](/api-reference/introduction). It runs the same `prepare` → `sign` → `send` workflow documented under [API Reference](/api-reference/endpoint/agentic-methods-x402) directly from your terminal, signing transactions locally and paying each request through [x402](/api-reference/endpoint/agentic-methods-x402).
+The **Brickken CLI** is the public terminal client for the [x402 API](/api-reference/endpoint/agentic-methods-x402). It prepares Brickken agentic transactions, signs locally with your private key, pays API requests through x402, and can submit the signed transaction in one command.
 
-It covers:
-
-- **ERC-8004 agent identity** — register agents, set their URI, metadata, and operational wallet.
-- **ERC-8004 reputation** — give, revoke, and respond to feedback.
-- **Agentic token economics** — create, mint, burn, transfer, transfer-from, and approve x402-capable ERC-20 tokens.
-- **Raw transaction flow** — prepare, sign, send, and check status of any API V2 method, or run all three steps in one shot.
-
-Repository: [github.com/Brickken/brickken-api-cli](https://github.com/Brickken/brickken-api-cli)
-
-<Warning>
-The CLI is **x402-only**. It does not use API keys — `BRICKKEN_API_KEY` and `BKN_API_KEY` are ignored. You sign and pay every request locally with a private key, which never leaves your machine. See [Authentication](/cli/authentication).
-</Warning>
-
-## How it works
-
-High-level commands are **wallet-first** and **prepare-only by default**. Add `--execute` to prepare, sign locally, send, and pay the API request through x402 in one step.
-
-```bash
-# Prepare only (returns an unsigned transaction, no signing, no send)
-brickken create-token --chain 11155111 --signer-address 0xYourWallet --name "My Token" --symbol MYT --agent-wallet 0xYourWallet
-
-# Prepare, sign, send, and pay through x402 in one step
-brickken create-token --chain 11155111 --signer-address 0xYourWallet --name "My Token" --symbol MYT --agent-wallet 0xYourWallet --execute --json
-```
-
-## Command groups
-
-| Group | Purpose |
-| --- | --- |
-| [`brickken agent`](/cli/commands/agent) | ERC-8004 identity and reputation operations |
-| [`brickken create-token` / `mint` / `burn` / `transfer` / `transfer-from` / `approve`](/cli/commands/token-economics) | Agentic ERC-20 token economics through the x402 flow |
-| [`brickken tx`](/cli/commands/tx) | Raw `prepare` / `sign` / `send` / `status` flows and one-shot execute |
-
-## Next steps
-
-<CardGroup>
-  <Card title="Install the CLI" icon="download" href="/cli/installation">
-    Install `brickken-cli` globally from npm.
+<CardGroup cols={2}>
+  <Card title="npm package" icon="box" href="https://www.npmjs.com/package/brickken-cli">
+    Install `brickken-cli` from npm.
   </Card>
-  <Card title="Authentication" icon="key" href="/cli/authentication">
-    Configure your private key, RPC, and environment.
-  </Card>
-  <Card title="Quickstart" icon="rocket" href="/cli/quickstart">
-    Run your first end-to-end x402 transaction.
-  </Card>
-  <Card title="API Reference" icon="book" href="/api-reference/endpoint/agentic-methods-x402">
-    Field-level reference for every agentic method.
+  <Card title="GitHub repository" icon="github" href="https://github.com/Brickken/brickken-api-cli">
+    View the public source repository.
   </Card>
 </CardGroup>
+
+## Install
+
+```bash
+npm install -g brickken-cli
+brickken --version
+brickken --help
+```
+
+You can also run it without a global install:
+
+```bash
+npx brickken-cli --help
+```
+
+## Authentication
+
+The CLI is x402-only. It ignores `BRICKKEN_API_KEY` and `BKN_API_KEY`.
+
+```bash
+export BRICKKEN_PRIVATE_KEY=0x...
+```
+
+`BKN_PRIVATE_KEY` is accepted as an alias. The private key is used locally for x402 payment signing and blockchain transaction signing.
+
+<Warning>
+Never paste production private keys into shared terminals, tickets, or chat logs. Prefer environment variables or an `.env` file that is not committed.
+</Warning>
+
+## Environments
+
+| Environment | Base URL |
+| --- | --- |
+| `sandbox` (default) | `https://api.sandbox.brickken.com` |
+| `production` | `https://api.brickken.com` |
+
+```bash
+brickken --env sandbox --help
+brickken --env production --help
+```
+
+Override the API base URL directly when needed:
+
+```bash
+brickken --base-url https://api.sandbox.brickken.com --help
+```
+
+## Network and RPC
+
+Pass the target operation chain with `--chain`. Decimal and hex values are accepted.
+
+| Network | Decimal | Hex |
+| --- | --- | --- |
+| Ethereum mainnet | `1` | `0x1` |
+| Base mainnet | `8453` | `0x2105` |
+| BNB Smart Chain | `56` | `0x38` |
+| Polygon mainnet | `137` | `0x89` |
+| Sepolia testnet | `11155111` | `0xaa36a7` |
+| Polygon Amoy testnet | `80002` | `0x13882` |
+
+Some commands, especially `create-token --execute`, wait for a deployment receipt to recover `tokenAddress`. Set an RPC URL for that lookup:
+
+```bash
+export BRICKKEN_RPC_URL="https://ethereum-sepolia-rpc.publicnode.com"
+```
+
+`BKN_RPC_URL` is accepted as an alias, or pass `--rpc-url`.
+
+## Command Model
+
+High-level commands are prepare-only by default. Add `--execute` to prepare, sign locally, send, and pay through x402 in one step. Add `--json` for machine-readable output.
+
+```bash
+brickken create-token \
+  --chain 11155111 \
+  --signer-address 0xYourWallet \
+  --name "Research Agent Token" \
+  --symbol RAGT \
+  --agent-wallet 0xYourWallet
+
+brickken create-token \
+  --chain 11155111 \
+  --signer-address 0xYourWallet \
+  --name "Research Agent Token" \
+  --symbol RAGT \
+  --agent-wallet 0xYourWallet \
+  --execute \
+  --json
+```
+
+## Commands
+
+| Command | Backend method | Purpose |
+| --- | --- | --- |
+| `brickken agent register` | `agentRegister` | Register an ERC-8004 agent identity. |
+| `brickken agent set-uri` | `agentSetURI` | Update an agent URI/profile. |
+| `brickken agent set-metadata` | `agentSetMetadata` | Write an agent metadata key/value. |
+| `brickken agent set-wallet` | `agentSetWallet` | Update the agent operational wallet. |
+| `brickken agent feedback give` | `agentGiveFeedback` | Submit reputation feedback. |
+| `brickken agent feedback revoke` | `agentRevokeFeedback` | Revoke feedback. |
+| `brickken agent feedback respond` | `agentAppendFeedbackResponse` | Respond to feedback. |
+| `brickken create-token` | `agentCreateToken` | Deploy an agent-owned ERC-20 token. |
+| `brickken mint` | `agentMintToken` | Mint an agent-owned token. |
+| `brickken burn` | `agentBurnToken` | Burn an agent-owned token. |
+| `brickken transfer` | `agentTransferToken` | Transfer an agent-owned token. |
+| `brickken transfer-from` | `agentTransferFromToken` | Transfer through allowance. |
+| `brickken approve` | `agentApproveToken` | Approve an allowance. |
+| `brickken tx prepare --method <method>` | any supported method | Prepare a raw backend method. |
+| `brickken tx sign` | local only | Sign prepared transaction JSON locally. |
+| `brickken tx send` | `POST /send-transactions` | Submit signed transactions. |
+| `brickken tx status` | `GET /get-transaction-status` | Poll transaction status. |
+
+## Agent Example
+
+```bash
+export CHAIN="11155111"
+export WALLET="0xYourWallet"
+
+brickken agent register \
+  --chain "$CHAIN" \
+  --signer-address "$WALLET" \
+  --name "Research Agent" \
+  --description "On-chain AI research agent" \
+  --image https://example.com/agent.png \
+  --service-name A2A \
+  --service-endpoint https://agent.example/.well-known/agent-card.json \
+  --ai-model-provider OpenAI \
+  --ai-model-name "Research Model" \
+  --x402-support true \
+  --execute \
+  --json
+```
+
+## File Input
+
+Use `--file` for nested JSON/YAML payloads, long metadata, or automation:
+
+```bash
+brickken tx prepare \
+  --method agentSetMetadata \
+  --file metadata.json \
+  --execute \
+  --json
+```
+
+<Note>
+Both prepare and send are x402-priced. Fund the wallet behind `BRICKKEN_PRIVATE_KEY` with enough USDC on the x402 payment chain and enough native gas on the operation chain.
+</Note>

@@ -1,6 +1,6 @@
 ---
-title: 'Introduction'
-description: 'Overview and authentication for the Brickken API.'
+title: 'Brickken Developer Documentation'
+description: 'Official docs for the Brickken dApp API, x402 API, MCP server, and CLI.'
 ---
 <img
   className="block dark:hidden"
@@ -15,54 +15,42 @@ description: 'Overview and authentication for the Brickken API.'
 
 ## Welcome
 
-Welcome to the Brickken Platform your gateway to tokenizing real-world assets in a secure, compliant, and efficient way. This documentation is designed to help you navigate through the platform’s capabilities, understand the core concepts, and start building with our APIs and smart contracts.
+Brickken exposes the tokenization platform through four developer surfaces:
 
-Whether you're a developer integrating tokenization workflows, a business issuing digital assets, or a partner building on top of Brickken's infrastructure, this guide will walk you through the essential steps to get started.
+- **dApp API** for API-key authenticated tokenization, STO, security-token, and read workflows.
+- **x402 API** for private-key based ERC-8004 agent and agent-token workflows.
+- **MCP** for MCP-compatible AI agents.
+- **CLI** for local terminal workflows using the public `brickken-cli` package.
 
+<CardGroup cols={2}>
+  <Card title="dApp API" icon="key" href="/api-reference/introduction">
+    Use an API key to prepare, sign, send, and read Brickken dApp transactions.
+  </Card>
+  <Card title="x402 API" icon="wallet" href="/api-reference/endpoint/agentic-methods-x402">
+    Use a private key to pay x402 requests and sign ERC-8004 transactions locally.
+  </Card>
+  <Card title="MCP" icon="plug" href="/mcp/introduction">
+    Connect AI agents to the hosted Brickken MCP endpoint.
+  </Card>
+  <Card title="CLI" icon="terminal" href="/cli/introduction">
+    Install the public npm CLI and run x402-paid workflows from your terminal.
+  </Card>
+</CardGroup>
 
-<Card
-  title="Brickken Sandbox enviroment"
-  icon="1"
-  href="https://dapp.sandbox.brickken.com"
->
-  create an account on brickken sandbox.
-</Card>
-<Card
-  title="Request your api key"
-  icon="2"
-  href="mailto:tech@brickken.com"
->
-  Send us an email to tech@brickken.com with your user (email) to get your api key
-</Card>
-<Card
-  title="Start your tokenization journey"
-  icon="3"
-  href="/api-reference/endpoint/create"
->
-  you are ready to start using our api in sandbox enviroment
-</Card>
-<Card
-  title="Are you ready to go to Prod? "
-  icon="4"
-  href="https://meetings.hubspot.com/ludovico-rossi/t1"
->
-  Schedule a call with us 
-</Card>
+## Environments
 
-## Authentication
+| Environment | API URL | App URL |
+| --- | --- | --- |
+| Sandbox | `https://api.sandbox.brickken.com` | `https://dapp.sandbox.brickken.com` |
+| Production | `https://api.brickken.com` | `https://dapp.brickken.com` |
 
-All API endpoints are authenticated using an API Key sent in the request header. This is defined in the OpenAPI specification under securitySchemes.
+## Access
 
-You must include your unique API key in the x-api-key header of each request.
-
-```json
-"components": {
-  "securitySchemes": {
-    "apiKeyAuth": {
-      "type": "apiKey",
-      "in": "header",
-      "name": "x-api-key"
-    }
-  }
-}
-```
+<CardGroup cols={2}>
+  <Card title="Request an API key" icon="envelope" href="mailto:tech@brickken.com">
+    Contact `tech@brickken.com` with your Brickken user email.
+  </Card>
+  <Card title="Go live" icon="calendar" href="https://meetings.hubspot.com/ludovico-rossi/t1">
+    Schedule a production onboarding call.
+  </Card>
+</CardGroup>
