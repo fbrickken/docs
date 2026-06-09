@@ -1,0 +1,26 @@
+---
+title: 'Approve Agent Token'
+openapi: 'POST /x402/token/approve'
+description: 'Prepare an agent-owned ERC-20 allowance approval through x402.'
+---
+
+Prepares unsigned transactions for approving an agent-owned ERC-20 token allowance. This facade maps to `agentApproveToken`.
+
+## Authentication
+
+Omit `x-api-key`. If the API returns `402 Payment Required`, sign the x402 payment locally and retry with `X-Payment`.
+
+## Key Fields
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `chainId` | Yes | Target chain ID. Decimal and hex values are accepted. |
+| `signerAddress` | Yes | Wallet that signs the prepared transaction. |
+| `tokenAddress` | Yes | Agent token contract address. |
+| `spenderAddress` | Yes | Wallet approved to spend tokens. |
+| `amount` | Yes | Human-readable allowance amount. |
+| `decimals` | No | Token decimals used to normalize `amount`. |
+
+## Response
+
+Returns prepared unsigned transactions and `txId`. Sign the transaction locally, then submit it with `POST /send-transactions`.

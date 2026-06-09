@@ -1,0 +1,27 @@
+---
+title: 'Give Feedback'
+openapi: 'POST /x402/agent/feedback/give'
+description: 'Prepare ERC-8004 reputation feedback through x402.'
+---
+
+Prepares unsigned transactions for submitting ERC-8004 reputation feedback. This facade maps to `agentGiveFeedback`.
+
+## Authentication
+
+Omit `x-api-key`. If the API returns `402 Payment Required`, sign the x402 payment locally and retry with `X-Payment`.
+
+## Key Fields
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `chainId` | Yes | Target chain ID. Decimal and hex values are accepted. |
+| `signerAddress` | Yes | Wallet that signs the prepared transaction. |
+| `value` | Yes | Feedback value. |
+| `valueDecimals` | Yes | Decimal precision used for `value`. |
+| `agentUuid` or `agentId` | Usually | Agent identifier receiving feedback. |
+| `tag1`, `tag2` | No | Optional feedback tags. |
+| `endpoint`, `feedbackURI`, `feedbackHash` | No | Optional context and off-chain feedback references. |
+
+## Response
+
+Returns prepared unsigned transactions and `txId`. Sign the transaction locally, then submit it with `POST /send-transactions`.

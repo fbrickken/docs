@@ -71,9 +71,43 @@
         "tab": "Agentic API",
         "groups": [
           {
-            "group": "Agentic API",
+            "group": "API Documentation",
             "pages": [
               "api-reference/endpoint/agentic-methods-x402"
+            ]
+          },
+          {
+            "group": "Agent Identity",
+            "pages": [
+              "api-reference/endpoint/x402-agent-register",
+              "api-reference/endpoint/x402-agent-set-uri",
+              "api-reference/endpoint/x402-agent-set-metadata",
+              "api-reference/endpoint/x402-agent-set-wallet"
+            ]
+          },
+          {
+            "group": "Reputation",
+            "pages": [
+              "api-reference/endpoint/x402-agent-feedback-give",
+              "api-reference/endpoint/x402-agent-feedback-revoke",
+              "api-reference/endpoint/x402-agent-feedback-respond"
+            ]
+          },
+          {
+            "group": "Agent Token Operations",
+            "pages": [
+              "api-reference/endpoint/x402-token-create",
+              "api-reference/endpoint/x402-token-mint",
+              "api-reference/endpoint/x402-token-burn",
+              "api-reference/endpoint/x402-token-transfer",
+              "api-reference/endpoint/x402-token-transfer-from",
+              "api-reference/endpoint/x402-token-approve"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "api-reference/endpoint/agentic-pricing"
             ]
           }
         ]
@@ -82,7 +116,7 @@
         "tab": "MCP",
         "groups": [
           {
-            "group": "MCP",
+            "group": "Server Documentation",
             "pages": [
               "mcp/introduction"
             ]
@@ -93,7 +127,7 @@
         "tab": "CLI",
         "groups": [
           {
-            "group": "CLI",
+            "group": "CLI Documentation",
             "pages": [
               "cli/introduction"
             ]
@@ -104,7 +138,7 @@
         "tab": "Skill",
         "groups": [
           {
-            "group": "Skill",
+            "group": "AI Agent Skill",
             "pages": [
               "skill/introduction"
             ]
@@ -112,25 +146,30 @@
         ]
       }
     ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://docs.brickken.com",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Community",
-          "href": "https://discord.com/invite/brickken-official-community-851756929268056086",
-          "icon": "discord"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://www.brickken.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
+    "global": {}
+  },
+  "contextual": {
+    "display": "toc",
+    "options": [
+      {
+        "title": "Documentation",
+        "description": "Open the Brickken documentation home.",
+        "href": "https://docs.brickken.com",
+        "icon": "book-open-cover"
+      },
+      {
+        "title": "Community",
+        "description": "Join the Brickken community on Discord.",
+        "href": "https://discord.com/invite/brickken-official-community-851756929268056086",
+        "icon": "discord"
+      },
+      {
+        "title": "Blog",
+        "description": "Read the Brickken blog.",
+        "href": "https://www.brickken.com/blog",
+        "icon": "newspaper"
+      }
+    ]
   },
   "logo": {
     "light": "/logo/light.svg",

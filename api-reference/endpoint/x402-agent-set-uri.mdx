@@ -1,0 +1,26 @@
+---
+title: 'Set Agent URI'
+openapi: 'POST /x402/agent/set-uri'
+description: 'Prepare an ERC-8004 agent URI/profile update through x402.'
+---
+
+Prepares unsigned transactions for updating an ERC-8004 agent profile URI. This facade maps to `agentSetURI`.
+
+## Authentication
+
+Omit `x-api-key`. If the API returns `402 Payment Required`, sign the x402 payment locally and retry with `X-Payment`.
+
+## Key Fields
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `chainId` | Yes | Target chain ID. Decimal and hex values are accepted. |
+| `signerAddress` | Yes | Wallet that signs the prepared transaction. |
+| `agentUuid` or `agentId` | Usually | Agent identifier from registration or the on-chain agent ID. |
+| `name`, `description`, `image` | No | Profile fields used to build the updated URI metadata. |
+| `services`, `metadata`, `tags` | No | Additional agent profile metadata. |
+| `documentation`, `sourceCode`, `license` | No | Public agent documentation and source metadata. |
+
+## Response
+
+Returns prepared unsigned transactions and `txId`. Sign the transaction locally, then submit it with `POST /send-transactions`.

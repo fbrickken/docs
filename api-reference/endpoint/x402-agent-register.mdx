@@ -1,0 +1,30 @@
+---
+title: 'Register Agent'
+openapi: 'POST /x402/agent/register'
+description: 'Prepare an ERC-8004 agent registration through x402.'
+---
+
+Prepares unsigned transactions for registering an ERC-8004 agent identity. This facade maps to `agentRegister`.
+
+## Authentication
+
+Omit `x-api-key`. If the API returns `402 Payment Required`, sign the x402 payment locally and retry with `X-Payment`.
+
+## Key Fields
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `chainId` | Yes | Target chain ID. Decimal and hex values are accepted. |
+| `signerAddress` | Yes | Wallet that signs the prepared transaction. |
+| `name` | Yes | Human-readable agent name. |
+| `description` | Yes | Agent description. |
+| `image` | Yes | Agent image URL. |
+| `services` | Yes | Service descriptors such as A2A endpoints. |
+| `aiModelName`, `aiModelProvider` | No | AI model metadata published with the agent profile. |
+| `x402Support`, `active` | No | Agent capability and status flags. |
+
+## Response
+
+Returns prepared unsigned transactions and `txId`. Save `info.agentUuid` from the response for future URI, metadata, and wallet updates.
+
+Sign the transaction locally, then submit it with `POST /send-transactions`.

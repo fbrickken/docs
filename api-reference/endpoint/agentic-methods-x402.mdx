@@ -5,7 +5,7 @@ description: 'Private-key based Agentic API for ERC-8004 agent identity, reputat
 
 ## Overview
 
-The Agentic API is the private-key based surface for Brickken agentic methods. It covers ERC-8004 agent identity, ERC-8004 reputation, and agent-owned ERC-20 token operations.
+The Agentic API is the private-key based surface for Brickken agentic methods. It covers ERC-8004 agent identity, reputation, and agent-owned ERC-20 token operations.
 
 Use this surface when you do not want to use a Brickken API key. Your private key stays local and is used to sign:
 
@@ -90,25 +90,24 @@ curl --request POST 'https://api.sandbox.brickken.com/send-transactions' \
 
 `send-transactions` x402 batches must contain only x402-eligible prepared transactions, and all transactions in the batch must be on the same chain.
 
-## x402 Endpoints
+## Endpoint Groups
 
-Facade requests use the same body fields as the matching `method`, except `method` is optional and ignored because the path fixes it.
+Facade requests use the same body fields as the matching backend `method`, except `method` is optional and ignored because the path fixes it.
 
-| Facade endpoint | Fixed method | Purpose |
-| --- | --- | --- |
-| `POST /x402/agent/register` | `agentRegister` | Register an ERC-8004 agent identity. |
-| `POST /x402/agent/set-uri` | `agentSetURI` | Publish or update the agent profile URI. |
-| `POST /x402/agent/set-metadata` | `agentSetMetadata` | Write an ERC-8004 agent metadata key/value pair. |
-| `POST /x402/agent/set-wallet` | `agentSetWallet` | Set the operational wallet for an agent. |
-| `POST /x402/agent/feedback/give` | `agentGiveFeedback` | Submit ERC-8004 reputation feedback. |
-| `POST /x402/agent/feedback/revoke` | `agentRevokeFeedback` | Revoke a feedback entry. |
-| `POST /x402/agent/feedback/respond` | `agentAppendFeedbackResponse` | Append a response to a feedback thread. |
-| `POST /x402/token/create` | `agentCreateToken` | Deploy an agent-owned ERC-20 token. |
-| `POST /x402/token/mint` | `agentMintToken` | Mint an agent-owned token. |
-| `POST /x402/token/burn` | `agentBurnToken` | Burn an agent-owned token. |
-| `POST /x402/token/transfer` | `agentTransferToken` | Transfer an agent-owned token. |
-| `POST /x402/token/transfer-from` | `agentTransferFromToken` | Transfer an agent-owned token through allowance. |
-| `POST /x402/token/approve` | `agentApproveToken` | Approve an agent-owned token allowance. |
+<CardGroup cols={2}>
+  <Card title="Agent Identity" icon="user-round" href="/api-reference/endpoint/x402-agent-register">
+    Register and maintain ERC-8004 agent identity data.
+  </Card>
+  <Card title="Reputation" icon="message-square" href="/api-reference/endpoint/x402-agent-feedback-give">
+    Give, revoke, and respond to ERC-8004 feedback.
+  </Card>
+  <Card title="Agent Tokens" icon="coins" href="/api-reference/endpoint/x402-token-create">
+    Create and operate agent-owned ERC-20 tokens.
+  </Card>
+  <Card title="Pricing" icon="badge-dollar-sign" href="/api-reference/endpoint/agentic-pricing">
+    Review x402 prepare, send, and total prices.
+  </Card>
+</CardGroup>
 
 Advanced clients can also call `POST /prepare-transactions` directly and pass `method` explicitly. `newTokenizedAgent` remains a legacy alias for agent registration, but it is not published in x402scan discovery.
 
@@ -123,47 +122,10 @@ Advanced clients can also call `POST /prepare-transactions` directly and pass `m
 | `nonce` | number | No | Optional explicit nonce when managing nonces manually. |
 | `privateRpcUrl` | string | No | Optional RPC override. |
 
-## Method Fields
-
-| Methods | Important fields |
-| --- | --- |
-| `agentRegister`, `agentSetURI` | `name`, `description`, `image`, `services`, `metadata`, `aiModelName`, `aiModelProvider`, `tags`, `documentation`, `sourceCode`, `license`, `agentType`, `supportedTrust`, `x402Support`, `active` |
-| `agentSetMetadata` | `agentUuid` or `agentId`, `metadataKey`, `metadataValue`, `metadataEncoding` |
-| `agentSetWallet` | `agentUuid` or `agentId`, `newWallet`, `deadline`, `signature` |
-| `agentGiveFeedback` | `agentUuid` or `agentId`, `value`, `valueDecimals`, `tag1`, `tag2`, `endpoint`, `feedbackURI`, `feedbackHash` |
-| `agentRevokeFeedback` | `agentId`, `feedbackIndex` |
-| `agentAppendFeedbackResponse` | `agentId`, `clientAddress`, `feedbackIndex`, `responseURI`, `responseHash` |
-| `agentCreateToken` | `name`, `symbol`, `agentWallet`, `premint`, `decimals` |
-| `agentMintToken` | `tokenAddress`, `to`, `amount`, `decimals` |
-| `agentBurnToken` | `tokenAddress`, `from`, `amount`, `decimals` |
-| `agentTransferToken` | `tokenAddress`, `to`, `amount`, `decimals` |
-| `agentTransferFromToken` | `tokenAddress`, `from`, `to`, `amount`, `decimals` |
-| `agentApproveToken` | `tokenAddress`, `spenderAddress`, `amount`, `decimals` |
+## Response Shape
 
 The prepare response includes `txId`, `transactions`, and optional `info`. For `agentRegister`, save `info.agentUuid` for later `set-uri` and `set-metadata` calls.
 
-## Mainnet x402 Pricing
-
-Prices are in USDC. The prepare charge applies to `/x402/...` facades and `POST /prepare-transactions`; the send charge applies to `POST /send-transactions`.
-
-| Method | Prepare | Send | Total |
-| --- | ---: | ---: | ---: |
-| `agentRegister` | `0.50` | `0.49` | `0.99` |
-| `agentSetURI` | `0.25` | `0.24` | `0.49` |
-| `agentSetMetadata` | `0.25` | `0.24` | `0.49` |
-| `agentSetWallet` | `0.50` | `0.49` | `0.99` |
-| `agentGiveFeedback` | `0.13` | `0.12` | `0.25` |
-| `agentRevokeFeedback` | `0.13` | `0.12` | `0.25` |
-| `agentAppendFeedbackResponse` | `0.25` | `0.24` | `0.49` |
-| `agentCreateToken` | `5.00` | `4.99` | `9.99` |
-| `agentMintToken` | `0.05` | `0.05` | `0.10` |
-| `agentBurnToken` | `0.03` | `0.02` | `0.05` |
-| `agentTransferToken` | `0.03` | `0.02` | `0.05` |
-| `agentTransferFromToken` | `0.03` | `0.02` | `0.05` |
-| `agentApproveToken` | `0.02` | `0.01` | `0.03` |
-
-Sandbox and non-production environments use a reference price of approximately `0.01` USDC per call.
-
 <Warning>
-x402 payments and on-chain transactions are non-refundable. Confirm chain, signer, recipient, token address, and expected USDC price before signing.
+x402 payments and on-chain transactions are non-refundable. Confirm chain, signer, recipient, token address, and expected USDC price before signing. See [Pricing](/api-reference/endpoint/agentic-pricing) for the published mainnet table.
 </Warning>

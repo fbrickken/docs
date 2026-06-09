@@ -1,0 +1,26 @@
+---
+title: 'Set Agent Metadata'
+openapi: 'POST /x402/agent/set-metadata'
+description: 'Prepare an ERC-8004 agent metadata update through x402.'
+---
+
+Prepares unsigned transactions for writing an ERC-8004 agent metadata key/value pair. This facade maps to `agentSetMetadata`.
+
+## Authentication
+
+Omit `x-api-key`. If the API returns `402 Payment Required`, sign the x402 payment locally and retry with `X-Payment`.
+
+## Key Fields
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `chainId` | Yes | Target chain ID. Decimal and hex values are accepted. |
+| `signerAddress` | Yes | Wallet that signs the prepared transaction. |
+| `agentUuid` or `agentId` | Usually | Agent identifier from registration or the on-chain agent ID. |
+| `metadataKey` | No | Metadata key to write. |
+| `metadataValue` | No | Metadata value to write. |
+| `metadataEncoding` | No | Optional encoding descriptor for the metadata value. |
+
+## Response
+
+Returns prepared unsigned transactions and `txId`. Sign the transaction locally, then submit it with `POST /send-transactions`.

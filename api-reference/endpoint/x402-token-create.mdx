@@ -1,0 +1,27 @@
+---
+title: 'Create Agent Token'
+openapi: 'POST /x402/token/create'
+description: 'Prepare an agent-owned ERC-20 token deployment through x402.'
+---
+
+Prepares unsigned transactions for deploying an agent-owned ERC-20 token. This facade maps to `agentCreateToken`.
+
+## Authentication
+
+Omit `x-api-key`. If the API returns `402 Payment Required`, sign the x402 payment locally and retry with `X-Payment`.
+
+## Key Fields
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `chainId` | Yes | Target chain ID. Decimal and hex values are accepted. |
+| `signerAddress` | Yes | Wallet that signs the prepared transaction. |
+| `name` | Yes | Token name. |
+| `symbol` | Yes | Token symbol. |
+| `agentWallet` | Yes | Agent wallet that owns or operates the token. |
+| `premint` | No | Optional initial token amount. |
+| `decimals` | No | Optional token decimals. |
+
+## Response
+
+Returns prepared unsigned transactions and `txId`. If executed, use the deployment receipt to recover the deployed `tokenAddress`.
