@@ -5,11 +5,11 @@ description: 'Hosted Brickken MCP server for API-key and x402 workflows in MCP-c
 
 ## Overview
 
-The Brickken MCP server exposes the Brickken dApp API and x402 agentic API as tools for MCP-compatible AI agents.
+The Brickken MCP server exposes the Brickken dapp API and Agentic API as tools for MCP-compatible AI agents.
 
 <CardGroup cols={2}>
-  <Card title="MCP endpoint" icon="plug" href="https://mcp.brickken.com/mcp">
-    Connect agents to `https://mcp.brickken.com/mcp`.
+  <Card title="MCP" icon="plug" href="https://mcp.brickken.com/">
+    Open the official Brickken MCP page.
   </Card>
   <Card title="Health check" icon="activity" href="https://mcp.brickken.com/health">
     Check hosted server availability.
@@ -24,7 +24,7 @@ Use the hosted endpoint in Claude Code, Codex, or any MCP-compatible client:
 {
   "mcpServers": {
     "brickken": {
-      "url": "https://mcp.brickken.com/mcp"
+      "url": "https://mcp.brickken.com/"
     }
   }
 }
@@ -36,7 +36,7 @@ Every MCP session is isolated. Configure credentials at runtime with the `config
 
 ### API-key mode
 
-Use this mode for the [dApp API](/api-reference/introduction).
+Use this mode for the [dapp API](/api-reference/introduction).
 
 ```json
 {
@@ -47,7 +47,7 @@ Use this mode for the [dApp API](/api-reference/introduction).
 
 ### x402 private-key mode
 
-Use this mode for the [x402 API](/api-reference/endpoint/agentic-methods-x402). The private key is used by the MCP server session for local transaction signing and x402 payment signing.
+Use this mode for the [Agentic API](/api-reference/endpoint/agentic-methods-x402). The private key is used by the MCP server session for local transaction signing and x402 payment signing.
 
 ```json
 {
@@ -86,9 +86,9 @@ Only configure a private key in MCP clients and environments you trust. `get_con
 | `send_transactions` | Submit signed transactions to Brickken. |
 | `get_transaction_status` | Poll a transaction hash. |
 
-## dApp API Tools
+## dapp API Tools
 
-These tools map to API-key authenticated dApp flows. If a private key is configured, write tools can prepare, sign, and send automatically; otherwise they return prepared transactions for external signing.
+These tools map to API-key authenticated dapp flows. If a private key is configured, write tools can prepare, sign, and send automatically; otherwise they return prepared transactions for external signing.
 
 | Area | Tools |
 | --- | --- |

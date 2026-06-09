@@ -11,14 +11,90 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Documentation",
+        "tab": "dapp API",
         "groups": [
           {
-            "group": "Brickken APIs and Tools",
+            "group": "API Documentation",
             "pages": [
-              "api-reference/introduction",
-              "api-reference/endpoint/agentic-methods-x402",
-              "mcp/introduction",
+              "api-reference/introduction"
+            ]
+          },
+          {
+            "group": "Create Transaction",
+            "pages": [
+              "api-reference/endpoint/create",
+              "api-reference/endpoint/prepare-newTokenization",
+              "api-reference/endpoint/prepare-mintToken",
+              "api-reference/endpoint/prepare-whitelist",
+              "api-reference/endpoint/prepare-burnToken",
+              "api-reference/endpoint/prepare-transferFrom",
+              "api-reference/endpoint/prepare-transferTo",
+              "api-reference/endpoint/prepare-approve",
+              "api-reference/endpoint/prepare-dividendDistribution",
+              "api-reference/endpoint/prepare-newSto",
+              "api-reference/endpoint/prepare-newInvest",
+              "api-reference/endpoint/prepare-claimTokens",
+              "api-reference/endpoint/prepare-closeOffer"
+            ]
+          },
+          {
+            "group": "Send Transaction",
+            "pages": [
+              "api-reference/endpoint/send"
+            ]
+          },
+          {
+            "group": "Information Endpoints",
+            "pages": [
+              "api-reference/endpoint/get-stos",
+              "api-reference/endpoint/get-sto-balance",
+              "api-reference/endpoint/get-investors-info",
+              "api-reference/endpoint/get-investments-by-sto",
+              "api-reference/endpoint/get-transaction-status",
+              "api-reference/endpoint/get-allowance",
+              "api-reference/endpoint/get-balance-whitelist",
+              "api-reference/endpoint/get-network-info",
+              "api-reference/endpoint/get-token-info",
+              "api-reference/endpoint/get-tokenizer-info",
+              "api-reference/endpoint/get-whitelist-status"
+            ]
+          },
+          {
+            "group": "Management Endpoints",
+            "pages": [
+              "api-reference/endpoint/update-docs"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Agentic API",
+        "groups": [
+          {
+            "group": "Agentic API",
+            "pages": [
+              "api-reference/endpoint/agentic-methods-x402"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "MCP",
+        "groups": [
+          {
+            "group": "MCP",
+            "pages": [
+              "mcp/introduction"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "CLI",
+        "groups": [
+          {
+            "group": "CLI",
+            "pages": [
               "cli/introduction"
             ]
           }
