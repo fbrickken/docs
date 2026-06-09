@@ -1,0 +1,111 @@
+---
+title: 'Skill'
+description: 'Brickken AI-agent skill for the dapp API, Agentic API, CLI, and MCP.'
+---
+
+## Overview
+
+The **Brickken Skill** is a Codex-compatible AI-agent skill that helps agents choose and use the right Brickken surface:
+
+- **dapp API** when you have a Brickken API key.
+- **Agentic API** when you do not have an API key and want to use private-key based x402 flows.
+- **MCP** when your agent can connect to the hosted Brickken MCP server.
+- **CLI** when local signing and terminal execution are the best fit.
+
+Use the skill when an agent needs to inspect Brickken endpoints, prepare request bodies, understand expected responses, or decide whether a task should go through the API, CLI, or MCP.
+
+<CardGroup cols={2}>
+  <Card title="Download Skill" icon="download" href="/downloads/brickken-skill.zip">
+    Download the standalone Brickken skill archive.
+  </Card>
+  <Card title="CLI package" icon="box" href="https://www.npmjs.com/package/brickken-cli">
+    Install the public `brickken-cli` package from npm.
+  </Card>
+  <Card title="GitHub repository" icon="github" href="https://github.com/Brickken/brickken-api-cli">
+    View the public CLI and bundled skill source.
+  </Card>
+  <Card title="MCP" icon="plug" href="https://mcp.brickken.com/">
+    Open the official Brickken MCP page.
+  </Card>
+</CardGroup>
+
+## Install Only the Skill
+
+Use this path when you want the Brickken Skill without installing the CLI globally.
+
+```bash
+mkdir -p ~/.codex/skills
+curl -L https://docs.brickken.com/downloads/brickken-skill.zip -o /tmp/brickken-skill.zip
+rm -rf ~/.codex/skills/brickken
+unzip -o /tmp/brickken-skill.zip -d ~/.codex/skills
+```
+
+Verify the installation:
+
+```bash
+test -f ~/.codex/skills/brickken/SKILL.md && echo "Brickken skill installed"
+```
+
+Start a new Codex session after installing the skill so the agent reloads available skills.
+
+## Install with the CLI
+
+If you already use the [Brickken CLI](/cli/introduction), install the bundled skill with:
+
+```bash
+npm install -g brickken-cli
+brickken skill install
+```
+
+To install without a global CLI install, run the installer through `npx`:
+
+```bash
+npx brickken-cli skill install --path ~/.codex/skills --force
+```
+
+Inspect where the npm package bundles the skill:
+
+```bash
+brickken skill path
+```
+
+## Configure Credentials
+
+### dapp API
+
+Use the [dapp API](/api-reference/introduction) when you have a Brickken API key.
+
+```bash
+export BRICKKEN_API_KEY="YOUR_BRICKKEN_API_KEY"
+```
+
+The skill guides the agent toward API-key authenticated endpoints, request bodies, response examples, and transaction preparation or send flows.
+
+### Agentic API
+
+Use the [Agentic API](/api-reference/endpoint/agentic-methods-x402) when you want private-key based x402 flows without a Brickken API key.
+
+```bash
+export BRICKKEN_PRIVATE_KEY="0xYOUR_PRIVATE_KEY"
+export BRICKKEN_RPC_URL="https://ethereum-sepolia-rpc.publicnode.com"
+```
+
+The private key is used by your local agent runtime, CLI, or trusted MCP session for x402 payment signing and blockchain transaction signing. Never send a private key to the Brickken API.
+
+<Warning>
+Do not paste production API keys or private keys into shared chats, tickets, terminals, or logs. Use your agent client's secret store or local environment variables.
+</Warning>
+
+## Example Prompts
+
+```text
+Use the Brickken skill to prepare a new tokenization with my dapp API key.
+```
+
+```text
+Use the Brickken skill to register an ERC-8004 agent with the Agentic API and no API key.
+```
+
+```text
+Use the Brickken skill to decide whether this workflow should use the API, CLI, or MCP.
+```

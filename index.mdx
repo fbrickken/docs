@@ -1,6 +1,6 @@
 ---
 title: 'Brickken Developer Documentation'
-description: 'Official docs for the Brickken dapp API, Agentic API, MCP server, and CLI.'
+description: 'Official docs for the Brickken dapp API, Agentic API, MCP server, CLI, and Skill.'
 ---
 <img
   className="block dark:hidden"
@@ -15,12 +15,13 @@ description: 'Official docs for the Brickken dapp API, Agentic API, MCP server, 
 
 ## Welcome
 
-Brickken exposes the tokenization platform through four developer surfaces:
+Brickken exposes the tokenization platform through five developer and agent surfaces:
 
 - **dapp API** for API-key authenticated tokenization, STO, security-token, and read workflows.
 - **Agentic API** for private-key based ERC-8004 agent and agent-token workflows.
 - **MCP** for MCP-compatible AI agents.
 - **CLI** for local terminal workflows using the public `brickken-cli` package.
+- **Skill** for AI agents that need Brickken-specific API, CLI, and MCP guidance.
 
 <CardGroup cols={2}>
   <Card title="dapp API" icon="key" href="/api-reference/introduction">
@@ -34,6 +35,9 @@ Brickken exposes the tokenization platform through four developer surfaces:
   </Card>
   <Card title="CLI" icon="terminal" href="/cli/introduction">
     Install the public npm CLI and run x402-paid workflows from your terminal.
+  </Card>
+  <Card title="Skill" icon="sparkles" href="/skill/introduction">
+    Install the Brickken AI-agent skill with or without the CLI package.
   </Card>
 </CardGroup>
 

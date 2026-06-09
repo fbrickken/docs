@@ -124,6 +124,38 @@ brickken create-token \
 | `brickken tx sign` | local only | Sign prepared transaction JSON locally. |
 | `brickken tx send` | `POST /send-transactions` | Submit signed transactions. |
 | `brickken tx status` | `GET /get-transaction-status` | Poll transaction status. |
+| `brickken skill path` | local only | Print the bundled Brickken AI-agent skill path. |
+| `brickken skill install` | local only | Install the bundled skill into a Codex skills directory. |
+
+## AI Agent Skill
+
+The npm package includes a Codex-compatible Brickken skill at `skills/brickken`. Use it when an AI agent needs to choose between the dapp API, Agentic API, CLI, or MCP.
+
+For standalone installation without a global CLI install, see the [Skill documentation](/skill/introduction).
+
+After installing `brickken-cli`, install the skill into the default Codex skills directory:
+
+```bash
+brickken skill install
+```
+
+Or install it to a custom skills directory:
+
+```bash
+brickken skill install --path ~/.codex/skills --force
+```
+
+To inspect where the bundled skill lives in the installed package:
+
+```bash
+brickken skill path
+```
+
+Without a global install:
+
+```bash
+npx brickken-cli skill install --path ~/.codex/skills --force
+```
 
 ## Agent Example
 

@@ -99,6 +99,17 @@
             ]
           }
         ]
+      },
+      {
+        "tab": "Skill",
+        "groups": [
+          {
+            "group": "Skill",
+            "pages": [
+              "skill/introduction"
+            ]
+          }
+        ]
       }
     ],
     "global": {
