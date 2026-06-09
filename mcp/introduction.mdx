@@ -5,7 +5,7 @@ description: 'Hosted Brickken MCP server for API-key and x402 workflows in MCP-c
 
 ## Overview
 
-The Brickken MCP server exposes the Brickken dapp API and Agentic API as tools for MCP-compatible AI agents.
+The Brickken MCP server exposes the Brickken Dapp API and Agentic API as tools for MCP-compatible AI agents.
 
 <CardGroup cols={2}>
   <Card title="MCP" icon="plug" href="https://mcp.brickken.com/">
@@ -36,7 +36,7 @@ Every MCP session is isolated. Configure credentials at runtime with the `config
 
 ### API-key mode
 
-Use this mode for the [dapp API](/api-reference/introduction).
+Use this mode for the [Dapp API](/api-reference/introduction).
 
 ```json
 {
@@ -86,7 +86,7 @@ Only configure a private key in MCP clients and environments you trust. `get_con
 | `send_transactions` | Submit signed transactions to Brickken. |
 | `get_transaction_status` | Poll a transaction hash. |
 
-## dapp API Tools
+## Dapp API Tools
 
 These tools map to API-key authenticated dapp flows. If a private key is configured, write tools can prepare, sign, and send automatically; otherwise they return prepared transactions for external signing.
 
