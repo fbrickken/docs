@@ -125,24 +125,24 @@ brickken create-token \
 | `brickken tx send` | `POST /send-transactions` | Submit signed transactions. |
 | `brickken tx status` | `GET /get-transaction-status` | Poll transaction status. |
 | `brickken skill path` | local only | Print the bundled Brickken AI-agent skill path. |
-| `brickken skill install` | local only | Install the bundled skill into a Codex skills directory. |
+| `brickken skill install` | local only | Install the bundled skill into an agent skills directory. |
 
 ## AI Agent Skill
 
-The npm package includes a Codex-compatible Brickken skill at `skills/brickken`. Use it when an AI agent needs to choose between the Dapp API, Agentic API, CLI, or MCP.
+The npm package includes a Brickken skill at `skills/brickken`, built on the open [Agent Skills](https://agentskills.io) format and compatible with any agent that supports it — Claude Code, OpenAI Codex, Gemini CLI, Cursor, GitHub Copilot, and more. Use it when an AI agent needs to choose between the Dapp API, Agentic API, CLI, or MCP.
 
 For standalone installation without a global CLI install, see the [Skill documentation](/skill/introduction).
 
-After installing `brickken-cli`, install the skill into the default Codex skills directory:
+After installing `brickken-cli`, install the skill into the default skills directory (`~/.codex/skills`):
 
 ```bash
 brickken skill install
 ```
 
-Or install it to a custom skills directory:
+Or pass `--path` to target your agent's skills directory (for example `~/.claude/skills` for Claude Code, `~/.gemini/skills` for Gemini CLI, `~/.cursor/skills` for Cursor):
 
 ```bash
-brickken skill install --path ~/.codex/skills --force
+brickken skill install --path ~/.claude/skills --force
 ```
 
 To inspect where the bundled skill lives in the installed package:
@@ -154,7 +154,7 @@ brickken skill path
 Without a global install:
 
 ```bash
-npx brickken-cli skill install --path ~/.codex/skills --force
+npx brickken-cli skill install --path ~/.claude/skills --force
 ```
 
 ## Agent Example

@@ -5,7 +5,7 @@ description: 'Brickken AI-agent skill for the Dapp API, Agentic API, CLI, and MC
 
 ## Overview
 
-The **Brickken Skill** is a Codex-compatible AI-agent skill that helps agents choose and use the right Brickken surface:
+The **Brickken Skill** is an AI-agent skill built on the open [Agent Skills](https://agentskills.io) format (`SKILL.md`). It works with any agent that supports the standard — including Claude Code, OpenAI Codex, Gemini CLI, Cursor, and GitHub Copilot — and helps agents choose and use the right Brickken surface:
 
 - **Dapp API** when you have a Brickken API key.
 - **Agentic API** when you do not have an API key and want to use private-key based x402 flows.
@@ -31,22 +31,35 @@ Use the skill when an agent needs to inspect Brickken endpoints, prepare request
 
 ## Install Only the Skill
 
-Use this path when you want the Brickken Skill without installing the CLI globally.
+Use this path when you want the Brickken Skill without installing the CLI globally. Download the archive and unzip it into your agent's skills directory:
+
+| Agent | Personal skills directory |
+| --- | --- |
+| Claude Code | `~/.claude/skills` |
+| OpenAI Codex | `~/.codex/skills` |
+| Gemini CLI | `~/.gemini/skills` |
+| Cursor | `~/.cursor/skills` |
+| GitHub Copilot / VS Code | `~/.copilot/skills` |
+| Other agents | See your agent's documentation for its skills directory |
 
 ```bash
-mkdir -p ~/.codex/skills
+export SKILLS_DIR=~/.claude/skills   # set to your agent's skills directory
+
+mkdir -p "$SKILLS_DIR"
 curl -L https://raw.githubusercontent.com/fbrickken/docs/main/downloads/brickken-skill.zip -o /tmp/brickken-skill.zip
-rm -rf ~/.codex/skills/brickken
-unzip -o /tmp/brickken-skill.zip -d ~/.codex/skills
+rm -rf "$SKILLS_DIR/brickken"
+unzip -o /tmp/brickken-skill.zip -d "$SKILLS_DIR"
 ```
 
 Verify the installation:
 
 ```bash
-test -f ~/.codex/skills/brickken/SKILL.md && echo "Brickken skill installed"
+test -f "$SKILLS_DIR/brickken/SKILL.md" && echo "Brickken skill installed"
 ```
 
-Start a new Codex session after installing the skill so the agent reloads available skills.
+Most agents also discover project-level skills from a directory inside the repository (for example `.claude/skills`, `.cursor/skills`, `.gemini/skills`, or `.github/skills`). Unzip the archive there instead to share the skill with your team through version control.
+
+Start a new agent session after installing the skill so the agent reloads its available skills.
 
 ## Install with the CLI
 
@@ -57,10 +70,16 @@ npm install -g brickken-cli
 brickken skill install
 ```
 
+By default the installer targets `~/.codex/skills`. Pass `--path` to install into any other agent's skills directory:
+
+```bash
+brickken skill install --path ~/.claude/skills --force
+```
+
 To install without a global CLI install, run the installer through `npx`:
 
 ```bash
-npx brickken-cli skill install --path ~/.codex/skills --force
+npx brickken-cli skill install --path ~/.claude/skills --force
 ```
 
 Inspect where the npm package bundles the skill:
