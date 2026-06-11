@@ -42,7 +42,7 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** This endpoint prepares unsigned transactions for various blockchain operations. The operation is determined by the `method` field in the request body. Supported methods include standard tokenization methods (`newTokenization`, `mintToken`, `whitelist`, `burnToken`, `approve`, `transferTo`, `transferFrom`, `dividendDistribution`, `newSto`, `newInvest`, `closeOffer`, `claimTokens`) and x402-eligible agentic methods (`newTokenizedAgent`, `agentRegister`, `agentSetURI`, `agentSetMetadata`, `agentSetWallet`, `agentGiveFeedback`, `agentRevokeFeedback`, `agentAppendFeedbackResponse`, `agentCreateToken`, `agentMintToken`, `agentBurnToken`, `agentTransferToken`, `agentTransferFromToken`, `agentApproveToken`).\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY` for API-key auth, or `X-Payment` for x402 retries on eligible agentic methods\n- `Content-Type`: `application/json`\n\n**Common Request Body Parameters:**\n- `method` (string): Operation to perform.\n- `signerAddress` (string): Address initiating the transaction.\n- `chainId` (string): Chain ID in hex (e.g., \"aa36a7\").\n- `gasLimit` (string, optional): Optional gas limit.\n- `privateRpcUrl` (string, optional): Optional private RPC URL. `rpcUrl` is kept for backward compatibility in older examples.\n\n---\n\n**Method: `newTokenization`**\nPrepares a new tokenization transaction.\n\n**Additional Request Body Parameters:**\n- `url` (string): Token documentation URL.\n- `name` (string): Token name.\n- `symbol` (string): Token symbol (3 to 5 characters).\n- `tokenizerEmail` (string): The email of the tokenizer.\n- `supplyCap` (string, optional): Max token supply.\n- `preMints` (array, optional): Pre-mint configurations.\n- `initialHolders` (array, optional): Initial holder configurations.\n\n---\n\n**Method: `mintToken`**\nPrepares minting tokens to users.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `userToMint` (array of objects): Each object includes:\n  - `email` (string)\n  - `investorAddress` (string)\n  - `amount` (string)\n  - `needWhitelist` (boolean)\n\n---\n\n**Method: `whitelist`**\nWhitelists or blacklists users.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `userToWhitelist` (array of objects): Each includes:\n  - `whitelistStatus` (string): \"true\" or \"false\".\n  - `investorAddress` (string)\n\n---\n\n**Method: `burnToken`**\nBurns tokens from the signer’s balance.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `amount` (string): Amount to burn.\n\n---\n\n**Method: `transferFrom`**\nTransfers tokens from one address to another (with prior approval).\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `from` (string): Sender address.\n- `to` (string): Receiver address.\n- `amount` (string): Amount to transfer.\n\n---\n\n**Method: `transferTo`**\nTransfers tokens from `signerAddress` to another address.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Symbol of the token.\n- `to` (string): Receiver address.\n- `amount` (string): Amount to transfer.\n\n---\n\n**Method: `approve`**\nApproves a spender to use tokens.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string): Token to approve (can include BKN, USDT, USDC).\n- `spenderAddress` (string): Address being approved.\n- `amount` (string): Allowance amount.\n\n---\n\n**Method: `dividendDistribution`**\nDistributes `paymentToken` dividends to holders of `tokenSymbol`.\n\n**Additional Request Body Parameters:**\n- `tokenSymbol` (string)\n- `amount` (string): Amount of payment token to distribute.\n\n**Note:** Amounts are in whole units (e.g., 10 for 10 USDT).\n\n---\n\n**Method: `newSto`**\nCreates a new STO (Security Token Offering).\n\n**Additional Request Body Parameters:**\n- `tokenizerEmail` (string)\n- `tokenAmount` (string)\n- `offeringName` (string)\n- `startDate` (string)\n- `endDate` (string)\n- `acceptedCoin` (string)\n- `minRaiseUSD` (string)\n- `maxRaiseUSD` (string)\n- `minInvestment` (string)\n- `maxInvestment` (string)\n- `signerAddress` (string)",
+        "description": "**Description:** This endpoint prepares unsigned transactions for the method selected in the `method` field. For exact required and optional body fields, use the method-specific endpoints under Create Transaction.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY` for API-key auth, or `X-Payment` for x402 retries on eligible agentic methods\n- `Content-Type`: `application/json`\n\n**Common Request Body Parameters:**\n- `method` (string, required): Operation to prepare.\n- `chainId` (string, required): Blockchain network identifier. Hex format is recommended, for example `aa36a7` for Sepolia.\n- `signerAddress` (string, conditionally required): Wallet address that signs the prepared transaction. Most methods require it; `newInvest` and `claimTokens` can use `investorAddress` as the signer.\n- `gasLimit` (string, optional): Gas limit override. If omitted, the API estimates gas automatically.\n- `privateRpcUrl` (string, optional): Private RPC URL override.\n- `nonce` (integer, optional): Nonce override. If omitted, the API reads the pending nonce from the RPC.",
         "security": [
           {
             "apiKeyAuth": []
@@ -93,18 +93,18 @@
                   },
                   "signerAddress": {
                     "type": "string",
-                    "example": "0xSignerAddress",
-                    "description": "The address of the user initiating the transaction."
+                    "description": "Optional. Wallet address that will sign the prepared transaction. If omitted, the API uses investorAddress for this method.",
+                    "example": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b"
                   },
                   "chainId": {
                     "type": "string",
-                    "example": "aa36a7",
-                    "description": "The blockchain network's chain ID in hexadecimal format (e.g., \"aa36a7\" for Sepolia testnet)."
+                    "description": "Required. Blockchain network identifier. Hex format is recommended, for example Sepolia `aa36a7`.",
+                    "example": "aa36a7"
                   },
                   "tokenSymbol": {
                     "type": "string",
-                    "example": "BKN",
-                    "description": "The token symbol (3 to 5 characters)."
+                    "description": "Required. Token symbol. Must be 2 to 5 uppercase letters or numbers.",
+                    "example": "EXMPL"
                   },
                   "tokenType": {
                     "type": "string",
@@ -119,220 +119,308 @@
                       "PROFIT_SHARING"
                     ],
                     "example": "EQUITY",
-                    "description": "Type of token. Allowed values: EQUITY, DEBT, BILL_FACTORING, ICO, STABLECOIN, REVENUE_SHARE, RWA_TOKEN, PROFIT_SHARING."
+                    "description": "Optional. Token type. Defaults to EQUITY when omitted."
                   },
                   "tokenizerEmail": {
                     "type": "string",
-                    "example": "tokenizer.email@example.com",
-                    "description": "The email of the user."
+                    "description": "Optional. Tokenizer email. Required for newTokenization, newSto, and closeOffer.",
+                    "example": "tokenizer@example.com",
+                    "format": "email"
                   },
                   "acceptedCoin": {
                     "type": "string",
-                    "example": "USDT",
-                    "description": "Accepted payment token symbol (used in newSto)."
+                    "description": "Required. Accepted payment token symbol.",
+                    "example": "USDT"
                   },
                   "amount": {
                     "type": "string",
-                    "example": "100",
-                    "description": "Amount for various operations (approve, burnToken, transferFrom, transferTo, dividendDistribution)."
+                    "description": "Optional. Amount used by approve, burnToken, transferFrom, transferTo, and dividendDistribution.",
+                    "example": "100"
                   },
                   "endDate": {
                     "type": "string",
-                    "format": "date-time",
-                    "example": "2025-10-02T00:00:00.000Z",
-                    "description": "End date of the STO (used in newSto)."
+                    "description": "Required. STO end date.",
+                    "example": "2026-12-31T23:59:59.000Z",
+                    "format": "date-time"
                   },
                   "from": {
                     "type": "string",
-                    "example": "0x123...",
-                    "description": "Source address for transfer (used in transferFrom)."
+                    "description": "Optional. Source address required by transferFrom.",
+                    "example": "0x1111111111111111111111111111111111111111",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
                   },
                   "gasLimit": {
                     "type": "string",
-                    "example": "2000000 but can be omitted",
-                    "description": "An amount of gas units as limits. If not specified, it will be automatically estimated."
+                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically.",
+                    "example": "2000000"
                   },
                   "initialHolders": {
                     "type": "array",
+                    "description": "Optional. Initial holders paired by index with preMints. Provide walletAddress directly, or email when a DFNS wallet can be resolved.",
                     "items": {
                       "type": "object",
                       "properties": {
-                        "email": {
-                          "type": "string"
+                        "walletAddress": {
+                          "type": "string",
+                          "description": "Optional. Holder wallet address.",
+                          "example": "0x1111111111111111111111111111111111111111",
+                          "pattern": "^0x[a-fA-F0-9]{40}$"
                         },
-                        "percentage": {
-                          "type": "number"
+                        "email": {
+                          "type": "string",
+                          "description": "Optional. Holder email used to resolve a DFNS wallet when walletAddress is omitted.",
+                          "example": "holder@example.com",
+                          "format": "email"
                         }
                       }
                     },
-                    "description": "Array of initial token holders (used in newTokenization)."
+                    "example": [
+                      {
+                        "walletAddress": "0x1111111111111111111111111111111111111111"
+                      }
+                    ]
                   },
                   "investmentAmount": {
                     "type": "string",
-                    "example": "10",
-                    "description": "Amount to invest (used in newInvest)."
+                    "description": "Required. Payment-token amount to invest.",
+                    "example": "1000"
                   },
                   "investorAddress": {
                     "type": "string",
-                    "example": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
-                    "description": "Address of the investor (used in newInvest, claimTokens, mintToken)."
+                    "description": "Optional. Investor wallet address. Required for newInvest and claimTokens; optional for approve payment-token owner scope.",
+                    "example": "0x1111111111111111111111111111111111111111",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
                   },
                   "investorEmail": {
                     "type": "string",
+                    "description": "Optional. Investor email. Required for newInvest, claimTokens, burnToken, and each whitelist/mint recipient.",
                     "example": "investor@example.com",
-                    "description": "Email of the investor (used in newInvest, claimTokens, whitelist)."
+                    "format": "email"
                   },
                   "maxInvestment": {
                     "type": "string",
-                    "example": "100",
-                    "description": "Maximum investment amount (used in newSto)."
+                    "description": "Required. Maximum investment amount.",
+                    "example": "10000"
                   },
                   "maxRaiseUSD": {
                     "type": "string",
-                    "example": "100",
-                    "description": "Maximum raise amount in USD (used in newSto)."
+                    "description": "Required. Maximum raise amount in USD.",
+                    "example": "100000"
                   },
                   "minInvestment": {
                     "type": "string",
-                    "example": "10",
-                    "description": "Minimum investment amount (used in newSto)."
+                    "description": "Required. Minimum investment amount.",
+                    "example": "100"
                   },
                   "minRaiseUSD": {
                     "type": "string",
-                    "example": "10",
-                    "description": "Minimum raise amount in USD (used in newSto)."
+                    "description": "Required. Minimum raise amount in USD.",
+                    "example": "10000"
                   },
                   "name": {
                     "type": "string",
-                    "example": "Brickken",
-                    "description": "Name of the token."
+                    "description": "Required. Name of the tokenized asset.",
+                    "example": "Example Token"
                   },
                   "newInvestor": {
                     "type": "object",
+                    "description": "Optional. Default profile data used when creating missing investor users.",
                     "properties": {
                       "name": {
                         "type": "string",
+                        "description": "Optional. Investor first name.",
                         "example": "John"
                       },
                       "surname": {
                         "type": "string",
+                        "description": "Optional. Investor surname.",
                         "example": "Doe"
+                      },
+                      "middleName": {
+                        "type": "string",
+                        "description": "Optional. Investor middle name.",
+                        "example": "A."
+                      },
+                      "secondSurname": {
+                        "type": "string",
+                        "description": "Optional. Investor second surname.",
+                        "example": "Smith"
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "Optional. Investor type. Defaults to INVESTOR_PERSON.",
+                        "example": "INVESTOR_PERSON"
                       }
-                    },
-                    "description": "New investor information (used in whitelist and mintToken)."
+                    }
                   },
                   "offeringName": {
                     "type": "string",
-                    "example": "FE Test STO 5",
-                    "description": "Name of the STO offering (used in newSto)."
+                    "description": "Required. Name of the STO offering.",
+                    "example": "Series A"
                   },
                   "paymentTokenSymbol": {
                     "type": "string",
-                    "example": "USDT",
-                    "description": "Symbol of the payment token (used in newInvest, claimTokens)."
+                    "description": "Optional. Payment token symbol used by newInvest. If omitted, the chain default payment token is used.",
+                    "example": "USDT"
                   },
                   "preMints": {
                     "type": "array",
+                    "description": "Optional. Pre-mint amounts. If provided, initialHolders must also be provided with the same length.",
                     "items": {
                       "type": "object",
+                      "required": [
+                        "amount"
+                      ],
                       "properties": {
-                        "email": {
-                          "type": "string"
-                        },
-                        "investorAddress": {
-                          "type": "string"
-                        },
                         "amount": {
-                          "type": "string"
-                        },
-                        "needWhitelist": {
-                          "type": "boolean"
+                          "type": "string",
+                          "description": "Required. Amount to pre-mint to the holder at the same array index.",
+                          "example": "1000"
                         }
                       }
                     },
-                    "description": "Array of pre-mint configurations (used in newTokenization)."
-                  },
-                  "rpcUrl": {
-                    "type": "string",
-                    "example": "{URL_TO_RPC} but can be omitted",
-                    "description": "The RPC URL of the blockchain network. If not provided, a default RPC URL for the specified chain ID will be used."
+                    "example": [
+                      {
+                        "amount": "1000"
+                      }
+                    ]
                   },
                   "privateRpcUrl": {
                     "type": "string",
-                    "example": "https://rpc.example",
-                    "description": "Optional private RPC override used when preparing transactions."
+                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId.",
+                    "example": "https://rpc.example.com"
                   },
                   "spenderAddress": {
                     "type": "string",
-                    "example": "0x456...",
-                    "description": "Address of the spender being approved (used in approve)."
+                    "description": "Optional. Spender address required by approve.",
+                    "example": "0x3333333333333333333333333333333333333333",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
                   },
                   "startDate": {
                     "type": "string",
-                    "format": "date-time",
-                    "example": "2025-08-26T17:30:00.000Z",
-                    "description": "Start date of the STO (used in newSto)."
+                    "description": "Required. STO start date.",
+                    "example": "2026-09-01T00:00:00.000Z",
+                    "format": "date-time"
                   },
                   "supplyCap": {
                     "type": "string",
-                    "example": "10",
-                    "description": "Max token supply."
+                    "description": "Optional. Maximum token supply. Defaults to `0` when omitted.",
+                    "example": "1000000"
                   },
                   "to": {
                     "type": "string",
-                    "example": "0x456...",
-                    "description": "Destination address for transfer (used in transferFrom, transferTo)."
+                    "description": "Optional. Destination address required by transferFrom and transferTo.",
+                    "example": "0x2222222222222222222222222222222222222222",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
                   },
                   "tokenAmount": {
                     "type": "string",
-                    "example": "1000",
-                    "description": "Amount of tokens for STO (used in newSto)."
+                    "description": "Required. Number of tokens offered in the STO.",
+                    "example": "1000"
                   },
                   "tokenizerAddress": {
                     "type": "string",
-                    "example": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
-                    "description": "The address of the tokenizer (used in newTokenization)."
+                    "description": "Optional. Tokenizer wallet address used by tokenization setup flows when provided.",
+                    "example": "0x4444444444444444444444444444444444444444",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
                   },
                   "url": {
                     "type": "string",
-                    "example": "https://example.com/token-docs",
-                    "description": "URL associated with tokenization documents (required for newTokenization)."
+                    "description": "Optional. Token documentation URL. Defaults to an empty string when omitted.",
+                    "example": "https://example.com/token-docs"
                   },
                   "userToMint": {
                     "type": "array",
+                    "minItems": 1,
+                    "description": "Required. Users to mint tokens to.",
                     "items": {
                       "type": "object",
+                      "required": [
+                        "investorEmail",
+                        "amount"
+                      ],
                       "properties": {
                         "investorEmail": {
-                          "type": "string"
-                        },
-                        "investorAddress": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Required. Recipient investor email.",
+                          "example": "investor@example.com",
+                          "format": "email"
                         },
                         "amount": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Required. Positive whole-token amount to mint.",
+                          "example": "100"
+                        },
+                        "investorAddress": {
+                          "type": "string",
+                          "description": "Optional. Recipient wallet address. If omitted, the API attempts to create or resolve a DFNS wallet.",
+                          "example": "0x1111111111111111111111111111111111111111",
+                          "pattern": "^0x[a-fA-F0-9]{40}$"
                         },
                         "needWhitelist": {
-                          "type": "boolean"
+                          "type": "boolean",
+                          "description": "Optional. Whether the recipient should be whitelisted before minting. Defaults to true unless explicitly false.",
+                          "example": true
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "Optional. Investor first name used when creating a new investor record.",
+                          "example": "John"
+                        },
+                        "surname": {
+                          "type": "string",
+                          "description": "Optional. Investor surname used when creating a new investor record.",
+                          "example": "Doe"
                         }
                       }
                     },
-                    "description": "Array of users to mint tokens to (used in mintToken)."
+                    "example": [
+                      {
+                        "investorEmail": "investor@example.com",
+                        "investorAddress": "0x1111111111111111111111111111111111111111",
+                        "amount": "100",
+                        "needWhitelist": true
+                      }
+                    ]
                   },
                   "userToWhitelist": {
                     "type": "array",
+                    "minItems": 1,
+                    "description": "Required. Users to whitelist or blacklist.",
                     "items": {
                       "type": "object",
+                      "required": [
+                        "investorAddress",
+                        "investorEmail",
+                        "whitelistStatus"
+                      ],
                       "properties": {
-                        "whitelistStatus": {
-                          "type": "boolean"
-                        },
                         "investorAddress": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Required. Investor wallet address.",
+                          "example": "0x1111111111111111111111111111111111111111",
+                          "pattern": "^0x[a-fA-F0-9]{40}$"
+                        },
+                        "investorEmail": {
+                          "type": "string",
+                          "description": "Required. Investor email used for the investor record.",
+                          "example": "investor@example.com",
+                          "format": "email"
+                        },
+                        "whitelistStatus": {
+                          "type": "boolean",
+                          "description": "Required. `true` to whitelist, `false` to blacklist.",
+                          "example": true
                         }
                       }
                     },
-                    "description": "Array of users to whitelist/blacklist (used in whitelist)."
+                    "example": [
+                      {
+                        "investorAddress": "0x1111111111111111111111111111111111111111",
+                        "investorEmail": "investor@example.com",
+                        "whitelistStatus": true
+                      }
+                    ]
                   },
                   "ownerEmail": {
                     "type": "string",
@@ -475,8 +563,65 @@
                   "active": {
                     "type": "boolean",
                     "description": "Whether the registered agent should appear active."
+                  },
+                  "nonce": {
+                    "type": "integer",
+                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC.",
+                    "example": 12
+                  },
+                  "paymentTokenAddress": {
+                    "type": "string",
+                    "description": "Optional. Payment token contract address override. If omitted, the chain default payment token is used.",
+                    "example": "0x5555555555555555555555555555555555555555",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
                   }
+                },
+                "required": [
+                  "method",
+                  "chainId"
+                ],
+                "example": {
+                  "method": "newTokenization",
+                  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                  "chainId": "aa36a7",
+                  "tokenizerEmail": "tokenizer@example.com",
+                  "name": "Example Token",
+                  "tokenSymbol": "EXMPL",
+                  "tokenType": "EQUITY",
+                  "supplyCap": "1000000",
+                  "url": "https://example.com/token-docs",
+                  "preMints": [
+                    {
+                      "amount": "1000"
+                    }
+                  ],
+                  "initialHolders": [
+                    {
+                      "walletAddress": "0x1111111111111111111111111111111111111111"
+                    }
+                  ]
                 }
+              },
+              "example": {
+                "method": "newTokenization",
+                "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                "chainId": "aa36a7",
+                "tokenizerEmail": "tokenizer@example.com",
+                "name": "Example Token",
+                "tokenSymbol": "EXMPL",
+                "tokenType": "EQUITY",
+                "supplyCap": "1000000",
+                "url": "https://example.com/token-docs",
+                "preMints": [
+                  {
+                    "amount": "1000"
+                  }
+                ],
+                "initialHolders": [
+                  {
+                    "walletAddress": "0x1111111111111111111111111111111111111111"
+                  }
+                ]
               }
             }
           }
@@ -596,7 +741,7 @@
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "Prepares unsigned transactions for the newTokenization method.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"newTokenization\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\",\n    \"url\": \"https://example.com/token-docs\",\n    \"name\": \"Example Token\",\n    \"tokenSymbol\": \"EXMPL\",\n    \"tokenizerEmail\": \"tokenizer@example.com\",\n    \"tokenType\": \"EQUITY\",\n    \"supplyCap\": \"1000000\"\n  }'\n```",
+        "description": "Prepares unsigned transactions for the newTokenization method.",
         "security": [
           {
             "apiKeyAuth": []
@@ -608,40 +753,43 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "description": "Request body for newTokenization method.",
+                "description": "Request body for newTokenization. Required fields are method, chainId, signerAddress, tokenizerEmail, name, and tokenSymbol.",
+                "required": [
+                  "method",
+                  "signerAddress",
+                  "chainId",
+                  "tokenizerEmail",
+                  "name",
+                  "tokenSymbol"
+                ],
                 "properties": {
                   "method": {
                     "type": "string",
-                    "example": "newTokenization",
-                    "description": "The operation to be performed."
+                    "enum": [
+                      "newTokenization"
+                    ],
+                    "description": "Required. Must be `newTokenization`."
                   },
                   "signerAddress": {
                     "type": "string",
-                    "description": "Address initiating the transaction."
+                    "description": "Required. Wallet address that will sign the prepared transaction."
                   },
                   "chainId": {
                     "type": "string",
-                    "description": "Chain ID in hex."
-                  },
-                  "gasLimit": {
-                    "type": "string",
-                    "description": "Optional gas limit."
-                  },
-                  "rpcUrl": {
-                    "type": "string",
-                    "description": "Optional RPC URL."
+                    "description": "Required. Blockchain network identifier. Hex format is recommended, for example Sepolia `aa36a7`."
                   },
                   "tokenizerEmail": {
-                    "type": "string"
-                  },
-                  "url": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Tokenizer email. The tokenizer user must already exist.",
+                    "format": "email"
                   },
                   "name": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Name of the tokenized asset."
                   },
                   "tokenSymbol": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Token symbol. Must be 2 to 5 uppercase letters or numbers."
                   },
                   "tokenType": {
                     "type": "string",
@@ -655,24 +803,116 @@
                       "RWA_TOKEN",
                       "PROFIT_SHARING"
                     ],
-                    "description": "Type of token."
+                    "description": "Optional. Token type. Defaults to EQUITY when omitted."
                   },
                   "supplyCap": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Optional. Maximum token supply. Defaults to `0` when omitted."
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "Optional. Token documentation URL. Defaults to an empty string when omitted."
+                  },
+                  "tokenizerAddress": {
+                    "type": "string",
+                    "description": "Optional. Tokenizer wallet address used by tokenization setup flows when provided.",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "paymentTokenAddress": {
+                    "type": "string",
+                    "description": "Optional. Payment token contract address override. If omitted, the chain default payment token is used.",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
                   },
                   "preMints": {
                     "type": "array",
+                    "description": "Optional. Pre-mint amounts. If provided, initialHolders must also be provided with the same length.",
                     "items": {
-                      "type": "object"
+                      "type": "object",
+                      "required": [
+                        "amount"
+                      ],
+                      "properties": {
+                        "amount": {
+                          "type": "string",
+                          "description": "Required. Amount to pre-mint to the holder at the same array index."
+                        }
+                      }
                     }
                   },
                   "initialHolders": {
                     "type": "array",
+                    "description": "Optional. Initial holders paired by index with preMints. Provide walletAddress directly, or email when a DFNS wallet can be resolved.",
                     "items": {
-                      "type": "object"
+                      "type": "object",
+                      "properties": {
+                        "walletAddress": {
+                          "type": "string",
+                          "description": "Optional. Holder wallet address.",
+                          "pattern": "^0x[a-fA-F0-9]{40}$"
+                        },
+                        "email": {
+                          "type": "string",
+                          "description": "Optional. Holder email used to resolve a DFNS wallet when walletAddress is omitted.",
+                          "format": "email"
+                        }
+                      }
                     }
+                  },
+                  "gasLimit": {
+                    "type": "string",
+                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId."
+                  },
+                  "nonce": {
+                    "type": "integer",
+                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC."
                   }
+                },
+                "example": {
+                  "method": "newTokenization",
+                  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                  "chainId": "aa36a7",
+                  "tokenizerEmail": "tokenizer@example.com",
+                  "name": "Example Token",
+                  "tokenSymbol": "EXMPL",
+                  "tokenType": "EQUITY",
+                  "supplyCap": "1000000",
+                  "url": "https://example.com/token-docs",
+                  "preMints": [
+                    {
+                      "amount": "1000"
+                    }
+                  ],
+                  "initialHolders": [
+                    {
+                      "walletAddress": "0x1111111111111111111111111111111111111111"
+                    }
+                  ]
                 }
+              },
+              "example": {
+                "method": "newTokenization",
+                "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                "chainId": "aa36a7",
+                "tokenizerEmail": "tokenizer@example.com",
+                "name": "Example Token",
+                "tokenSymbol": "EXMPL",
+                "tokenType": "EQUITY",
+                "supplyCap": "1000000",
+                "url": "https://example.com/token-docs",
+                "preMints": [
+                  {
+                    "amount": "1000"
+                  }
+                ],
+                "initialHolders": [
+                  {
+                    "walletAddress": "0x1111111111111111111111111111111111111111"
+                  }
+                ]
               }
             }
           }
@@ -713,7 +953,7 @@
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "Prepares unsigned transactions for the mintToken method.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"mintToken\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\",\n    \"tokenSymbol\": \"EXMPL\",\n    \"userToMint\": [\n      {\n        \"investorEmail\": \"investor@example.com\",\n        \"investorAddress\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\",\n        \"amount\": \"100\",\n        \"needWhitelist\": true\n      }\n    ]\n  }'\n```",
+        "description": "Prepares unsigned transactions for the mintToken method.",
         "security": [
           {
             "apiKeyAuth": []
@@ -725,35 +965,115 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "description": "Request body for mintToken method.",
+                "description": "Request body for mintToken. userToMint must contain at least one recipient.",
+                "required": [
+                  "method",
+                  "signerAddress",
+                  "chainId",
+                  "tokenSymbol",
+                  "userToMint"
+                ],
                 "properties": {
                   "method": {
                     "type": "string",
-                    "example": "mintToken",
-                    "description": "The operation to be performed."
+                    "enum": [
+                      "mintToken"
+                    ],
+                    "description": "Required. Must be `mintToken`."
                   },
                   "signerAddress": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Wallet address that will sign the prepared transaction."
                   },
                   "chainId": {
-                    "type": "string"
-                  },
-                  "gasLimit": {
-                    "type": "string"
-                  },
-                  "rpcUrl": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Blockchain network identifier. Hex format is recommended, for example Sepolia `aa36a7`."
                   },
                   "tokenSymbol": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Token symbol. Must be 2 to 5 uppercase letters or numbers."
                   },
                   "userToMint": {
                     "type": "array",
+                    "minItems": 1,
+                    "description": "Required. Users to mint tokens to.",
                     "items": {
-                      "type": "object"
+                      "type": "object",
+                      "required": [
+                        "investorEmail",
+                        "amount"
+                      ],
+                      "properties": {
+                        "investorEmail": {
+                          "type": "string",
+                          "description": "Required. Recipient investor email.",
+                          "format": "email"
+                        },
+                        "amount": {
+                          "type": "string",
+                          "description": "Required. Positive whole-token amount to mint."
+                        },
+                        "investorAddress": {
+                          "type": "string",
+                          "description": "Optional. Recipient wallet address. If omitted, the API attempts to create or resolve a DFNS wallet.",
+                          "pattern": "^0x[a-fA-F0-9]{40}$"
+                        },
+                        "needWhitelist": {
+                          "type": "boolean",
+                          "description": "Optional. Whether the recipient should be whitelisted before minting. Defaults to true unless explicitly false."
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "Optional. Investor first name used when creating a new investor record."
+                        },
+                        "surname": {
+                          "type": "string",
+                          "description": "Optional. Investor surname used when creating a new investor record."
+                        }
+                      }
                     }
+                  },
+                  "gasLimit": {
+                    "type": "string",
+                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId."
+                  },
+                  "nonce": {
+                    "type": "integer",
+                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC."
                   }
+                },
+                "example": {
+                  "method": "mintToken",
+                  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                  "chainId": "aa36a7",
+                  "tokenSymbol": "EXMPL",
+                  "userToMint": [
+                    {
+                      "investorEmail": "investor@example.com",
+                      "investorAddress": "0x1111111111111111111111111111111111111111",
+                      "amount": "100",
+                      "needWhitelist": true
+                    }
+                  ]
                 }
+              },
+              "example": {
+                "method": "mintToken",
+                "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                "chainId": "aa36a7",
+                "tokenSymbol": "EXMPL",
+                "userToMint": [
+                  {
+                    "investorEmail": "investor@example.com",
+                    "investorAddress": "0x1111111111111111111111111111111111111111",
+                    "amount": "100",
+                    "needWhitelist": true
+                  }
+                ]
               }
             }
           }
@@ -794,7 +1114,7 @@
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "Prepares unsigned transactions for the whitelist method.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"whitelist\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\",\n    \"tokenSymbol\": \"EXMPL\",\n    \"userToWhitelist\": [\n      {\n        \"whitelistStatus\": \"true\",\n        \"investorAddress\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\"\n      }\n    ]\n  }'\n```",
+        "description": "Prepares unsigned transactions for the whitelist method.",
         "security": [
           {
             "apiKeyAuth": []
@@ -806,38 +1126,128 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "description": "Request body for whitelist method.",
+                "description": "Request body for whitelist. userToWhitelist must contain at least one investor address and target status.",
+                "required": [
+                  "method",
+                  "signerAddress",
+                  "chainId",
+                  "tokenSymbol",
+                  "userToWhitelist"
+                ],
                 "properties": {
                   "method": {
                     "type": "string",
-                    "example": "whitelist",
-                    "description": "The operation to be performed."
+                    "enum": [
+                      "whitelist"
+                    ],
+                    "description": "Required. Must be `whitelist`."
                   },
                   "signerAddress": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Wallet address that will sign the prepared transaction."
                   },
                   "chainId": {
-                    "type": "string"
-                  },
-                  "gasLimit": {
-                    "type": "string"
-                  },
-                  "rpcUrl": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Blockchain network identifier. Hex format is recommended, for example Sepolia `aa36a7`."
                   },
                   "tokenSymbol": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Token symbol. Must be 2 to 5 uppercase letters or numbers."
                   },
                   "userToWhitelist": {
                     "type": "array",
+                    "minItems": 1,
+                    "description": "Required. Users to whitelist or blacklist.",
                     "items": {
-                      "type": "object"
+                      "type": "object",
+                      "required": [
+                        "investorAddress",
+                        "investorEmail",
+                        "whitelistStatus"
+                      ],
+                      "properties": {
+                        "investorAddress": {
+                          "type": "string",
+                          "description": "Required. Investor wallet address.",
+                          "pattern": "^0x[a-fA-F0-9]{40}$"
+                        },
+                        "investorEmail": {
+                          "type": "string",
+                          "description": "Required. Investor email used for the investor record.",
+                          "format": "email"
+                        },
+                        "whitelistStatus": {
+                          "type": "boolean",
+                          "description": "Required. `true` to whitelist, `false` to blacklist."
+                        }
+                      }
                     }
                   },
                   "newInvestor": {
-                    "type": "object"
+                    "type": "object",
+                    "description": "Optional. Default profile data used when creating missing investor users.",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Optional. Investor first name."
+                      },
+                      "surname": {
+                        "type": "string",
+                        "description": "Optional. Investor surname."
+                      },
+                      "middleName": {
+                        "type": "string",
+                        "description": "Optional. Investor middle name."
+                      },
+                      "secondSurname": {
+                        "type": "string",
+                        "description": "Optional. Investor second surname."
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "Optional. Investor type. Defaults to INVESTOR_PERSON."
+                      }
+                    }
+                  },
+                  "gasLimit": {
+                    "type": "string",
+                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId."
+                  },
+                  "nonce": {
+                    "type": "integer",
+                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC."
                   }
+                },
+                "example": {
+                  "method": "whitelist",
+                  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                  "chainId": "aa36a7",
+                  "tokenSymbol": "EXMPL",
+                  "userToWhitelist": [
+                    {
+                      "investorAddress": "0x1111111111111111111111111111111111111111",
+                      "investorEmail": "investor@example.com",
+                      "whitelistStatus": true
+                    }
+                  ]
                 }
+              },
+              "example": {
+                "method": "whitelist",
+                "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                "chainId": "aa36a7",
+                "tokenSymbol": "EXMPL",
+                "userToWhitelist": [
+                  {
+                    "investorAddress": "0x1111111111111111111111111111111111111111",
+                    "investorEmail": "investor@example.com",
+                    "whitelistStatus": true
+                  }
+                ]
               }
             }
           }
@@ -878,7 +1288,7 @@
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "Prepares unsigned transactions for the burnToken method.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"burnToken\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\",\n    \"tokenSymbol\": \"EXMPL\",\n    \"amount\": \"100\"\n  }'\n```",
+        "description": "Prepares unsigned transactions for the burnToken method.",
         "security": [
           {
             "apiKeyAuth": []
@@ -890,30 +1300,73 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "description": "Request body for burnToken method.",
+                "description": "Request body for burnToken.",
+                "required": [
+                  "method",
+                  "signerAddress",
+                  "chainId",
+                  "tokenSymbol",
+                  "amount",
+                  "investorEmail"
+                ],
                 "properties": {
                   "method": {
                     "type": "string",
-                    "example": "burnToken",
-                    "description": "The operation to be performed."
+                    "enum": [
+                      "burnToken"
+                    ],
+                    "description": "Required. Must be `burnToken`."
                   },
                   "signerAddress": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Wallet address that will sign the prepared transaction."
                   },
                   "chainId": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Blockchain network identifier. Hex format is recommended, for example Sepolia `aa36a7`."
                   },
                   "tokenSymbol": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Token symbol. Must be 2 to 5 uppercase letters or numbers."
                   },
                   "amount": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Amount of tokens to burn."
                   },
                   "investorEmail": {
                     "type": "string",
-                    "description": "Email of the investor"
+                    "description": "Required. Email of the investor burning tokens.",
+                    "format": "email"
+                  },
+                  "gasLimit": {
+                    "type": "string",
+                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId."
+                  },
+                  "nonce": {
+                    "type": "integer",
+                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC."
                   }
+                },
+                "example": {
+                  "method": "burnToken",
+                  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                  "chainId": "aa36a7",
+                  "tokenSymbol": "EXMPL",
+                  "amount": "100",
+                  "investorEmail": "investor@example.com"
                 }
+              },
+              "example": {
+                "method": "burnToken",
+                "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                "chainId": "aa36a7",
+                "tokenSymbol": "EXMPL",
+                "amount": "100",
+                "investorEmail": "investor@example.com"
               }
             }
           }
@@ -954,7 +1407,7 @@
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "Prepares unsigned transactions for the transferFrom method.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"transferFrom\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\",\n    \"tokenSymbol\": \"EXMPL\",\n    \"from\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\",\n    \"to\": \"0x8ba1f109551bD432803012645Hac136c\",\n    \"amount\": \"100\"\n  }'\n```",
+        "description": "Prepares unsigned transactions for the transferFrom method.",
         "security": [
           {
             "apiKeyAuth": []
@@ -966,32 +1419,81 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "description": "Request body for transferFrom method.",
+                "description": "Request body for transferFrom.",
+                "required": [
+                  "method",
+                  "signerAddress",
+                  "chainId",
+                  "tokenSymbol",
+                  "from",
+                  "to",
+                  "amount"
+                ],
                 "properties": {
                   "method": {
                     "type": "string",
-                    "example": "transferFrom",
-                    "description": "The operation to be performed."
+                    "enum": [
+                      "transferFrom"
+                    ],
+                    "description": "Required. Must be `transferFrom`."
                   },
                   "signerAddress": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Wallet address that will sign the prepared transaction."
                   },
                   "chainId": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Blockchain network identifier. Hex format is recommended, for example Sepolia `aa36a7`."
                   },
                   "tokenSymbol": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Token symbol. Must be 2 to 5 uppercase letters or numbers."
                   },
                   "from": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Owner address to transfer from. This address must have approved signerAddress.",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
                   },
                   "to": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Recipient address.",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
                   },
                   "amount": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Amount of tokens to transfer."
+                  },
+                  "gasLimit": {
+                    "type": "string",
+                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId."
+                  },
+                  "nonce": {
+                    "type": "integer",
+                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC."
                   }
+                },
+                "example": {
+                  "method": "transferFrom",
+                  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                  "chainId": "aa36a7",
+                  "tokenSymbol": "EXMPL",
+                  "from": "0x1111111111111111111111111111111111111111",
+                  "to": "0x2222222222222222222222222222222222222222",
+                  "amount": "100"
                 }
+              },
+              "example": {
+                "method": "transferFrom",
+                "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                "chainId": "aa36a7",
+                "tokenSymbol": "EXMPL",
+                "from": "0x1111111111111111111111111111111111111111",
+                "to": "0x2222222222222222222222222222222222222222",
+                "amount": "100"
               }
             }
           }
@@ -1032,7 +1534,7 @@
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "Prepares unsigned transactions for the transferTo method.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"transferTo\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\",\n    \"tokenSymbol\": \"EXMPL\",\n    \"to\": \"0x8ba1f109551bD432803012645Hac136c\",\n    \"amount\": \"100\"\n  }'\n```",
+        "description": "Prepares unsigned transactions for the transferTo method.",
         "security": [
           {
             "apiKeyAuth": []
@@ -1044,29 +1546,73 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "description": "Request body for transferTo method.",
+                "description": "Request body for transferTo.",
+                "required": [
+                  "method",
+                  "signerAddress",
+                  "chainId",
+                  "tokenSymbol",
+                  "to",
+                  "amount"
+                ],
                 "properties": {
                   "method": {
                     "type": "string",
-                    "example": "transferTo",
-                    "description": "The operation to be performed."
+                    "enum": [
+                      "transferTo"
+                    ],
+                    "description": "Required. Must be `transferTo`."
                   },
                   "signerAddress": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Wallet address that will sign the prepared transaction."
                   },
                   "chainId": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Blockchain network identifier. Hex format is recommended, for example Sepolia `aa36a7`."
                   },
                   "tokenSymbol": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Token symbol. Must be 2 to 5 uppercase letters or numbers."
                   },
                   "to": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Recipient address.",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
                   },
                   "amount": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Amount of tokens to transfer."
+                  },
+                  "gasLimit": {
+                    "type": "string",
+                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId."
+                  },
+                  "nonce": {
+                    "type": "integer",
+                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC."
                   }
+                },
+                "example": {
+                  "method": "transferTo",
+                  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                  "chainId": "aa36a7",
+                  "tokenSymbol": "EXMPL",
+                  "to": "0x2222222222222222222222222222222222222222",
+                  "amount": "100"
                 }
+              },
+              "example": {
+                "method": "transferTo",
+                "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                "chainId": "aa36a7",
+                "tokenSymbol": "EXMPL",
+                "to": "0x2222222222222222222222222222222222222222",
+                "amount": "100"
               }
             }
           }
@@ -1107,7 +1653,7 @@
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "Prepares unsigned transactions for the approve method.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"approve\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\",\n    \"tokenSymbol\": \"EXMPL\",\n    \"spenderAddress\": \"0x8ba1f109551bD432803012645Hac136c\",\n    \"amount\": \"100\"\n  }'\n```",
+        "description": "Prepares unsigned transactions for the approve method.",
         "security": [
           {
             "apiKeyAuth": []
@@ -1119,29 +1665,94 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "description": "Request body for approve method.",
+                "description": "Request body for approve.",
+                "required": [
+                  "method",
+                  "signerAddress",
+                  "chainId",
+                  "tokenSymbol",
+                  "spenderAddress",
+                  "amount"
+                ],
                 "properties": {
                   "method": {
                     "type": "string",
-                    "example": "approve",
-                    "description": "The operation to be performed."
+                    "enum": [
+                      "approve"
+                    ],
+                    "description": "Required. Must be `approve`."
                   },
                   "signerAddress": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Wallet address that will sign the prepared transaction."
                   },
                   "chainId": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Blockchain network identifier. Hex format is recommended, for example Sepolia `aa36a7`."
                   },
                   "tokenSymbol": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Token symbol to approve. Can be a tokenized asset symbol or a payment token symbol such as BKN, USDT, USDC, USDt, or HAI."
                   },
                   "spenderAddress": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Address being approved to spend tokens.",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
                   },
                   "amount": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Allowance amount to approve."
+                  },
+                  "investorAddress": {
+                    "type": "string",
+                    "description": "Optional. Token owner address for payment-token approvals. Defaults to signerAddress.",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "tokenizerAddress": {
+                    "type": "string",
+                    "description": "Optional. Conditionally required when approving payment tokens (BKN, USDT, USDC, USDt, or HAI) so the API can resolve the tokenizer scope.",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "tokenizerEmail": {
+                    "type": "string",
+                    "description": "Optional. Tokenizer email override for payment-token approvals.",
+                    "format": "email"
+                  },
+                  "investmentId": {
+                    "type": "string",
+                    "description": "Optional. Investment identifier to associate with this approval."
+                  },
+                  "gasLimit": {
+                    "type": "string",
+                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId."
+                  },
+                  "nonce": {
+                    "type": "integer",
+                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC."
                   }
+                },
+                "example": {
+                  "method": "approve",
+                  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                  "chainId": "aa36a7",
+                  "tokenSymbol": "USDT",
+                  "spenderAddress": "0x3333333333333333333333333333333333333333",
+                  "amount": "100",
+                  "tokenizerAddress": "0x4444444444444444444444444444444444444444"
                 }
+              },
+              "example": {
+                "method": "approve",
+                "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                "chainId": "aa36a7",
+                "tokenSymbol": "USDT",
+                "spenderAddress": "0x3333333333333333333333333333333333333333",
+                "amount": "100",
+                "tokenizerAddress": "0x4444444444444444444444444444444444444444"
               }
             }
           }
@@ -1182,7 +1793,7 @@
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "Prepares unsigned transactions for the dividendDistribution method.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"dividendDistribution\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\",\n    \"tokenSymbol\": \"EXMPL\",\n    \"amount\": \"1000\"\n  }'\n```",
+        "description": "Prepares unsigned transactions for the dividendDistribution method.",
         "security": [
           {
             "apiKeyAuth": []
@@ -1194,26 +1805,65 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "description": "Request body for dividendDistribution method.",
+                "description": "Request body for dividendDistribution.",
+                "required": [
+                  "method",
+                  "signerAddress",
+                  "chainId",
+                  "tokenSymbol",
+                  "amount"
+                ],
                 "properties": {
                   "method": {
                     "type": "string",
-                    "example": "dividendDistribution",
-                    "description": "The operation to be performed."
+                    "enum": [
+                      "dividendDistribution"
+                    ],
+                    "description": "Required. Must be `dividendDistribution`."
                   },
                   "signerAddress": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Wallet address that will sign the prepared transaction."
                   },
                   "chainId": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Blockchain network identifier. Hex format is recommended, for example Sepolia `aa36a7`."
                   },
                   "tokenSymbol": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Token symbol. Must be 2 to 5 uppercase letters or numbers."
                   },
                   "amount": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Amount of the token payment currency to distribute as dividends."
+                  },
+                  "gasLimit": {
+                    "type": "string",
+                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId."
+                  },
+                  "nonce": {
+                    "type": "integer",
+                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC."
                   }
+                },
+                "example": {
+                  "method": "dividendDistribution",
+                  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                  "chainId": "aa36a7",
+                  "tokenSymbol": "EXMPL",
+                  "amount": "1000"
                 }
+              },
+              "example": {
+                "method": "dividendDistribution",
+                "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                "chainId": "aa36a7",
+                "tokenSymbol": "EXMPL",
+                "amount": "1000"
               }
             }
           }
@@ -1254,7 +1904,7 @@
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "Prepares unsigned transactions for the newSto method.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"newSto\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\",\n    \"tokenSymbol\": \"EXMPL\",\n    \"price\": \"1000000000000000000\",\n    \"tokensForSale\": \"1000\"\n  }'\n```",
+        "description": "Prepares unsigned transactions for the newSto method.",
         "security": [
           {
             "apiKeyAuth": []
@@ -1266,52 +1916,131 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "description": "Request body for newSto method.",
+                "description": "Request body for newSto.",
+                "required": [
+                  "method",
+                  "signerAddress",
+                  "chainId",
+                  "tokenizerEmail",
+                  "tokenSymbol",
+                  "tokenAmount",
+                  "offeringName",
+                  "startDate",
+                  "endDate",
+                  "acceptedCoin",
+                  "minRaiseUSD",
+                  "maxRaiseUSD",
+                  "minInvestment",
+                  "maxInvestment"
+                ],
                 "properties": {
                   "method": {
                     "type": "string",
-                    "example": "newSto",
-                    "description": "The operation to be performed."
+                    "enum": [
+                      "newSto"
+                    ],
+                    "description": "Required. Must be `newSto`."
                   },
                   "signerAddress": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Wallet address that will sign the prepared transaction."
                   },
                   "chainId": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Blockchain network identifier. Hex format is recommended, for example Sepolia `aa36a7`."
                   },
                   "tokenizerEmail": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Tokenizer email.",
+                    "format": "email"
+                  },
+                  "tokenSymbol": {
+                    "type": "string",
+                    "description": "Required. Token symbol. Must be 2 to 5 uppercase letters or numbers."
                   },
                   "tokenAmount": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Number of tokens offered in the STO."
                   },
                   "offeringName": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Name of the STO offering."
                   },
                   "startDate": {
                     "type": "string",
+                    "description": "Required. STO start date.",
                     "format": "date-time"
                   },
                   "endDate": {
                     "type": "string",
+                    "description": "Required. STO end date.",
                     "format": "date-time"
                   },
                   "acceptedCoin": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Accepted payment token symbol."
                   },
                   "minRaiseUSD": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Minimum raise amount in USD."
                   },
                   "maxRaiseUSD": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Maximum raise amount in USD."
                   },
                   "minInvestment": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Minimum investment amount."
                   },
                   "maxInvestment": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Maximum investment amount."
+                  },
+                  "gasLimit": {
+                    "type": "string",
+                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId."
+                  },
+                  "nonce": {
+                    "type": "integer",
+                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC."
                   }
+                },
+                "example": {
+                  "method": "newSto",
+                  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                  "chainId": "aa36a7",
+                  "tokenizerEmail": "tokenizer@example.com",
+                  "tokenSymbol": "EXMPL",
+                  "tokenAmount": "1000",
+                  "offeringName": "Series A",
+                  "startDate": "2026-09-01T00:00:00.000Z",
+                  "endDate": "2026-12-31T23:59:59.000Z",
+                  "acceptedCoin": "USDT",
+                  "minRaiseUSD": "10000",
+                  "maxRaiseUSD": "100000",
+                  "minInvestment": "100",
+                  "maxInvestment": "10000"
                 }
+              },
+              "example": {
+                "method": "newSto",
+                "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                "chainId": "aa36a7",
+                "tokenizerEmail": "tokenizer@example.com",
+                "tokenSymbol": "EXMPL",
+                "tokenAmount": "1000",
+                "offeringName": "Series A",
+                "startDate": "2026-09-01T00:00:00.000Z",
+                "endDate": "2026-12-31T23:59:59.000Z",
+                "acceptedCoin": "USDT",
+                "minRaiseUSD": "10000",
+                "maxRaiseUSD": "100000",
+                "minInvestment": "100",
+                "maxInvestment": "10000"
               }
             }
           }
@@ -1352,7 +2081,7 @@
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "Prepares unsigned transactions for the newInvest method.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions/newInvest \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"newInvest\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\",\n    \"investorAddress\": \"0xInvestorAddress\",\n    \"offeringId\": \"offering123\",\n    \"amount\": \"1000\"\n  }'\n```",
+        "description": "Prepares unsigned transactions for the newInvest method.",
         "security": [
           {
             "apiKeyAuth": []
@@ -1364,32 +2093,84 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "description": "Request body for newInvest method.",
+                "description": "Request body for newInvest. signerAddress is optional when investorAddress signs the transaction.",
+                "required": [
+                  "method",
+                  "chainId",
+                  "tokenSymbol",
+                  "investorEmail",
+                  "investorAddress",
+                  "investmentAmount"
+                ],
                 "properties": {
                   "method": {
                     "type": "string",
-                    "example": "newInvest",
-                    "description": "The operation to be performed."
+                    "enum": [
+                      "newInvest"
+                    ],
+                    "description": "Required. Must be `newInvest`."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "description": "Optional. Wallet address that will sign the prepared transaction. If omitted, the API uses investorAddress for this method."
                   },
                   "chainId": {
-                    "type": "string"
-                  },
-                  "investorAddress": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Blockchain network identifier. Hex format is recommended, for example Sepolia `aa36a7`."
                   },
                   "tokenSymbol": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Token symbol. Must be 2 to 5 uppercase letters or numbers."
                   },
                   "investorEmail": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Investor email.",
+                    "format": "email"
+                  },
+                  "investorAddress": {
+                    "type": "string",
+                    "description": "Required. Investor wallet address. Used as signerAddress when signerAddress is omitted.",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
                   },
                   "investmentAmount": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Payment-token amount to invest."
                   },
                   "paymentTokenSymbol": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Optional. Payment token symbol. If omitted, the chain default payment token is used."
+                  },
+                  "gasLimit": {
+                    "type": "string",
+                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId."
+                  },
+                  "nonce": {
+                    "type": "integer",
+                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC."
                   }
+                },
+                "example": {
+                  "method": "newInvest",
+                  "chainId": "aa36a7",
+                  "tokenSymbol": "EXMPL",
+                  "investorEmail": "investor@example.com",
+                  "investorAddress": "0x1111111111111111111111111111111111111111",
+                  "investmentAmount": "1000",
+                  "paymentTokenSymbol": "USDT"
                 }
+              },
+              "example": {
+                "method": "newInvest",
+                "chainId": "aa36a7",
+                "tokenSymbol": "EXMPL",
+                "investorEmail": "investor@example.com",
+                "investorAddress": "0x1111111111111111111111111111111111111111",
+                "investmentAmount": "1000",
+                "paymentTokenSymbol": "USDT"
               }
             }
           }
@@ -1430,7 +2211,7 @@
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "Prepares unsigned transactions for the claimTokens method.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions/claimTokens \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"claimTokens\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\",\n    \"investorAddress\": \"0xInvestorAddress\",\n    \"tokenSymbol\": \"TOKEN\",\n    \"investorEmail\": \"investor@example.com\",\n    \"paymentTokenSymbol\": \"USDC\"\n  }'\n```",
+        "description": "Prepares unsigned transactions for the claimTokens method.",
         "security": [
           {
             "apiKeyAuth": []
@@ -1442,29 +2223,71 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "description": "Request body for claimTokens method.",
+                "description": "Request body for claimTokens. signerAddress is optional when investorAddress signs the transaction.",
+                "required": [
+                  "method",
+                  "chainId",
+                  "tokenSymbol",
+                  "investorEmail",
+                  "investorAddress"
+                ],
                 "properties": {
                   "method": {
                     "type": "string",
-                    "example": "claimTokens",
-                    "description": "The operation to be performed."
+                    "enum": [
+                      "claimTokens"
+                    ],
+                    "description": "Required. Must be `claimTokens`."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "description": "Optional. Wallet address that will sign the prepared transaction. If omitted, the API uses investorAddress for this method."
                   },
                   "chainId": {
-                    "type": "string"
-                  },
-                  "investorAddress": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Blockchain network identifier. Hex format is recommended, for example Sepolia `aa36a7`."
                   },
                   "tokenSymbol": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Token symbol. Must be 2 to 5 uppercase letters or numbers."
                   },
                   "investorEmail": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Investor email.",
+                    "format": "email"
                   },
-                  "paymentTokenSymbol": {
-                    "type": "string"
+                  "investorAddress": {
+                    "type": "string",
+                    "description": "Required. Investor wallet address. Used as signerAddress when signerAddress is omitted.",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "gasLimit": {
+                    "type": "string",
+                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId."
+                  },
+                  "nonce": {
+                    "type": "integer",
+                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC."
                   }
+                },
+                "example": {
+                  "method": "claimTokens",
+                  "chainId": "aa36a7",
+                  "tokenSymbol": "EXMPL",
+                  "investorEmail": "investor@example.com",
+                  "investorAddress": "0x1111111111111111111111111111111111111111"
                 }
+              },
+              "example": {
+                "method": "claimTokens",
+                "chainId": "aa36a7",
+                "tokenSymbol": "EXMPL",
+                "investorEmail": "investor@example.com",
+                "investorAddress": "0x1111111111111111111111111111111111111111"
               }
             }
           }
@@ -1505,7 +2328,7 @@
           "Endpoints",
           "Prepare Transactions"
         ],
-        "description": "Prepares unsigned transactions for the closeOffer method.\n\n**Example:**\n```bash\ncurl --request POST \\\n  --url https://api.sandbox.brickken.com/prepare-transactions/closeOffer \\\n  --header 'Content-Type: application/json' \\\n  --header 'x-api-key: YOUR_API_KEY' \\\n  --data '{\n    \"method\": \"closeOffer\",\n    \"signerAddress\": \"0xYourAddress\",\n    \"chainId\": \"aa36a7\",\n    \"tokenSymbol\": \"TOKEN\",\n    \"tokenizerEmail\": \"tokenizer@example.com\"\n  }'\n```",
+        "description": "Prepares unsigned transactions for the closeOffer method.",
         "security": [
           {
             "apiKeyAuth": []
@@ -1517,23 +2340,66 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "description": "Request body for closeOffer method.",
+                "description": "Request body for closeOffer.",
+                "required": [
+                  "method",
+                  "signerAddress",
+                  "chainId",
+                  "tokenSymbol",
+                  "tokenizerEmail"
+                ],
                 "properties": {
                   "method": {
                     "type": "string",
-                    "example": "closeOffer",
-                    "description": "The operation to be performed."
-                  },
-                  "chainId": {
-                    "type": "string"
+                    "enum": [
+                      "closeOffer"
+                    ],
+                    "description": "Required. Must be `closeOffer`."
                   },
                   "signerAddress": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Wallet address that will sign the prepared transaction."
+                  },
+                  "chainId": {
+                    "type": "string",
+                    "description": "Required. Blockchain network identifier. Hex format is recommended, for example Sepolia `aa36a7`."
                   },
                   "tokenSymbol": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Required. Token symbol. Must be 2 to 5 uppercase letters or numbers."
+                  },
+                  "tokenizerEmail": {
+                    "type": "string",
+                    "description": "Required. Tokenizer email.",
+                    "format": "email"
+                  },
+                  "gasLimit": {
+                    "type": "string",
+                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically."
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId."
+                  },
+                  "nonce": {
+                    "type": "integer",
+                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC."
                   }
+                },
+                "example": {
+                  "method": "closeOffer",
+                  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                  "chainId": "aa36a7",
+                  "tokenSymbol": "EXMPL",
+                  "tokenizerEmail": "tokenizer@example.com"
                 }
+              },
+              "example": {
+                "method": "closeOffer",
+                "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+                "chainId": "aa36a7",
+                "tokenSymbol": "EXMPL",
+                "tokenizerEmail": "tokenizer@example.com"
               }
             }
           }

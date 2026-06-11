@@ -5,56 +5,6 @@ openapi: 'POST /prepare-transactions/claimTokens'
 
 Prepares unsigned transactions for claiming tokens from a completed Security Token Offering (STO) investment. This endpoint is equivalent to calling `/prepare-transactions` with `method=claimTokens`.
 
-## Request Body
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `signerAddress` | string | Yes | Address that will sign the transaction |
-| `chainId` | string | Yes | Blockchain network identifier (hex format) |
-| `method` | string | Yes | Transaction method type (should be "claimTokens") |
-| `tokenSymbol` | string | Yes | Symbol of the token to claim |
-| `investorAddress` | string | Yes | Address of the investor claiming tokens |
-| `investorEmail` | string | Yes | Email of the investor |
-| `paymentTokenSymbol` | string | Yes | Symbol of the payment token used in the STO |
-
-## Example Request
-
-```json
-{
-  "signerAddress": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
-  "chainId": "aa36a7",
-  "method": "claimTokens",
-  "tokenSymbol": "PROP1",
-  "investorAddress": "0x456...",
-  "investorEmail": "investor@example.com",
-  "paymentTokenSymbol": "USDT"
-}
-```
-
-## Response
-
-Returns an array of unsigned transactions that need to be signed and a transaction ID for tracking.
-
-```json
-{
-  "transactions": [
-    {
-      "from": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
-      "to": "0xTargetAddress",
-      "value": {"type": "BigNumber", "hex": "0x00"},
-      "nonce": 1,
-      "chainId": 11155111,
-      "data": "0x...",
-      "type": 2,
-      "maxPriorityFeePerGas": {"type": "BigNumber", "hex": "0x..."},
-      "maxFeePerGas": {"type": "BigNumber", "hex": "0x..."},
-      "gasLimit": {"type": "BigNumber", "hex": "0x..."}
-    }
-  ],
-  "txId": "unique-transaction-id"
-}
-```
-
 ## Notes
 
 - Tokens can only be claimed after the STO has ended successfully
