@@ -1,0 +1,73 @@
+---
+title: 'Postman Collection'
+description: 'Download the official Brickken API Postman collection and environments'
+icon: 'download'
+---
+
+## Overview
+
+Get started with the Brickken API in minutes using our official Postman collection. It includes ready-to-run requests for every public endpoint — transaction preparation, signed transaction submission, read endpoints, token documentation management, and the Agentic (x402) API — pre-configured with example payloads and environment variables.
+
+## Downloads
+
+<CardGroup cols={1}>
+  <Card
+    title="Brickken API Collection"
+    icon="download"
+    href="https://raw.githubusercontent.com/fbrickken/docs/main/downloads/postman/brickken-api.postman_collection.json"
+  >
+    The full client collection: Create Transaction, Send Transaction, Information, Management, Agentic API (x402) and Discovery requests.
+  </Card>
+</CardGroup>
+
+<CardGroup cols={2}>
+  <Card
+    title="Sandbox Environment"
+    icon="flask"
+    href="https://raw.githubusercontent.com/fbrickken/docs/main/downloads/postman/brickken-api-sandbox.postman_environment.json"
+  >
+    Targets `https://api.sandbox.brickken.com` — use this for testing.
+  </Card>
+  <Card
+    title="Production Environment"
+    icon="rocket"
+    href="https://raw.githubusercontent.com/fbrickken/docs/main/downloads/postman/brickken-api-production.postman_environment.json"
+  >
+    Targets `https://api.brickken.com` — use this for live operations.
+  </Card>
+</CardGroup>
+
+<Info>
+If a file opens in the browser instead of downloading, right-click the card and choose **Save Link As…**.
+</Info>
+
+## Import into Postman
+
+1. Open Postman and click **Import** (top left).
+2. Drop in the collection file and both environment files.
+3. Select the **Brickken API — Sandbox** environment from the environment picker (top right).
+4. Open the environment and set your `apiKey`. Optionally adjust `tokenSymbol` and `chainId` (defaults: `EXMPL`, `aa36a7` — Sepolia).
+5. Run any request — authentication is applied automatically via the `x-api-key` header at collection level.
+
+## Authentication
+
+Every business endpoint requires an API key sent in the `x-api-key` header. To request an API key (sandbox or production) and whitelist your `signerAddress`, contact [support@brickken.com](mailto:support@brickken.com) or [tech@brickken.com](mailto:tech@brickken.com).
+
+Agentic (x402) endpoints alternatively accept a per-call payment via the `X-Payment` header — see [Agentic Methods](/api-reference/endpoint/agentic-methods-x402).
+
+## Typical Workflow
+
+<Steps>
+  <Step title="Prepare">
+    Call a request from the **Create Transaction** folder — it returns unsigned transactions and a `txId`.
+  </Step>
+  <Step title="Sign">
+    Sign the returned transactions locally with your whitelisted signer wallet (e.g. using ethers.js).
+  </Step>
+  <Step title="Send">
+    Submit the signed transactions with **Send Transactions**.
+  </Step>
+  <Step title="Track">
+    Poll **Check Transaction Status** in the **Information** folder until the transaction confirms.
+  </Step>
+</Steps>

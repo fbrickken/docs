@@ -2576,7 +2576,7 @@
         }
       }
     },
-    "/update-docs": {
+    "/patch-token-docs": {
       "patch": {
         "summary": "Update Token Documentation",
         "tags": [
@@ -2681,13 +2681,13 @@
         }
       }
     },
-    "/get-offers": {
+    "/get-stos": {
       "get": {
         "summary": "Get all stos by TokenSymbol",
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** This endpoint retrieves all stos from a token (`tokenSymbol`).\n\n**Headers:**\n\n- `Authorization: Bearer YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The token symbol from a specific token.",
+        "description": "**Description:** This endpoint retrieves all stos from a token (`tokenSymbol`).\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The token symbol from a specific token.",
         "security": [
           {
             "apiKeyAuth": []
@@ -2810,13 +2810,13 @@
         }
       }
     },
-    "/get-sto-by-id/{id}": {
+    "/get-sto-by-id": {
       "get": {
         "summary": "Get a specific STO by its UUID",
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** This endpoint retrieves the details of a specific STO using its unique identifier (`uuid`).\n\n**Headers:**\n\n- `Authorization: Bearer YOUR_API_KEY`\n\n**Path Parameters:**\n\n- `uuid` (string, format: uuid): The unique identifier of the STO to retrieve.",
+        "description": "**Description:** This endpoint retrieves the details of a specific STO using its unique identifier (`uuid`).\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.\n- `id` (string, format: uuid): The unique identifier of the STO to retrieve.",
         "security": [
           {
             "apiKeyAuth": []
@@ -2824,8 +2824,17 @@
         ],
         "parameters": [
           {
+            "name": "tokenSymbol",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The symbol of the token."
+          },
+          {
             "name": "id",
-            "in": "path",
+            "in": "query",
             "required": true,
             "schema": {
               "type": "string",
@@ -2940,7 +2949,7 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** This endpoint retrieves balance details and current status for a Security Token Offering (STO). The specific STO may be determined by context (e.g., associated with the API key) or might require parameters not specified here.\n\n**Headers:**\n\n- `Authorization: Bearer YOUR_API_KEY`",
+        "description": "**Description:** This endpoint retrieves balance details and current status for a Security Token Offering (STO).\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.\n- `id` (string, format: uuid): The unique identifier of the STO.",
         "security": [
           {
             "apiKeyAuth": []
@@ -3055,10 +3064,31 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "tokenSymbol",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The symbol of the token."
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The unique identifier (UUID) of the STO."
+          }
+        ]
       }
     },
-    "/get-investors-info": {
+    "/get-investor-info": {
       "get": {
         "summary": "Get investors information",
         "tags": [
@@ -3072,22 +3102,22 @@
         ],
         "parameters": [
           {
+            "name": "tokenSymbol",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The symbol of the token."
+          },
+          {
             "name": "email",
             "in": "query",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "The email of the investor."
-          },
-          {
-            "name": "token symbol",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "The tokens symbol."
+            "description": "The email address of the investor."
           }
         ],
         "responses": {
@@ -3205,13 +3235,13 @@
         }
       }
     },
-    "/get-investments-by-sto": {
+    "/get-investments-by-sto-id": {
       "get": {
         "summary": "Get investments associated with a specific STO ID",
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** This endpoint retrieves a list of investment transactions associated with a specific Security Token Offering (STO), identified by its UUID.\n\n**Headers:**\n\n- `Authorization: Bearer YOUR_API_KEY`\n\n**Path Parameters:**\n\n- `stoId` (string, format: uuid): The unique identifier of the STO for which to retrieve investments.",
+        "description": "**Description:** This endpoint retrieves a list of investment transactions associated with a specific Security Token Offering (STO), identified by its UUID.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.\n- `id` (string, format: uuid): The unique identifier of the STO for which to retrieve investments.",
         "security": [
           {
             "apiKeyAuth": []
@@ -3219,18 +3249,17 @@
         ],
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
+            "name": "tokenSymbol",
+            "in": "query",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             },
-            "description": "The unique identifier (UUID) of the STO."
+            "description": "The symbol of the token."
           },
           {
-            "name": "tokenSymbol",
-            "in": "path",
+            "name": "id",
+            "in": "query",
             "required": true,
             "schema": {
               "type": "string",
@@ -3492,6 +3521,65 @@
                     "senderBalance": {
                       "type": "string",
                       "description": "Balance of the sender."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get-dividend-distribution": {
+      "get": {
+        "summary": "Get Dividend Distribution Info",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "**Description:** Retrieves information about dividend distributions for a token.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tokenSymbol",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The symbol of the token."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "distributions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "amount": {
+                            "type": "string",
+                            "description": "Distributed amount."
+                          },
+                          "timestamp": {
+                            "type": "integer",
+                            "description": "Distribution timestamp."
+                          },
+                          "tokenSymbol": {
+                            "type": "string",
+                            "description": "Currency token symbol."
+                          }
+                        }
+                      }
                     }
                   }
                 }

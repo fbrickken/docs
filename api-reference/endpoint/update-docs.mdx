@@ -1,11 +1,11 @@
 ---
 title: 'Update Token Documentation'
-openapi: 'PATCH /update-docs'
+openapi: 'PATCH /patch-token-docs'
 ---
 
 ## Overview
 
-The `PATCH /update-docs` endpoint allows you to update token-related documentation and branding materials for existing tokens. This endpoint handles file uploads for token logos, subscription agreements, and legal documents.
+The `PATCH /patch-token-docs` endpoint allows you to update token-related documentation and branding materials for existing tokens. This endpoint handles file uploads for token logos, subscription agreements, and legal documents.
 
 ## Key Features
 
@@ -29,7 +29,7 @@ This endpoint accepts `multipart/form-data` with the following fields:
 ## Example Request
 
 ```bash
-curl -X PATCH "https://api-sandbox.brickken.com/patch-token-docs" \
+curl -X PATCH "https://api.sandbox.brickken.com/patch-token-docs" \
   -H "x-api-key: YOUR_API_KEY" \
   -F "tokenSymbol=MYTOKEN" \
   -F "tokenLogotype=@logo.png" \

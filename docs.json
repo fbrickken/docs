@@ -16,7 +16,8 @@
           {
             "group": "API Documentation",
             "pages": [
-              "api-reference/introduction"
+              "api-reference/introduction",
+              "api-reference/postman"
             ]
           },
           {
@@ -53,6 +54,7 @@
               "api-reference/endpoint/get-transaction-status",
               "api-reference/endpoint/get-allowance",
               "api-reference/endpoint/get-balance-whitelist",
+              "api-reference/endpoint/get-dividend-distribution",
               "api-reference/endpoint/get-network-info",
               "api-reference/endpoint/get-token-info",
               "api-reference/endpoint/get-tokenizer-info",

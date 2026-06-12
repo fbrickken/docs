@@ -1,0 +1,1362 @@
+{
+  "info": {
+    "name": "Brickken API",
+    "description": "Client collection for the Brickken API V2 (Dapp API + Agentic x402 API).\n\n**Authentication**: every business endpoint requires the `x-api-key` header. Request an API key from tech@brickken.com or support@brickken.com. Agentic (x402) endpoints alternatively accept a per-call `X-Payment` header.\n\n**Environments**: import the Sandbox and Production environment files shipped next to this collection, select one, then fill in `apiKey` (and optionally `tokenSymbol`/`chainId`).\n\n**Typical flow**: 1) POST /prepare-transactions \u2192 returns unsigned transactions + txId, 2) sign locally with the whitelisted signer wallet, 3) POST /send-transactions, 4) poll GET /get-transaction-status.\n\nDocs: https://docs.brickken.com",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "x-api-key",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api.sandbox.brickken.com",
+      "type": "string"
+    },
+    {
+      "key": "apiKey",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tokenSymbol",
+      "value": "EXMPL",
+      "type": "string"
+    },
+    {
+      "key": "chainId",
+      "value": "aa36a7",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Create Transaction",
+      "item": [
+        {
+          "name": "Prepare Transactions (Generic)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prepare-transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prepare-transactions"
+              ]
+            },
+            "description": "Prepare Transactions\n\n**Description:** This endpoint prepares unsigned transactions for the method selected in the `method` field. For exact required and optional body fields, use the method-specific endpoints under Create Transaction.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY` for API-key auth, or `X-Payment` for x402 retries on eligible agentic methods\n- `Content-Type`: `application/json`\n\n**Common Request Body Parameters:**\n- `method` (string, required): Operation to prepare.\n- `chainId` (string, required): Blockchain network identifier. Hex format is recommended, for example `aa36a7` for Sepolia.\n- `signerAddress` (string, conditionally required): Wallet address that signs the prepared transaction. Most methods require it; `newInvest` and `claimTokens` can use `investorAddress` as the signer.\n- `gasLimit` (string, optional): Gas limit override. If omitted, the API estimates gas automatically.\n- `privateRpcUrl` (string, optional): Private RPC URL override.\n- `nonce` (integer, optional): Nonce override. If omitted, the API reads the pending nonce from the RPC.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"newTokenization\",\n  \"signerAddress\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\",\n  \"chainId\": \"aa36a7\",\n  \"tokenizerEmail\": \"tokenizer@example.com\",\n  \"name\": \"Example Token\",\n  \"tokenSymbol\": \"EXMPL\",\n  \"tokenType\": \"EQUITY\",\n  \"supplyCap\": \"1000000\",\n  \"url\": \"https://example.com/token-docs\",\n  \"preMints\": [\n    {\n      \"amount\": \"1000\"\n    }\n  ],\n  \"initialHolders\": [\n    {\n      \"walletAddress\": \"0x1111111111111111111111111111111111111111\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prepare Transactions \u2014 New Tokenization",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prepare-transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prepare-transactions"
+              ]
+            },
+            "description": "newTokenization\n\nPrepares unsigned transactions for the newTokenization method.\n\nNote: the request URL is always `/prepare-transactions`; this variant is selected by the `method` field in the body.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"newTokenization\",\n  \"signerAddress\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\",\n  \"chainId\": \"aa36a7\",\n  \"tokenizerEmail\": \"tokenizer@example.com\",\n  \"name\": \"Example Token\",\n  \"tokenSymbol\": \"EXMPL\",\n  \"tokenType\": \"EQUITY\",\n  \"supplyCap\": \"1000000\",\n  \"url\": \"https://example.com/token-docs\",\n  \"preMints\": [\n    {\n      \"amount\": \"1000\"\n    }\n  ],\n  \"initialHolders\": [\n    {\n      \"walletAddress\": \"0x1111111111111111111111111111111111111111\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prepare Transactions \u2014 New STO",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prepare-transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prepare-transactions"
+              ]
+            },
+            "description": "newSto\n\nPrepares unsigned transactions for the newSto method.\n\nNote: the request URL is always `/prepare-transactions`; this variant is selected by the `method` field in the body.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"newSto\",\n  \"signerAddress\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\",\n  \"chainId\": \"aa36a7\",\n  \"tokenizerEmail\": \"tokenizer@example.com\",\n  \"tokenSymbol\": \"EXMPL\",\n  \"tokenAmount\": \"1000\",\n  \"offeringName\": \"Series A\",\n  \"startDate\": \"2026-09-01T00:00:00.000Z\",\n  \"endDate\": \"2026-12-31T23:59:59.000Z\",\n  \"acceptedCoin\": \"USDT\",\n  \"minRaiseUSD\": \"10000\",\n  \"maxRaiseUSD\": \"100000\",\n  \"minInvestment\": \"100\",\n  \"maxInvestment\": \"10000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prepare Transactions \u2014 New Invest",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prepare-transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prepare-transactions"
+              ]
+            },
+            "description": "newInvest\n\nPrepares unsigned transactions for the newInvest method.\n\nNote: the request URL is always `/prepare-transactions`; this variant is selected by the `method` field in the body.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"newInvest\",\n  \"chainId\": \"aa36a7\",\n  \"tokenSymbol\": \"EXMPL\",\n  \"investorEmail\": \"investor@example.com\",\n  \"investorAddress\": \"0x1111111111111111111111111111111111111111\",\n  \"investmentAmount\": \"1000\",\n  \"paymentTokenSymbol\": \"USDT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prepare Transactions \u2014 Claim Tokens",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prepare-transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prepare-transactions"
+              ]
+            },
+            "description": "claimTokens\n\nPrepares unsigned transactions for the claimTokens method.\n\nNote: the request URL is always `/prepare-transactions`; this variant is selected by the `method` field in the body.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"claimTokens\",\n  \"chainId\": \"aa36a7\",\n  \"tokenSymbol\": \"EXMPL\",\n  \"investorEmail\": \"investor@example.com\",\n  \"investorAddress\": \"0x1111111111111111111111111111111111111111\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prepare Transactions \u2014 Close Offer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prepare-transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prepare-transactions"
+              ]
+            },
+            "description": "closeOffer\n\nPrepares unsigned transactions for the closeOffer method.\n\nNote: the request URL is always `/prepare-transactions`; this variant is selected by the `method` field in the body.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"closeOffer\",\n  \"signerAddress\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\",\n  \"chainId\": \"aa36a7\",\n  \"tokenSymbol\": \"EXMPL\",\n  \"tokenizerEmail\": \"tokenizer@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prepare Transactions \u2014 Mint Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prepare-transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prepare-transactions"
+              ]
+            },
+            "description": "mintToken\n\nPrepares unsigned transactions for the mintToken method.\n\nNote: the request URL is always `/prepare-transactions`; this variant is selected by the `method` field in the body.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"mintToken\",\n  \"signerAddress\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\",\n  \"chainId\": \"aa36a7\",\n  \"tokenSymbol\": \"EXMPL\",\n  \"userToMint\": [\n    {\n      \"investorEmail\": \"investor@example.com\",\n      \"investorAddress\": \"0x1111111111111111111111111111111111111111\",\n      \"amount\": \"100\",\n      \"needWhitelist\": true\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prepare Transactions \u2014 Whitelist",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prepare-transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prepare-transactions"
+              ]
+            },
+            "description": "whitelist\n\nPrepares unsigned transactions for the whitelist method.\n\nNote: the request URL is always `/prepare-transactions`; this variant is selected by the `method` field in the body.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"whitelist\",\n  \"signerAddress\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\",\n  \"chainId\": \"aa36a7\",\n  \"tokenSymbol\": \"EXMPL\",\n  \"userToWhitelist\": [\n    {\n      \"investorAddress\": \"0x1111111111111111111111111111111111111111\",\n      \"investorEmail\": \"investor@example.com\",\n      \"whitelistStatus\": true\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prepare Transactions \u2014 Burn Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prepare-transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prepare-transactions"
+              ]
+            },
+            "description": "burnToken\n\nPrepares unsigned transactions for the burnToken method.\n\nNote: the request URL is always `/prepare-transactions`; this variant is selected by the `method` field in the body.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"burnToken\",\n  \"signerAddress\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\",\n  \"chainId\": \"aa36a7\",\n  \"tokenSymbol\": \"EXMPL\",\n  \"amount\": \"100\",\n  \"investorEmail\": \"investor@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prepare Transactions \u2014 Transfer From",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prepare-transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prepare-transactions"
+              ]
+            },
+            "description": "transferFrom\n\nPrepares unsigned transactions for the transferFrom method.\n\nNote: the request URL is always `/prepare-transactions`; this variant is selected by the `method` field in the body.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"transferFrom\",\n  \"signerAddress\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\",\n  \"chainId\": \"aa36a7\",\n  \"tokenSymbol\": \"EXMPL\",\n  \"from\": \"0x1111111111111111111111111111111111111111\",\n  \"to\": \"0x2222222222222222222222222222222222222222\",\n  \"amount\": \"100\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prepare Transactions \u2014 Transfer To",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prepare-transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prepare-transactions"
+              ]
+            },
+            "description": "transferTo\n\nPrepares unsigned transactions for the transferTo method.\n\nNote: the request URL is always `/prepare-transactions`; this variant is selected by the `method` field in the body.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"transferTo\",\n  \"signerAddress\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\",\n  \"chainId\": \"aa36a7\",\n  \"tokenSymbol\": \"EXMPL\",\n  \"to\": \"0x2222222222222222222222222222222222222222\",\n  \"amount\": \"100\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prepare Transactions \u2014 Approve",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prepare-transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prepare-transactions"
+              ]
+            },
+            "description": "approve\n\nPrepares unsigned transactions for the approve method.\n\nNote: the request URL is always `/prepare-transactions`; this variant is selected by the `method` field in the body.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"approve\",\n  \"signerAddress\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\",\n  \"chainId\": \"aa36a7\",\n  \"tokenSymbol\": \"USDT\",\n  \"spenderAddress\": \"0x3333333333333333333333333333333333333333\",\n  \"amount\": \"100\",\n  \"tokenizerAddress\": \"0x4444444444444444444444444444444444444444\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prepare Transactions \u2014 Dividend Distribution",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/prepare-transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "prepare-transactions"
+              ]
+            },
+            "description": "dividendDistribution\n\nPrepares unsigned transactions for the dividendDistribution method.\n\nNote: the request URL is always `/prepare-transactions`; this variant is selected by the `method` field in the body.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"dividendDistribution\",\n  \"signerAddress\": \"0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b\",\n  \"chainId\": \"aa36a7\",\n  \"tokenSymbol\": \"EXMPL\",\n  \"amount\": \"1000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Prepare unsigned blockchain transactions. All requests POST to /prepare-transactions; the `method` field in the body selects the operation. Sign the returned transactions locally, then submit them with POST /send-transactions."
+    },
+    {
+      "name": "Send Transaction",
+      "item": [
+        {
+          "name": "Send Transactions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/send-transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "send-transactions"
+              ]
+            },
+            "description": "Submit Signed Transactions\n\n**Description:** This endpoint submits signed transactions to the blockchain. This endpoint works uniformly for all transaction types prepared using the `/prepare-transactions` endpoint.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY` for API-key auth, or `X-Payment` for x402 retries when sending x402-eligible agentic prepared transactions\n- `Content-Type`: `application/json`\n\n**Workflow:**\n1. **Prepare Transactions**: First, call `/prepare-transactions` with your desired method and parameters\n2. **Sign Transactions**: Sign each transaction in the returned `transactions` array using your preferred wallet or signing method\n3. **Send Transactions**: Submit the signed transactions along with the `txId` to this endpoint\n\n**Supported Transaction Types:**\nThis endpoint accepts signed transactions for all methods supported by `/prepare-transactions`:\n- `newTokenization` - Create new tokenized assets\n- `newSto` - Create Security Token Offerings\n- `newInvest` - Make investments in STOs\n- `claimTokens` - Claim tokens from completed STOs\n- `closeOffer` - Close active STOs\n- `mintToken` - Mint additional tokens\n- `whitelist` - Manage address whitelist status\n- `approve` - Approve token spending\n- `burnToken` - Burn tokens\n- `transferFrom` - Transfer tokens (with approval)\n- `transferTo` - Transfer tokens from signer\n- `dividendDistribution` - Distribute dividends\n- `newTokenizedAgent` / `agentRegister` - Register ERC-8004 agents\n- `agentSetURI`, `agentSetMetadata`, `agentSetWallet` - Maintain ERC-8004 agent profiles\n- `agentGiveFeedback`, `agentRevokeFeedback`, `agentAppendFeedbackResponse` - Manage reputation entries\n- `agentCreateToken`, `agentMintToken`, `agentBurnToken`, `agentTransferToken`, `agentTransferFromToken`, `agentApproveToken` - Manage agent ERC-20 tokens\n\nx402 can be used only for x402-eligible agentic prepared transactions. Do not mix x402-eligible and API-key-only transactions in the same send batch.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"signedTransactions\": [\n    \"0x02f8b1018203e8843b9aca00850ba43b740082520894742d35cc6634c0532925a3b8d4c9db96c4b4d8b80b844a9059cbb000000...\"\n  ],\n  \"txId\": \"tx_abc123def456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Information",
+      "item": [
+        {
+          "name": "Get Network Information",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/get-network-info?chainId={{chainId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "get-network-info"
+              ],
+              "query": [
+                {
+                  "key": "chainId",
+                  "value": "{{chainId}}",
+                  "description": "The blockchain's chain ID (e.g., \"aa36a7\"). (required)"
+                }
+              ]
+            },
+            "description": "Get Network Information\n\n**Description:** Retrieves network information for a specified chain ID.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `chainId` (string): The blockchain's chain ID (e.g., \"aa36a7\")."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Token Information",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/get-token-info?tokenSymbol={{tokenSymbol}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "get-token-info"
+              ],
+              "query": [
+                {
+                  "key": "tokenSymbol",
+                  "value": "{{tokenSymbol}}",
+                  "description": "The symbol of the token. (required)"
+                }
+              ]
+            },
+            "description": "Get Token Information\n\n**Description:** Retrieves detailed information about a specific token.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tokenizer Information",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/get-tokenizer-info?tokenSymbol={{tokenSymbol}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "get-tokenizer-info"
+              ],
+              "query": [
+                {
+                  "key": "tokenSymbol",
+                  "value": "{{tokenSymbol}}",
+                  "description": "The symbol of the token. (required)"
+                }
+              ]
+            },
+            "description": "Get Tokenizer Information\n\n**Description:** Retrieves information about the tokenizer of a specific token.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token."
+          },
+          "response": []
+        },
+        {
+          "name": "Get STOs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/get-stos?tokenSymbol={{tokenSymbol}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "get-stos"
+              ],
+              "query": [
+                {
+                  "key": "tokenSymbol",
+                  "value": "{{tokenSymbol}}",
+                  "description": "The token symbol from a specific token. (required)"
+                }
+              ]
+            },
+            "description": "Get all stos by TokenSymbol\n\n**Description:** This endpoint retrieves all stos from a token (`tokenSymbol`).\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The token symbol from a specific token."
+          },
+          "response": []
+        },
+        {
+          "name": "Get STO by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/get-sto-by-id?tokenSymbol={{tokenSymbol}}&id=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "get-sto-by-id"
+              ],
+              "query": [
+                {
+                  "key": "tokenSymbol",
+                  "value": "{{tokenSymbol}}",
+                  "description": "The symbol of the token. (required)"
+                },
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "The unique identifier (UUID) of the STO. (required)"
+                }
+              ]
+            },
+            "description": "Get a specific STO by its UUID\n\n**Description:** This endpoint retrieves the details of a specific STO using its unique identifier (`uuid`).\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.\n- `id` (string, format: uuid): The unique identifier of the STO to retrieve."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Investments by STO ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/get-investments-by-sto-id?tokenSymbol={{tokenSymbol}}&id=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "get-investments-by-sto-id"
+              ],
+              "query": [
+                {
+                  "key": "tokenSymbol",
+                  "value": "{{tokenSymbol}}",
+                  "description": "The symbol of the token. (required)"
+                },
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "The unique identifier (UUID) of the STO. (required)"
+                }
+              ]
+            },
+            "description": "Get investments associated with a specific STO ID\n\n**Description:** This endpoint retrieves a list of investment transactions associated with a specific Security Token Offering (STO), identified by its UUID.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.\n- `id` (string, format: uuid): The unique identifier of the STO for which to retrieve investments."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Investor Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/get-investor-info?tokenSymbol={{tokenSymbol}}&email=investor@example.com",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "get-investor-info"
+              ],
+              "query": [
+                {
+                  "key": "tokenSymbol",
+                  "value": "{{tokenSymbol}}",
+                  "description": "The symbol of the token. (required)"
+                },
+                {
+                  "key": "email",
+                  "value": "investor@example.com",
+                  "description": "The email address of the investor. (required)"
+                }
+              ]
+            },
+            "description": "Get investors information\n\nReturns detailed information about an individual investor, including personal details, KYC verification link, wallet address, investor type, and a list of all past investments. Each investment entry includes transaction details such as amount, currency, status, associated token, and offering metadata"
+          },
+          "response": []
+        },
+        {
+          "name": "Get STO balance and status information",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/get-sto-balance?tokenSymbol={{tokenSymbol}}&id=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "get-sto-balance"
+              ],
+              "query": [
+                {
+                  "key": "tokenSymbol",
+                  "value": "{{tokenSymbol}}",
+                  "description": "The symbol of the token. (required)"
+                },
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "The unique identifier (UUID) of the STO. (required)"
+                }
+              ]
+            },
+            "description": "Get STO balance and status information\n\n**Description:** This endpoint retrieves balance details and current status for a Security Token Offering (STO).\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.\n- `id` (string, format: uuid): The unique identifier of the STO."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Whitelist Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/get-whitelist-status?tokenSymbol={{tokenSymbol}}&investorAddress=0x0000000000000000000000000000000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "get-whitelist-status"
+              ],
+              "query": [
+                {
+                  "key": "tokenSymbol",
+                  "value": "{{tokenSymbol}}",
+                  "description": "The symbol of the token. (required)"
+                },
+                {
+                  "key": "investorAddress",
+                  "value": "0x0000000000000000000000000000000000000000",
+                  "description": "The Ethereum address of the investor. (required)"
+                }
+              ]
+            },
+            "description": "Get Whitelist Status\n\n**Description:** Checks the whitelist status of an investor for a specific token.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.\n- `investorAddress` (string): The Ethereum address of the investor."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Balance and Whitelist Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/get-balance-whitelist?tokenSymbol={{tokenSymbol}}&investorEmail=investor@example.com",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "get-balance-whitelist"
+              ],
+              "query": [
+                {
+                  "key": "tokenSymbol",
+                  "value": "{{tokenSymbol}}",
+                  "description": "The symbol of the token. (required)"
+                },
+                {
+                  "key": "investorEmail",
+                  "value": "investor@example.com",
+                  "description": "The email of the investor. (required)"
+                }
+              ]
+            },
+            "description": "Get Balance and Whitelist Status\n\n**Description:** Fetches the balance and whitelist status of a user for a specific token.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.\n- `investorEmail` (string): The email of the investor."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Allowance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/get-allowance?tokenSymbol={{tokenSymbol}}&spenderAddress=0x0000000000000000000000000000000000000001&ownerAddress=0x0000000000000000000000000000000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "get-allowance"
+              ],
+              "query": [
+                {
+                  "key": "tokenSymbol",
+                  "value": "{{tokenSymbol}}",
+                  "description": "The symbol of the token (e.g., \"USDT\"). (required)"
+                },
+                {
+                  "key": "spenderAddress",
+                  "value": "0x0000000000000000000000000000000000000001",
+                  "description": "The Ethereum address of the spender. (required)"
+                },
+                {
+                  "key": "ownerAddress",
+                  "value": "0x0000000000000000000000000000000000000000",
+                  "description": "The Ethereum address of the token owner. (required)"
+                }
+              ]
+            },
+            "description": "Get Allowance\n\n**Description:** Retrieves the allowance of a spender address for a given token from the owner's address.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token (e.g., \"USDT\").\n- `spenderAddress` (string): The Ethereum address of the spender.\n- `ownerAddress` (string): The Ethereum address of the token owner."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dividend Distribution",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/get-dividend-distribution?tokenSymbol={{tokenSymbol}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "get-dividend-distribution"
+              ],
+              "query": [
+                {
+                  "key": "tokenSymbol",
+                  "value": "{{tokenSymbol}}",
+                  "description": "The symbol of the token. (required)"
+                }
+              ]
+            },
+            "description": "Get Dividend Distribution Info\n\n**Description:** Retrieves information about dividend distributions for a token.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token."
+          },
+          "response": []
+        },
+        {
+          "name": "Check Transaction Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/get-transaction-status?hash=&txId=tx_abc123def456",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "get-transaction-status"
+              ],
+              "query": [
+                {
+                  "key": "hash",
+                  "value": "",
+                  "description": "On-chain transaction hash returned after the transaction is sent. Use the exact value starting with 0x. (optional)"
+                },
+                {
+                  "key": "txId",
+                  "value": "tx_abc123def456",
+                  "description": "Internal transaction ID returned by /prepare-transactions. Use this when the on-chain transaction hash is not available yet. (optional)"
+                }
+              ]
+            },
+            "description": "Check Transaction Status\n\n**Description:** This endpoint retrieves the status of a transaction submitted through `/send-transactions`.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `hash` (string, optional): On-chain transaction hash returned after the transaction is sent. Use the exact hash value starting with `0x`.\n- `txId` (string, optional): Internal transaction ID returned by `/prepare-transactions`. Use this when the on-chain transaction hash is not available yet.\n\nAt least one of `hash` or `txId` is required. Do not send a request body, because this endpoint only accepts `GET`."
+          },
+          "response": []
+        }
+      ],
+      "description": "Read-only endpoints. All require the x-api-key header."
+    },
+    {
+      "name": "Management",
+      "item": [
+        {
+          "name": "Update Token Documentation",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/patch-token-docs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patch-token-docs"
+              ]
+            },
+            "description": "Update Token Documentation\n\n**Description:** This endpoint allows you to update token-related documentation and branding materials.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY`\n\n**Request Format:**\nThis endpoint accepts `multipart/form-data` input, which should include:\n- `tokenSymbol` (text)\n- `tokenLogotype` (image file) - optional\n- `subscriptionAgreement` (PDF file) - optional\n- `legalDocs` (PDF file) - optional\n\n**What the endpoint does:**\n- The `tokenLogotype` is uploaded to S3.\n- The `subscriptionAgreement` and `legalDocs` are uploaded to IPFS.\n- The token record (identified by `tokenSymbol`) is then updated with references to the uploaded files.\n\n**Security:**\n- You must provide a valid `x-api-key`.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "tokenSymbol",
+                  "value": "{{tokenSymbol}}",
+                  "type": "text",
+                  "description": "Token symbol to update"
+                },
+                {
+                  "key": "tokenLogotype",
+                  "type": "file",
+                  "src": "",
+                  "description": "Token logo image file"
+                },
+                {
+                  "key": "subscriptionAgreement",
+                  "type": "file",
+                  "src": "",
+                  "description": "Subscription agreement document"
+                },
+                {
+                  "key": "legalDocs",
+                  "type": "file",
+                  "src": "",
+                  "description": "Legal documents"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Agentic API (x402)",
+      "item": [
+        {
+          "name": "Agent Identity",
+          "item": [
+            {
+              "name": "Prepare ERC-8004 agent registration",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Alternative auth: base64-encoded x402 payment payload (instead of x-api-key)."
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/x402/agent/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "agent",
+                    "register"
+                  ]
+                },
+                "description": "Prepare ERC-8004 agent registration\n\nPrepare an unsigned ERC-8004 agent registration transaction. The method is fixed by this facade endpoint; do not include a method field."
+              },
+              "response": []
+            },
+            {
+              "name": "Prepare ERC-8004 agent URI update",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Alternative auth: base64-encoded x402 payment payload (instead of x-api-key)."
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/x402/agent/set-uri",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "agent",
+                    "set-uri"
+                  ]
+                },
+                "description": "Prepare ERC-8004 agent URI update\n\nPrepare an unsigned transaction that publishes the final ERC-8004 agent URI and profile metadata. The method is fixed by this facade endpoint; do not include a method field."
+              },
+              "response": []
+            },
+            {
+              "name": "Prepare ERC-8004 metadata update",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Alternative auth: base64-encoded x402 payment payload (instead of x-api-key)."
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/x402/agent/set-metadata",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "agent",
+                    "set-metadata"
+                  ]
+                },
+                "description": "Prepare ERC-8004 metadata update\n\nPrepare an unsigned transaction that writes one ERC-8004 agent metadata key/value pair. The method is fixed by this facade endpoint; do not include a method field."
+              },
+              "response": []
+            },
+            {
+              "name": "Prepare ERC-8004 agent wallet update",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Alternative auth: base64-encoded x402 payment payload (instead of x-api-key)."
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/x402/agent/set-wallet",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "agent",
+                    "set-wallet"
+                  ]
+                },
+                "description": "Prepare ERC-8004 agent wallet update\n\nPrepare an unsigned transaction that sets the operational wallet for an ERC-8004 agent. The method is fixed by this facade endpoint; do not include a method field."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Reputation",
+          "item": [
+            {
+              "name": "Prepare ERC-8004 feedback",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Alternative auth: base64-encoded x402 payment payload (instead of x-api-key)."
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/x402/agent/feedback/give",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "agent",
+                    "feedback",
+                    "give"
+                  ]
+                },
+                "description": "Prepare ERC-8004 feedback\n\nPrepare an unsigned ERC-8004 reputation feedback transaction. The method is fixed by this facade endpoint; do not include a method field."
+              },
+              "response": []
+            },
+            {
+              "name": "Prepare ERC-8004 feedback revocation",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Alternative auth: base64-encoded x402 payment payload (instead of x-api-key)."
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/x402/agent/feedback/revoke",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "agent",
+                    "feedback",
+                    "revoke"
+                  ]
+                },
+                "description": "Prepare ERC-8004 feedback revocation\n\nPrepare an unsigned transaction that revokes an ERC-8004 feedback entry. The method is fixed by this facade endpoint; do not include a method field."
+              },
+              "response": []
+            },
+            {
+              "name": "Prepare ERC-8004 feedback response",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Alternative auth: base64-encoded x402 payment payload (instead of x-api-key)."
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/x402/agent/feedback/respond",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "agent",
+                    "feedback",
+                    "respond"
+                  ]
+                },
+                "description": "Prepare ERC-8004 feedback response\n\nPrepare an unsigned transaction that appends a response to an ERC-8004 feedback thread. The method is fixed by this facade endpoint; do not include a method field."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Token Operations",
+          "item": [
+            {
+              "name": "Prepare agent ERC-20 deployment",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Alternative auth: base64-encoded x402 payment payload (instead of x-api-key)."
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/x402/token/create",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "token",
+                    "create"
+                  ]
+                },
+                "description": "Prepare agent ERC-20 deployment\n\nPrepare an unsigned transaction that deploys an ERC-20 token controlled by an agent wallet. The method is fixed by this facade endpoint; do not include a method field."
+              },
+              "response": []
+            },
+            {
+              "name": "Prepare agent token mint",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Alternative auth: base64-encoded x402 payment payload (instead of x-api-key)."
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/x402/token/mint",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "token",
+                    "mint"
+                  ]
+                },
+                "description": "Prepare agent token mint\n\nPrepare an unsigned transaction that mints an agent ERC-20 token. The method is fixed by this facade endpoint; do not include a method field."
+              },
+              "response": []
+            },
+            {
+              "name": "Prepare agent token burn",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Alternative auth: base64-encoded x402 payment payload (instead of x-api-key)."
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/x402/token/burn",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "token",
+                    "burn"
+                  ]
+                },
+                "description": "Prepare agent token burn\n\nPrepare an unsigned transaction that burns an agent ERC-20 token. The method is fixed by this facade endpoint; do not include a method field."
+              },
+              "response": []
+            },
+            {
+              "name": "Prepare agent token transfer",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Alternative auth: base64-encoded x402 payment payload (instead of x-api-key)."
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/x402/token/transfer",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "token",
+                    "transfer"
+                  ]
+                },
+                "description": "Prepare agent token transfer\n\nPrepare an unsigned transaction that transfers an agent ERC-20 token. The method is fixed by this facade endpoint; do not include a method field."
+              },
+              "response": []
+            },
+            {
+              "name": "Prepare agent token transferFrom",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Alternative auth: base64-encoded x402 payment payload (instead of x-api-key)."
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/x402/token/transfer-from",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "token",
+                    "transfer-from"
+                  ]
+                },
+                "description": "Prepare agent token transferFrom\n\nPrepare an unsigned transaction that transfers an agent ERC-20 token through allowance. The method is fixed by this facade endpoint; do not include a method field."
+              },
+              "response": []
+            },
+            {
+              "name": "Prepare agent token allowance",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Alternative auth: base64-encoded x402 payment payload (instead of x-api-key)."
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/x402/token/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "token",
+                    "approve"
+                  ]
+                },
+                "description": "Prepare agent token allowance\n\nPrepare an unsigned transaction that approves an ERC-20 allowance for an agent token. The method is fixed by this facade endpoint; do not include a method field."
+              },
+              "response": []
+            }
+          ]
+        }
+      ],
+      "description": "ERC-8004 agent and agent-token facade endpoints. Authenticate with x-api-key, or pay per call via the X-Payment header (x402 protocol)."
+    },
+    {
+      "name": "Discovery",
+      "item": [
+        {
+          "name": "Get OpenAPI Spec",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/openapi.json",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "openapi.json"
+              ]
+            },
+            "description": "Get x402 discovery OpenAPI\n\nReturns the generated OpenAPI 3.1 document used by x402scan for Brickken agentic facade endpoints.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get x402 Well-Known Resources",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/.well-known/x402",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ".well-known",
+                "x402"
+              ]
+            },
+            "description": "Get x402 well-known resources\n\nReturns the x402 well-known resource list with absolute Brickken facade endpoint URLs.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Public discovery endpoints. No authentication required."
+    }
+  ]
+}
