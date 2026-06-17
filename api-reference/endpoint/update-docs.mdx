@@ -13,6 +13,7 @@ The `PATCH /patch-token-docs` endpoint allows you to update token-related docume
 - **Legal Document Management**: Upload subscription agreements and legal documents to IPFS
 - **Multipart Form Data**: Supports file uploads through multipart/form-data format
 - **Selective Updates**: All file fields are optional - update only what you need
+- **Off-chain Update**: This endpoint does not prepare or require any blockchain transaction
 
 ## Request Format
 
@@ -80,6 +81,7 @@ curl -X PATCH "https://api.sandbox.brickken.com/patch-token-docs" \
 - **API Key Required**: Include your API key in the `x-api-key` header
 - **Token Ownership**: You can only update documentation for tokens associated with your account
 - **File Validation**: Files are validated for type and size before upload
+- **No Transaction Signature**: API key requests do not require `signerAddress`, `txId`, or signed transactions
 
 ## Error Handling
 
@@ -112,4 +114,5 @@ curl -X PATCH "https://api.sandbox.brickken.com/patch-token-docs" \
 - Files are processed and uploaded to different storage systems based on their purpose
 - IPFS storage ensures immutable document storage for legal compliance
 - S3 storage provides fast access for branding materials
+- This endpoint is fully off-chain: token logos are uploaded to S3, documents are uploaded to IPFS, and the token database record is updated without preparing a blockchain transaction
 - The endpoint validates file types and user permissions before processing uploads
