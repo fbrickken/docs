@@ -8,20 +8,21 @@ Prepares unsigned transactions for deploying an agent-owned ERC-20 token. This f
 
 ## Authentication
 
-Omit `x-api-key`. If the API returns `402 Payment Required`, sign the x402 payment locally and retry with `X-Payment`.
+Omit `x-api-key`. Prepare is free; the x402 payment is charged on `POST /send-transactions`, where the API returns `402 Payment Required`. Sign the x402 payment locally and retry with `X-PAYMENT`. In `brickken-relayed` mode (recommended) Brickken's relayer signs and broadcasts; in `client-signed` mode you sign the prepared transaction first.
 
 ## Key Fields
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| `chainId` | Yes | Target chain ID. Decimal and hex values are accepted. |
-| `signerAddress` | Yes | Wallet that signs the prepared transaction. |
+| `chainId` | Yes | Target chain ID. Use `8453` for Base mainnet or `84532` for Base Sepolia. Decimal and hex values are accepted. |
+| `executionMode` | No | `brickken-relayed` (recommended) or `client-signed`. |
+| `signerAddress` | Conditional | Required in `client-signed` mode. Omit in `brickken-relayed` mode (Brickken signs). |
 | `name` | Yes | Token name. |
 | `symbol` | Yes | Token symbol. |
-| `agentWallet` | Yes | Agent wallet that owns or operates the token. |
+| `agentWallet` | Conditional | Agent wallet that owns or operates the token (client-signed). Omit in `brickken-relayed` mode — Brickken's relayer becomes the owner. |
 | `premint` | No | Optional initial token amount. |
 | `decimals` | No | Optional token decimals. |
 
 ## Response
 
-Returns prepared unsigned transactions and `txId`. If executed, use the deployment receipt to recover the deployed `tokenAddress`.
+Returns prepared unsigned transactions and `txId`. Submit it to `POST /send-transactions`: in `brickken-relayed` mode send `{ txId, transactions }` and pay via x402 (Brickken signs and broadcasts); in `client-signed` mode sign the transaction locally and send `{ txId, signedTransactions }`. If executed, use the deployment receipt to recover the deployed `tokenAddress`. In `brickken-relayed` mode, omit `agentWallet` — Brickken's relayer becomes the token owner.

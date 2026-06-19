@@ -3,19 +3,21 @@ title: 'Agent & Token Workflow'
 description: 'An end-to-end walkthrough: register an ERC-8004 agent, then deploy and manage its token with the Brickken CLI.'
 ---
 
-This guide runs a full lifecycle on Sepolia testnet: register an agent, finalize its profile and metadata, then deploy and operate its token — all through x402.
+This guide runs a full lifecycle on Base Sepolia: register an agent, finalize its profile and metadata, then deploy and operate its token — all through x402.
+
+It uses **`client-signed`** mode so you keep self-custody of signing — passing `--signer-address` (and `--agent-wallet`) selects it. For the hands-off path where Brickken's relayer signs and broadcasts, drop those flags and add `--execution-mode brickken-relayed` — see the [Quickstart](/cli/quickstart).
 
 ## Prerequisites
 
 - The CLI is [installed](/cli/installation) and a private key is set (`BRICKKEN_PRIVATE_KEY`).
-- The wallet holds enough Sepolia USDC to cover x402 fees (≈ `0.02 USDC` per executed command).
+- The wallet holds enough Base Sepolia Circle USDC (`0x036CbD53842c5426634e7929541eC2318f3dCF7e`) to cover x402 send fees (`0.01 USDC` per send in sandbox) and a little native ETH for gas (client-signed mode).
 - `jq` is available for reading `--json` output.
 
 ```bash
 export BRICKKEN_ENV="sandbox"
-export CHAIN="11155111"
+export CHAIN="84532"                 # Base Sepolia
 export WALLET="0xYourWallet"
-export BRICKKEN_RPC_URL="https://ethereum-sepolia-rpc.publicnode.com"
+export BRICKKEN_RPC_URL="https://sepolia.base.org"
 ```
 
 <Warning>

@@ -1,0 +1,34 @@
+---
+title: 'Transfer Agent Ownership'
+openapi: 'POST /x402/agent/transfer-ownership'
+description: 'Prepare an ERC-8004 identity ownership transfer through x402.'
+---
+
+Prepares an unsigned ERC-721 `safeTransferFrom` that moves an ERC-8004 agent identity from Brickken custody to a wallet you control. This facade maps to `agentTransferOwnership`.
+
+By default Brickken is the on-chain owner of the agent identity in `brickken-relayed` mode. Call this method only when you explicitly want to take custody of the identity NFT yourself.
+
+## Authentication
+
+Omit `x-api-key`. Prepare is free. On `POST /send-transactions` the API returns `402 Payment Required`; sign the x402 payment locally and retry with `X-PAYMENT`. In `brickken-relayed` mode Brickken's relayer (the current owner) signs and broadcasts the transfer once payment is verified.
+
+## Key Fields
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| `chainId` | Yes | Target chain ID. Use `8453` for Base mainnet or `84532` for Base Sepolia. Decimal and hex values are accepted. |
+| `newOwner` | Yes | Wallet that will receive the ERC-8004 identity NFT. Must differ from the current owner. |
+| `agentUuid` or `agentId` | Usually | Agent identifier from registration or the on-chain agent ID. The agent must already be registered on-chain. |
+| `executionMode` | No | `brickken-relayed` (recommended) or `client-signed`. |
+| `signerAddress` | Conditional | Required in `client-signed` mode (must be the current owner). Omit in `brickken-relayed` mode. |
+
+## Response
+
+Returns a prepared unsigned transaction and `txId`. Submit it to `POST /send-transactions` and complete the x402 payment.
+
+- **`brickken-relayed`:** send `{ txId, transactions }`; Brickken signs and broadcasts.
+- **`client-signed`:** sign the transaction locally as the current owner, then send `{ txId, signedTransactions }`.
+
+<Warning>
+Ownership transfer is **irreversible** and is different from [`agentSetWallet`](/api-reference/endpoint/x402-agent-set-wallet), which only changes the operational wallet. After the identity leaves Brickken custody, Brickken's relayer can no longer perform owner-only operations for that agent unless ownership is transferred back.
+</Warning>

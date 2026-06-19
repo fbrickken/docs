@@ -3,7 +3,7 @@ title: 'agent'
 description: 'Manage ERC-8004 agent identity and reputation from the Brickken CLI.'
 ---
 
-`brickken agent` groups the ERC-8004 identity and reputation operations. Every subcommand is **prepare-only by default**; add `--execute` to prepare, sign locally, send, and pay through x402 in one step.
+`brickken agent` groups the ERC-8004 identity and reputation operations on Base. Every subcommand is **prepare-only by default** (free); add `--execute` to also send and pay the x402 charge. The recommended `brickken-relayed` mode (`--execution-mode brickken-relayed`, omit `--signer-address`) lets Brickken's relayer sign and broadcast; the default `client-signed` mode signs locally with `--signer-address`.
 
 For the field-level semantics of each underlying method, see [Agentic Methods with x402](/api-reference/endpoint/agentic-methods-x402).
 
@@ -13,11 +13,12 @@ These options apply to every `agent` subcommand:
 
 | Flag | Description |
 | --- | --- |
-| `--chain <chain>` | Chain identifier (decimal or hex) |
-| `--signer-address <address>` | Signer wallet address |
-| `--gas-limit <value>` | Optional explicit gas limit |
+| `--chain <chain>` | Chain identifier (decimal or hex). `8453` Base mainnet, `84532` Base Sepolia. |
+| `--execution-mode <mode>` | `client-signed` (default) or `brickken-relayed` (recommended) |
+| `--signer-address <address>` | Signer wallet address. Required only for `client-signed`. |
+| `--gas-limit <value>` | Optional explicit gas limit (client-signed) |
 | `-f, --file <path>` | JSON/YAML input file (merged with CLI flags) |
-| `--execute` | Prepare, sign locally, send, and pay through x402 |
+| `--execute` | Send and pay the x402 charge (otherwise prepare-only) |
 
 <Note>
 `--owner-email` / `--email` is optional metadata. Agentic operations do not require a tokenizer user in the Brickken database.
@@ -157,6 +158,32 @@ brickken agent set-wallet \
   --execute \
   --json
 ```
+
+## agent transfer-ownership
+
+Prepare or execute an ERC-8004 identity ownership transfer → [`agentTransferOwnership`](/api-reference/endpoint/x402-agent-transfer-ownership). Moves the identity NFT from Brickken custody to a wallet you control via an ERC-721 `safeTransferFrom`.
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--agent-uuid <uuid>` | string | Yes¹ | Stored tokenized agent UUID |
+| `--agent-id <id>` | string | Yes¹ | On-chain ERC-8004 agent ID |
+| `--new-owner <address>` | string | Yes | Wallet that will receive the identity NFT (must differ from the current owner) |
+
+¹ Provide either `--agent-uuid` or `--agent-id`. The agent must already be registered on-chain.
+
+```bash
+brickken agent transfer-ownership \
+  --chain "$CHAIN" \
+  --execution-mode brickken-relayed \
+  --agent-uuid "$AGENT_UUID" \
+  --new-owner 0xYourWallet \
+  --execute \
+  --json
+```
+
+<Warning>
+Ownership transfer is **irreversible** and is different from `set-wallet` (which only changes the operational wallet). After the identity leaves Brickken custody, Brickken's relayer can no longer perform owner-only operations for that agent.
+</Warning>
 
 ## agent feedback give
 

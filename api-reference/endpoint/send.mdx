@@ -3,21 +3,40 @@ title: 'Send Transactions'
 openapi: 'POST /send-transactions'
 ---
 
-Submits signed transactions to the blockchain. This endpoint works uniformly for all transaction types prepared using the `/prepare-transactions` endpoint.
+Broadcasts a prepared transaction. This endpoint works uniformly for all transaction types prepared using the `/prepare-transactions` endpoint. For agentic (x402) methods, **this is the paid step** — preparing is free and the x402 USDC charge is collected here.
 
-For x402-eligible agentic methods, this endpoint can be authenticated with either `x-api-key` or x402 payment. To use x402, omit `x-api-key`, read the `PAYMENT-REQUIRED` header from the `402` response, then retry with `X-Payment`.
+For x402-eligible agentic methods, this endpoint can be authenticated with either `x-api-key` or x402 payment. To use x402, omit `x-api-key`, read the `PAYMENT-REQUIRED` header from the `402` response, then retry with `X-PAYMENT`.
+
+It accepts two mutually exclusive request shapes:
+
+- **Client-signed** — you sign the prepared blockchain transaction yourself and submit `txId` + `signedTransactions`.
+- **Brickken-relayed** — you do not sign the blockchain transaction. You submit `txId` + `transactions` (the prepared call), pay through x402, and Brickken's relayer signs and broadcasts it. Available for x402-eligible agentic methods that were prepared with `executionMode: "brickken-relayed"`.
 
 ## Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `signedTransactions` | string \| string[] | Yes | Signed transaction hex string(s) starting with `0x`. Can be a single string (legacy) or an array of strings |
-| `txId` | string \| string[] | Yes | Transaction ID(s) from prepare-transactions response. Must match the format of `signedTransactions` (both strings or both arrays) |
+| `txId` | string \| string[] | Yes | Transaction ID(s) from the prepare-transactions response. For brickken-relayed, a single string. |
+| `signedTransactions` | string \| string[] | Client-signed | Signed transaction hex string(s) starting with `0x`. A single string (legacy) or an array. Must match the format of `txId`. |
+| `transactions` | object[] | Brickken-relayed | Exactly one prepared call `{ to, data, value }` returned by prepare. Used instead of `signedTransactions` when Brickken relays the transaction. |
 
 > [!IMPORTANT]
-> `signedTransactions` must be a hex string (starting with `0x`), **not** an object or array of objects. Both `txId` and `signedTransactions` must use the same format (both strings or both arrays).
+> Provide **either** `signedTransactions` (client-signed) **or** `transactions` (brickken-relayed), not both. `signedTransactions` must be a hex string starting with `0x`; `txId` and `signedTransactions` must use the same format (both strings or both arrays). A brickken-relayed send requires x402 payment — API keys are not accepted on that path.
 
 ## Request Body
+
+### Brickken-relayed (recommended for agentic methods)
+
+```json
+{
+  "txId": "0x11769b5c2028a8ed0a3bdc7599e244aee68e2cae80261d8954e44c3b5cb621a4",
+  "transactions": [
+    { "to": "0xRegistry", "data": "0x...", "value": "0x0" }
+  ]
+}
+```
+
+Pay with the `X-PAYMENT` header. Brickken verifies the payment, signs with its relayer, and broadcasts. The payment is settled only after the operation confirms on-chain.
 
 ### Legacy Format (Single Transaction)
 
@@ -70,36 +89,36 @@ For x402-eligible agentic methods, this endpoint can be authenticated with eithe
 
 ## Workflow
 
-1. **Prepare Transactions**: First, call `/prepare-transactions` with your desired method and parameters
-2. **Sign Transactions**: Sign each transaction in the returned `transactions` array using your preferred wallet or signing method
-3. **Send Transactions**: Submit the signed transactions along with the `txId` to this endpoint
+**Client-signed**
+
+1. **Prepare**: call `/prepare-transactions` with your method, parameters, and `signerAddress`.
+2. **Sign**: sign each transaction in the returned `transactions` array with your wallet.
+3. **Send**: submit `signedTransactions` + `txId` to this endpoint (with `X-PAYMENT` for x402 methods).
+
+**Brickken-relayed**
+
+1. **Prepare** (free): call `/prepare-transactions` (or an `/x402/...` facade) with `executionMode: "brickken-relayed"` and omit `signerAddress`.
+2. **Send + pay**: submit `transactions` + `txId`, retry with `X-PAYMENT`. Brickken signs and broadcasts; the payment settles only after on-chain confirmation.
+
+A relayed send returns `200` with `status: "confirmed"` once the receipt is in, or `202` with `status: "pending"` if the operation was broadcast but not yet confirmed — in which case poll `/get-transaction-status` rather than resubmitting.
 
 ## Supported Transaction Types
 
-This endpoint accepts signed transactions for all methods supported by `/prepare-transactions`:
+This endpoint accepts transactions for all methods supported by `/prepare-transactions`.
 
-- `newTokenization` - Create new tokenized assets
-- `newSto` - Create Security Token Offerings
-- `newInvest` - Make investments in STOs
-- `claimTokens` - Claim tokens from completed STOs
-- `closeOffer` - Close active STOs
-- `mintToken` - Mint additional tokens
-- `whitelist` - Manage address whitelist status
-- `approve` - Approve token spending
-- `burnToken` - Burn tokens
-- `transferFrom` - Transfer tokens (with approval)
-- `transferTo` - Transfer tokens from signer
-- `dividendDistribution` - Distribute dividends
+**Dapp (API key):** `newTokenization`, `newSto`, `newInvest`, `claimTokens`, `closeOffer`, `mintToken`, `whitelist`, `approve`, `burnToken`, `transferFrom`, `transferTo`, `dividendDistribution`.
+
+**Agentic (x402-eligible):** `agentRegister`, `agentSetURI`, `agentSetMetadata`, `agentSetWallet`, `agentTransferOwnership`, `agentGiveFeedback`, `agentRevokeFeedback`, `agentAppendFeedbackResponse`, `agentCreateToken`, `agentMintToken`, `agentBurnToken`, `agentTransferToken`, `agentTransferFromToken`, `agentApproveToken` (and the legacy `newTokenizedAgent` alias).
 
 ## Transaction Status
 
-After submitting transactions, you can check their status using the `/get-transaction-status` endpoint with the returned transaction hash (`hash`) or the original transaction ID (`txId`) from `/prepare-transactions`.
+After submitting transactions, check their status using the `/get-transaction-status` endpoint with the returned transaction hash (`hash`) or the original transaction ID (`txId`) from `/prepare-transactions`. For `brickken-relayed` transactions, no API key is required to poll status.
 
 For x402 sends, the batch must contain only x402-eligible agentic prepared transactions and all transactions must be on the same chain.
 
 ## Security Notes
 
-- Always verify transaction details before signing
-- Ensure the `txId` matches the one received from `/prepare-transactions`
-- Use secure signing methods for production environments
-- Never share private keys or expose them in client-side code
+- Always verify transaction details (chain, recipient, token, amount, and the quoted USDC price) before paying or signing.
+- Ensure the `txId` matches the one received from `/prepare-transactions`.
+- In `client-signed` mode, use secure signing methods and never share or expose private keys in client-side code.
+- In `brickken-relayed` mode you sign only the x402 payment authorization; never resubmit or re-pay a `txId` once an operation hash exists — poll status instead.

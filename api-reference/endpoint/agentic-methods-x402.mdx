@@ -1,19 +1,24 @@
 ---
 title: 'Agentic API'
-description: 'Private-key based Agentic API for ERC-8004 agent identity, reputation, and agent-token workflows.'
+description: 'x402-paid Agentic API for ERC-8004 agent identity, reputation, and agent-token workflows on Base.'
 ---
 
 ## Overview
 
-The Agentic API is the private-key based surface for Brickken agentic methods. It covers ERC-8004 agent identity, reputation, and agent-owned ERC-20 token operations.
+The Agentic API is the x402-paid surface for Brickken agentic methods. It covers ERC-8004 agent identity, reputation, and agent-owned ERC-20 token operations on **Base mainnet** and **Base Sepolia**.
 
-Use this surface when you do not want to use a Brickken API key. Your private key stays local and is used to sign:
+Every agentic operation is a two-step flow:
 
-- the x402 USDC payment authorization; and
-- the prepared blockchain transaction before `send-transactions`.
+1. **Prepare** the unsigned transaction — **free**, no x402 payment required.
+2. **Send** the operation — the x402 USDC payment is charged here, and only here.
+
+There are two execution modes for the send step:
+
+- **`brickken-relayed` (recommended).** You do **not** sign the blockchain transaction. You pay the x402 charge and Brickken's relayer signs, pays native gas, and broadcasts the operation on your behalf. No EOA, no native gas, no on-chain signing on your side.
+- **`client-signed`.** You sign the prepared blockchain transaction with your own private key and submit the signed payload. Use this when you want to retain full self-custody of signing.
 
 <Warning>
-Never send a private key to the Brickken API. Private-key signing belongs in your client, the [Brickken CLI](/cli/introduction), or an MCP session you control.
+Never send a private key to the Brickken API. In `brickken-relayed` mode you only sign the x402 payment authorization. In `client-signed` mode, blockchain signing belongs in your client, the [Brickken CLI](/cli/introduction), or an MCP session you control.
 </Warning>
 
 ## Base URLs
@@ -23,22 +28,47 @@ Never send a private key to the Brickken API. Private-key signing belongs in you
 | Sandbox | `https://api.sandbox.brickken.com` |
 | Production | `https://api.brickken.com` |
 
+## Networks
+
+The Agentic API runs on Base, with Base Sepolia for tests. The x402 payment rail is **operation-aligned**: you pay on the same chain the operation runs on.
+
+| Network | `chainId` (decimal) | Hex | Use |
+| --- | --- | --- | --- |
+| Base mainnet | `8453` | `0x2105` | Production |
+| Base Sepolia | `84532` | `0x14a34` | Testing |
+| Ethereum Sepolia | `11155111` | `0xaa36a7` | Legacy testing |
+
 ## Authentication Flow
 
 For x402, omit `x-api-key`.
 
-1. Call a semantic facade such as `POST /x402/agent/register`, or call `POST /prepare-transactions` with an eligible `method`.
-2. If payment is required, the API returns `402 Payment Required` with a `PAYMENT-REQUIRED` response header.
-3. Decode and sign the x402 payment locally with the payer private key.
-4. Retry the same request with `X-Payment`.
-5. Sign the returned prepared blockchain transaction locally.
-6. Submit it with `POST /send-transactions`, following the same x402 retry flow if required.
+1. **Prepare (free).** Call a semantic facade such as `POST /x402/agent/register`, or `POST /prepare-transactions` with an eligible `method`. For relayed execution, pass `executionMode: "brickken-relayed"`. The response returns `txId`, `transactions`, and an `x402Requirements` quote of the upcoming send price. No payment is taken at this step.
+2. **Send.** Call `POST /send-transactions`. The API responds `402 Payment Required` with a `PAYMENT-REQUIRED` header describing the exact chain, asset, transfer method, amount, recipient, and timeout.
+3. **Sign the x402 payment locally** with the payer's private key, and retry the send with `X-PAYMENT`.
+4. Brickken verifies the payment, then (in `brickken-relayed` mode) signs and broadcasts the operation. The settlement is returned in the `PAYMENT-RESPONSE` header.
 
 ```http
-X-Payment: BASE64_ENCODED_X402_PAYMENT_PAYLOAD
+X-PAYMENT: BASE64_ENCODED_X402_PAYMENT_PAYLOAD
 ```
 
-The API returns `PAYMENT-RESPONSE` after settlement. The payment rail uses USDC with EIP-3009 authorization. Always read the chain, asset, amount, recipient, and timeout from `PAYMENT-REQUIRED`; do not hardcode them client-side.
+Always read the chain, asset, transfer method, amount, recipient, and timeout from `PAYMENT-REQUIRED`; do not hardcode them client-side. On Base Sepolia the payment rail uses **EIP-3009**; on Base mainnet it follows the advertised token's transfer method.
+
+<Note>
+In `brickken-relayed` mode, x402 payment is **mandatory** — API keys are not accepted on the send step. The payment is reserved when you pay and only **settled after the operation confirms on-chain**. If the operation reverts or its authorization expires before confirmation, the reservation is released.
+</Note>
+
+## Base Sepolia Testing
+
+Use `chainId: "84532"` (`eip155:84532`). The Base Sepolia x402 payment asset is **Circle USDC**:
+
+```text
+0x036CbD53842c5426634e7929541eC2318f3dCF7e
+```
+
+It has 6 decimals and uses the **EIP-3009** transfer method (EIP-712 name `USDC`, version `2`, authorization window 300s). Fund the payer with the exact asset advertised by `PAYMENT-REQUIRED` before signing. The Base Sepolia ERC-8004 registries are:
+
+- Identity: `0x8004A818BFB912233c491871b3d84c89A494BD9e`
+- Reputation: `0x8004B663056A597Dffe9eCcC1965A193B7388713`
 
 ## Discovery
 
@@ -51,14 +81,18 @@ Production (`https://api.brickken.com`) is the public x402scan target. Sandbox e
 
 ## Prepare and Send
 
-The semantic `/x402/...` routes prepare unsigned transactions. They do not submit transactions on-chain by themselves.
+The semantic `/x402/...` routes prepare unsigned transactions for free. They do not submit transactions on-chain by themselves.
+
+### Brickken-relayed (recommended)
+
+Prepare with `executionMode: "brickken-relayed"` and omit `signerAddress` — Brickken supplies its relayer as the signer.
 
 ```bash
 curl --request POST 'https://api.sandbox.brickken.com/x402/agent/register' \
   --header 'Content-Type: application/json' \
   --data '{
-    "chainId": "11155111",
-    "signerAddress": "0xYourWallet",
+    "chainId": "84532",
+    "executionMode": "brickken-relayed",
     "name": "Research Agent",
     "description": "Autonomous research agent",
     "image": "https://example.com/agent.png",
@@ -76,19 +110,43 @@ curl --request POST 'https://api.sandbox.brickken.com/x402/agent/register' \
   }'
 ```
 
-After signing the returned transaction:
+<Warning>
+`image` is required for `agentRegister` and must be a publicly reachable HTTPS logo URL. Do not use local paths or omit the field.
+</Warning>
+
+The prepare response returns a single `txId`, exactly one transaction `{ to, data, value }`, and `x402Requirements`. Submit those to `send-transactions` and complete the x402 payment; Brickken signs and broadcasts:
 
 ```bash
 curl --request POST 'https://api.sandbox.brickken.com/send-transactions' \
   --header 'Content-Type: application/json' \
-  --header 'X-Payment: BASE64_ENCODED_X402_PAYMENT_PAYLOAD' \
+  --header 'X-PAYMENT: BASE64_ENCODED_X402_PAYMENT_PAYLOAD' \
+  --data '{
+    "txId": "0xPreparedTransactionId",
+    "transactions": [
+      { "to": "0xRegistry", "data": "0x...", "value": "0x0" }
+    ]
+  }'
+```
+
+### Client-signed
+
+Prepare with your own `signerAddress`, sign the returned transaction locally, then send the signed payload:
+
+```bash
+curl --request POST 'https://api.sandbox.brickken.com/send-transactions' \
+  --header 'Content-Type: application/json' \
+  --header 'X-PAYMENT: BASE64_ENCODED_X402_PAYMENT_PAYLOAD' \
   --data '{
     "txId": "0xPreparedTransactionId",
     "signedTransactions": ["0xSignedRawTransaction"]
   }'
 ```
 
-`send-transactions` x402 batches must contain only x402-eligible prepared transactions, and all transactions in the batch must be on the same chain.
+`send-transactions` x402 batches must contain only x402-eligible prepared transactions, and all transactions in the batch must be on the same chain. A `brickken-relayed` send carries a single `txId` and exactly one transaction.
+
+### Polling
+
+For relayed operations, poll status with `GET /get-transaction-status` by `txId` or operation hash — no API key is required for `brickken-relayed` transactions. A response of `status: "pending"` means the operation was broadcast but not yet confirmed; do not pay or resubmit the same `txId` again. Brickken's reconciliation settles after confirmation or releases the payment on revert or authorization expiry.
 
 ## Endpoint Groups
 
@@ -96,7 +154,7 @@ Facade requests use the same body fields as the matching backend `method`, excep
 
 <CardGroup cols={2}>
   <Card title="Agent Identity" icon="user-round" href="/api-reference/endpoint/x402-agent-register">
-    Register and maintain ERC-8004 agent identity data.
+    Register, maintain, and transfer ownership of ERC-8004 agent identities.
   </Card>
   <Card title="Reputation" icon="message-square" href="/api-reference/endpoint/x402-agent-feedback-give">
     Give, revoke, and respond to ERC-8004 feedback.
@@ -105,7 +163,7 @@ Facade requests use the same body fields as the matching backend `method`, excep
     Create and operate agent-owned ERC-20 tokens.
   </Card>
   <Card title="Pricing" icon="badge-dollar-sign" href="/api-reference/endpoint/agentic-pricing">
-    Review x402 prepare, send, and total prices.
+    Review free prepare and per-operation send prices.
   </Card>
 </CardGroup>
 
@@ -115,17 +173,17 @@ Advanced clients can also call `POST /prepare-transactions` directly and pass `m
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
-| `chainId` | string | Yes | Target chain ID. Decimal and hex values are accepted. |
+| `chainId` | string | Yes | Target chain ID. Use `8453` for Base mainnet or `84532` for Base Sepolia. Decimal and hex values are accepted. |
 | `method` | string | Yes for `/prepare-transactions`; no for `/x402/...` facades | One of the eligible method names. Facades derive it from the path. |
-| `signerAddress` | string | Yes | Wallet that signs the prepared blockchain transaction. |
-| `gasLimit` | string or number | No | Optional explicit gas limit. |
-| `nonce` | number | No | Optional explicit nonce when managing nonces manually. |
-| `privateRpcUrl` | string | No | Optional RPC override. |
+| `executionMode` | string | No | `brickken-relayed` (Brickken signs and broadcasts) or `client-signed` (default). |
+| `signerAddress` | string | Conditional | Required in `client-signed` mode. Omit in `brickken-relayed` mode — Brickken sets its relayer as the signer. |
+| `gasLimit` | string or number | No | Optional explicit gas limit (client-signed). |
+| `nonce` | number | No | Optional explicit nonce when managing nonces manually (client-signed). |
 
 ## Response Shape
 
-The prepare response includes `txId`, `transactions`, and optional `info`. For `agentRegister`, save `info.agentUuid` for later `set-uri` and `set-metadata` calls.
+The prepare response includes `txId`, `transactions`, and optional `info`. For `agentRegister`, save `info.agentUuid` for later `set-uri`, `set-metadata`, and `transfer-ownership` calls.
 
 <Warning>
-x402 payments and on-chain transactions are non-refundable. Confirm chain, signer, recipient, token address, and expected USDC price before signing. See [Pricing](/api-reference/endpoint/agentic-pricing) for the published mainnet table.
+x402 payments and on-chain transactions are non-refundable. Confirm chain, signer/recipient, token address, and expected USDC price before paying. See [Pricing](/api-reference/endpoint/agentic-pricing) for the published mainnet table.
 </Warning>
