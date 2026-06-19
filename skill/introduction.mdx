@@ -102,14 +102,14 @@ The skill guides the agent toward API-key authenticated endpoints, request bodie
 
 ### Agentic API
 
-Use the [Agentic API](/api-reference/endpoint/agentic-methods-x402) when you want private-key based x402 flows without a Brickken API key.
+Use the [Agentic API](/api-reference/endpoint/agentic-methods-x402) when you want x402-paid flows without a Brickken API key. It runs on Base mainnet (`8453`) and Base Sepolia (`84532`).
 
 ```bash
 export BRICKKEN_PRIVATE_KEY="0xYOUR_PRIVATE_KEY"
-export BRICKKEN_RPC_URL="https://ethereum-sepolia-rpc.publicnode.com"
+export BRICKKEN_RPC_URL="https://sepolia.base.org"   # Base Sepolia
 ```
 
-The private key is used by your local agent runtime, CLI, or trusted MCP session for x402 payment signing and blockchain transaction signing. Never send a private key to the Brickken API.
+Preparing an operation is free; the x402 USDC payment is charged only on send. In the recommended `brickken-relayed` mode the private key signs only the x402 payment, and Brickken's relayer signs, pays native gas, and broadcasts the operation — so you do not need to sign the blockchain transaction or hold native gas. In `client-signed` mode the key also signs the prepared transaction locally. Never send a private key to the Brickken API.
 
 <Warning>
 Do not paste production API keys or private keys into shared chats, tickets, terminals, or logs. Use your agent client's secret store or local environment variables.

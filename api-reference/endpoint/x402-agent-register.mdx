@@ -8,23 +8,28 @@ Prepares unsigned transactions for registering an ERC-8004 agent identity. This 
 
 ## Authentication
 
-Omit `x-api-key`. If the API returns `402 Payment Required`, sign the x402 payment locally and retry with `X-Payment`.
+Omit `x-api-key`. Prepare is free; the x402 payment is charged on `POST /send-transactions`, where the API returns `402 Payment Required`. Sign the x402 payment locally and retry with `X-PAYMENT`. In `brickken-relayed` mode (recommended) Brickken's relayer signs and broadcasts; in `client-signed` mode you sign the prepared transaction first.
 
 ## Key Fields
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| `chainId` | Yes | Target chain ID. Decimal and hex values are accepted. |
-| `signerAddress` | Yes | Wallet that signs the prepared transaction. |
+| `chainId` | Yes | Target chain ID. Use `8453` for Base mainnet or `84532` for Base Sepolia tests. Decimal and hex values are accepted. |
+| `executionMode` | No | `brickken-relayed` (recommended) or `client-signed`. |
+| `signerAddress` | Conditional | Required in `client-signed` mode. Omit in `brickken-relayed` mode (Brickken signs). |
 | `name` | Yes | Human-readable agent name. |
 | `description` | Yes | Agent description. |
-| `image` | Yes | Agent image URL. |
+| `image` | Yes | Publicly reachable HTTPS URL for the agent logo. Local paths and omitted values are rejected. |
 | `services` | Yes | Service descriptors such as A2A endpoints. |
 | `aiModelName`, `aiModelProvider` | No | AI model metadata published with the agent profile. |
 | `x402Support`, `active` | No | Agent capability and status flags. |
 
+<Warning>
+`image` is mandatory. Provide the final public logo URL, or an explicitly authorized test fixture; requests without it fail with `image is required`.
+</Warning>
+
 ## Response
 
-Returns prepared unsigned transactions and `txId`. Save `info.agentUuid` from the response for future URI, metadata, and wallet updates.
+Returns prepared unsigned transactions and `txId`. Save `info.agentUuid` from the response for future URI, metadata, wallet, and ownership-transfer updates.
 
-Sign the transaction locally, then submit it with `POST /send-transactions`.
+Submit it to `POST /send-transactions`: in `brickken-relayed` mode send `{ txId, transactions }` and pay via x402 (Brickken signs and broadcasts); in `client-signed` mode sign the transaction locally and send `{ txId, signedTransactions }`.

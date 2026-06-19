@@ -5,16 +5,16 @@ description: 'x402-only authentication, private key signing, environments, and c
 
 ## x402-only model
 
-The CLI is **x402-only**. It does not send an `x-api-key` header, and it ignores `BRICKKEN_API_KEY` / `BKN_API_KEY` if they are set. Instead, every request is paid through x402:
+The CLI is **x402-only**. It does not send an `x-api-key` header, and it ignores `BRICKKEN_API_KEY` / `BKN_API_KEY` if they are set. Preparing a transaction is free; the send is paid through x402:
 
-1. The CLI calls a Brickken endpoint (e.g. `/prepare-transactions`).
-2. If payment is required, the API responds `402 Payment Required` with a `PAYMENT-REQUIRED` header.
-3. The CLI signs the x402 payment locally and retries with an `X-Payment` header.
+1. The CLI prepares a transaction with `/prepare-transactions` (free).
+2. On send, the API responds `402 Payment Required` with a `PAYMENT-REQUIRED` header.
+3. The CLI signs the x402 payment locally and retries with an `X-PAYMENT` header.
 
-The same private key is used both to **sign blockchain transactions** and to **sign x402 payments**.
+In the recommended `brickken-relayed` mode the private key signs **only the x402 payment** — Brickken's relayer signs and broadcasts the operation. In the default `client-signed` mode the same key also **signs the blockchain transaction** locally.
 
 <Warning>
-Your private key never leaves your machine. Both transaction signing and x402 payment signing happen locally. Treat the key as a secret: prefer an `.env` file or environment variable over passing `--private-key` inline.
+Your private key never leaves your machine. Treat it as a secret: prefer an `.env` file or environment variable over passing `--private-key` inline.
 </Warning>
 
 ## Provide a private key
@@ -42,23 +42,20 @@ The CLI's default sandbox base URL is `https://api.sandbox.brickken.com`. Some o
 
 ## Networks and chain IDs
 
-Pass the target chain with `--chain`. Both decimal and hex forms are accepted, and common decimal IDs are normalized automatically — for example Sepolia can be passed as `11155111` or `aa36a7`.
+Pass the target chain with `--chain`. Both decimal and hex forms are accepted, and common decimal IDs are normalized automatically — for example Base Sepolia can be passed as `84532` or `14a34`.
 
 | Network | Decimal | Hex |
 | --- | --- | --- |
-| Ethereum mainnet | `1` | `0x1` |
 | Base mainnet | `8453` | `0x2105` |
-| BNB Smart Chain | `56` | `0x38` |
-| Polygon mainnet | `137` | `0x89` |
-| Sepolia testnet | `11155111` | `0xaa36a7` |
-| Polygon Amoy testnet | `80002` | `0x13882` |
+| Base Sepolia | `84532` | `0x14a34` |
+| Ethereum Sepolia (legacy) | `11155111` | `0xaa36a7` |
 
 ## RPC URL
 
-Some commands (notably [`create-token`](/cli/commands/token-economics)) wait for the deployment receipt to read back the deployed `tokenAddress`. Sepolia has a built-in public RPC fallback; for other chains set an RPC:
+Some commands (notably [`create-token`](/cli/commands/token-economics)) wait for the deployment receipt to read back the deployed `tokenAddress`. Set an RPC for the target chain:
 
 ```bash
-export BRICKKEN_RPC_URL="https://ethereum-sepolia-rpc.publicnode.com"
+export BRICKKEN_RPC_URL="https://sepolia.base.org"   # Base Sepolia
 ```
 
 `BKN_RPC_URL` is accepted as an alias, or use `--rpc-url`.
@@ -70,7 +67,7 @@ Configuration is resolved in this order (highest priority first):
 1. **Command-line flags** — `--env`, `--base-url`, `--private-key`, `--rpc-url`, `--env-file`, `--json`
 2. **Environment variables** — `BRICKKEN_*` or `BKN_*`
 3. **`.env` file** in the current working directory (or the path given by `--env-file`)
-4. **Defaults** — `sandbox` environment, public Sepolia RPC fallback
+4. **Defaults** — `sandbox` environment, `client-signed` execution mode (pass `--execution-mode brickken-relayed` to opt into relayed)
 
 ### Global flags
 
@@ -94,4 +91,4 @@ Configuration is resolved in this order (highest priority first):
 
 ## Budget note
 
-Both `prepare` and `send` are x402-priced. Budget testnet USDC accordingly — a full run with retries can consume roughly `0.02 USDC` per executed command. Fund the wallet behind `BRICKKEN_PRIVATE_KEY` with enough USDC on the chain you target.
+Preparing is free; only the `send` is x402-priced. On Base Sepolia and other non-production environments the reference price is `0.01 USDC` per send. Fund the wallet behind `BRICKKEN_PRIVATE_KEY` with enough USDC on the x402 payment chain (Circle USDC `0x036CbD53842c5426634e7929541eC2318f3dCF7e` on Base Sepolia). See [Pricing](/api-reference/endpoint/agentic-pricing) for the mainnet per-operation table.

@@ -84,7 +84,8 @@
               "api-reference/endpoint/x402-agent-register",
               "api-reference/endpoint/x402-agent-set-uri",
               "api-reference/endpoint/x402-agent-set-metadata",
-              "api-reference/endpoint/x402-agent-set-wallet"
+              "api-reference/endpoint/x402-agent-set-wallet",
+              "api-reference/endpoint/x402-agent-transfer-ownership"
             ]
           },
           {
@@ -129,9 +130,26 @@
         "tab": "CLI",
         "groups": [
           {
-            "group": "CLI Documentation",
+            "group": "Getting Started",
             "pages": [
-              "cli/introduction"
+              "cli/introduction",
+              "cli/installation",
+              "cli/quickstart",
+              "cli/authentication"
+            ]
+          },
+          {
+            "group": "Commands",
+            "pages": [
+              "cli/commands/agent",
+              "cli/commands/token-economics",
+              "cli/commands/tx"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "cli/guides/agent-and-token-workflow"
             ]
           }
         ]

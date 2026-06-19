@@ -8,14 +8,15 @@ Prepares unsigned transactions for updating an ERC-8004 agent profile URI. This 
 
 ## Authentication
 
-Omit `x-api-key`. If the API returns `402 Payment Required`, sign the x402 payment locally and retry with `X-Payment`.
+Omit `x-api-key`. Prepare is free; the x402 payment is charged on `POST /send-transactions`, where the API returns `402 Payment Required`. Sign the x402 payment locally and retry with `X-PAYMENT`. In `brickken-relayed` mode (recommended) Brickken's relayer signs and broadcasts; in `client-signed` mode you sign the prepared transaction first.
 
 ## Key Fields
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| `chainId` | Yes | Target chain ID. Decimal and hex values are accepted. |
-| `signerAddress` | Yes | Wallet that signs the prepared transaction. |
+| `chainId` | Yes | Target chain ID. Use `8453` for Base mainnet or `84532` for Base Sepolia. Decimal and hex values are accepted. |
+| `executionMode` | No | `brickken-relayed` (recommended) or `client-signed`. |
+| `signerAddress` | Conditional | Required in `client-signed` mode. Omit in `brickken-relayed` mode (Brickken signs). |
 | `agentUuid` or `agentId` | Usually | Agent identifier from registration or the on-chain agent ID. |
 | `name`, `description`, `image` | No | Profile fields used to build the updated URI metadata. |
 | `services`, `metadata`, `tags` | No | Additional agent profile metadata. |
@@ -23,4 +24,4 @@ Omit `x-api-key`. If the API returns `402 Payment Required`, sign the x402 payme
 
 ## Response
 
-Returns prepared unsigned transactions and `txId`. Sign the transaction locally, then submit it with `POST /send-transactions`.
+Returns prepared unsigned transactions and `txId`. Submit it to `POST /send-transactions`: in `brickken-relayed` mode send `{ txId, transactions }` and pay via x402 (Brickken signs and broadcasts); in `client-signed` mode sign the transaction locally and send `{ txId, signedTransactions }`.

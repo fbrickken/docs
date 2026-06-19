@@ -47,7 +47,7 @@ Use this mode for the [Dapp API](/api-reference/introduction).
 
 ### x402 private-key mode
 
-Use this mode for the [Agentic API](/api-reference/endpoint/agentic-methods-x402). The private key is used by the MCP server session for local transaction signing and x402 payment signing.
+Use this mode for the [Agentic API](/api-reference/endpoint/agentic-methods-x402). The private key is used by the MCP server session to sign x402 payments and, in `client-signed` mode, to sign the prepared blockchain transaction. In `brickken-relayed` mode the key signs only the x402 payment — Brickken's relayer signs and broadcasts the operation.
 
 ```json
 {
@@ -99,17 +99,28 @@ These tools map to API-key authenticated dapp flows. If a private key is configu
 
 ## x402 Agent Tools
 
-These tools map to ERC-8004 and agent-token methods. When the session has a private key and no API key, agentic calls are paid through x402.
+These tools map to ERC-8004 and agent-token methods on Base. Preparing is free; the x402 USDC payment is charged only on send.
 
 | Area | Tools |
 | --- | --- |
-| Agent identity | `agent_register`, `agent_set_uri`, `agent_set_metadata`, `agent_set_wallet` |
+| Agent identity | `agent_register`, `agent_set_uri`, `agent_set_metadata`, `agent_set_wallet`, `agent_transfer_ownership` |
 | Reputation | `agent_give_feedback`, `agent_revoke_feedback`, `agent_append_feedback_response` |
 | Agent-owned tokens | `agent_create_token`, `agent_mint_token`, `agent_burn_token`, `agent_transfer_token`, `agent_transfer_from_token`, `agent_approve_token` |
 
+## Networks
+
+Use `chainId: "8453"` for Base mainnet and `chainId: "84532"` for Base Sepolia tests (decimal or hex accepted). On Base Sepolia the x402 asset is Circle USDC `0x036CbD53842c5426634e7929541eC2318f3dCF7e` (EIP-3009, 6 decimals). Always fund the payer with the exact asset quoted in `x402Requirements`.
+
+## Execution modes
+
+Agentic tools support both modes:
+
+- **`brickken-relayed` (recommended).** Pass `executionMode: "brickken-relayed"` and omit `signerAddress` (and `agentWallet` for `agent_create_token`). Brickken's relayer signs and broadcasts; the session only authorizes the x402 payment. Prepare returns a single `txId`, exactly one transaction, and `x402Requirements`.
+- **`client-signed`.** Provide `signerAddress`; the session signs the prepared transaction locally before sending.
+
 ## Example
 
-Configure x402 mode, then register an agent:
+Configure x402 mode, then register an agent on Base Sepolia in relayed mode:
 
 ```json
 {
@@ -121,8 +132,8 @@ Configure x402 mode, then register an agent:
 
 ```json
 {
-  "chainId": "11155111",
-  "signerAddress": "0xYourWallet",
+  "chainId": "84532",
+  "executionMode": "brickken-relayed",
   "name": "Research Agent",
   "description": "On-chain AI research agent",
   "image": "https://example.com/agent.png",
@@ -135,4 +146,4 @@ Configure x402 mode, then register an agent:
 }
 ```
 
-The `agent_register` result includes prepared transaction data and, when auto-executed, the send result. Save `prepared.info.agentUuid` for later agent updates.
+The `agent_register` result includes prepared transaction data and, when executed, the send result. Save `prepared.info.agentUuid` for later agent updates, including `agent_transfer_ownership`.

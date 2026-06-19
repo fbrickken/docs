@@ -14,17 +14,18 @@ description: 'Raw prepare, sign, send, and status flows for any Brickken API V2 
 
 ## tx prepare
 
-Prepare a raw transaction for any method. With `--execute`, the CLI prepares with `/prepare-transactions`, signs locally with the configured private key, and sends to `/send-transactions` — paying both steps through x402.
+Prepare a raw transaction for any method — preparing is free. With `--execute`, the CLI also sends to `/send-transactions` and pays the x402 charge. The recommended `--execution-mode brickken-relayed` lets Brickken's relayer sign and broadcast (omit `--signer-address`); the default `client-signed` mode signs locally with the configured private key first.
 
 | Flag | Type | Required | Description |
 | --- | --- | --- | --- |
 | `--method <method>` | string | Yes | Brickken transaction method |
-| `--chain <chain>` | string | No | Chain identifier |
-| `--signer-address <address>` | string | No | Signer wallet address |
+| `--chain <chain>` | string | No | Chain identifier (`8453` Base, `84532` Base Sepolia) |
+| `--execution-mode <mode>` | string | No | `client-signed` (default) or `brickken-relayed` (recommended) |
+| `--signer-address <address>` | string | No | Signer wallet address (required for `client-signed`) |
 | `-f, --file <path>` | string | No | JSON/YAML input file (merged with CLI flags) |
-| `--execute` | flag | No | Prepare, sign, and send in one step |
+| `--execute` | flag | No | Send and pay the x402 charge (otherwise prepare-only) |
 
-Supported agentic token methods include `agentCreateToken`, `agentMintToken`, `agentBurnToken`, `agentTransferToken`, `agentTransferFromToken`, `agentApproveToken` (and the `agentApprove` alias, normalized to `agentApproveToken`). Agent identity and reputation methods (`agentRegister`, `agentSetURI`, `agentSetMetadata`, `agentSetWallet`, `agentGiveFeedback`, `agentRevokeFeedback`, `agentAppendFeedbackResponse`) and other API V2 methods are also accepted. See [Agentic Methods with x402](/api-reference/endpoint/agentic-methods-x402) for each method's fields.
+Supported agentic token methods include `agentCreateToken`, `agentMintToken`, `agentBurnToken`, `agentTransferToken`, `agentTransferFromToken`, `agentApproveToken` (and the `agentApprove` alias, normalized to `agentApproveToken`). Agent identity and reputation methods (`agentRegister`, `agentSetURI`, `agentSetMetadata`, `agentSetWallet`, `agentTransferOwnership`, `agentGiveFeedback`, `agentRevokeFeedback`, `agentAppendFeedbackResponse`) and other API V2 methods are also accepted. You can also set `executionMode` directly in the `--file` body. See [Agentic Methods with x402](/api-reference/endpoint/agentic-methods-x402) for each method's fields.
 
 One-shot execution from a file:
 
@@ -53,8 +54,8 @@ Example metadata file:
 
 ```json
 {
-  "chainId": "11155111",
-  "signerAddress": "0xYourWallet",
+  "chainId": "84532",
+  "executionMode": "brickken-relayed",
   "agentUuid": "00000000-0000-0000-0000-000000000000",
   "metadataKey": "capabilities",
   "metadataValue": "{\"tasks\":[\"research\",\"summarization\"]}",
@@ -64,7 +65,7 @@ Example metadata file:
 
 ## tx sign
 
-Sign a prepared transaction locally with the configured private key.
+Sign a prepared transaction locally with the configured private key. This step applies to `client-signed` execution only; in `brickken-relayed` mode Brickken signs the operation, so you skip signing and send the prepared `transactions` directly.
 
 | Flag | Type | Required | Description |
 | --- | --- | --- | --- |

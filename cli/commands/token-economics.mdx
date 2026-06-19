@@ -3,7 +3,7 @@ title: 'Token economics'
 description: 'Create, mint, burn, transfer, and approve agentic ERC-20 tokens with the Brickken CLI.'
 ---
 
-The token economics commands deploy and manage x402-capable agentic ERC-20 tokens. Each is **prepare-only by default**; add `--execute` to prepare, sign locally, send, and pay through x402 in one step.
+The token economics commands deploy and manage x402-capable agentic ERC-20 tokens on Base. Each is **prepare-only by default** (free); add `--execute` to also send and pay the x402 charge. The recommended `brickken-relayed` mode (`--execution-mode brickken-relayed`) lets Brickken's relayer sign and broadcast; the default `client-signed` mode signs locally with `--signer-address`.
 
 Each high-level command maps to a backend agentic method. Field-level semantics for every method are documented under [Agentic Methods with x402](/api-reference/endpoint/agentic-methods-x402).
 
@@ -22,13 +22,14 @@ Every command accepts these:
 
 | Flag | Description |
 | --- | --- |
-| `--chain <chain>` | Chain identifier (decimal or hex) |
-| `--signer-address <address>` | Signer wallet address |
-| `--gas-limit <value>` | Optional explicit gas limit |
+| `--chain <chain>` | Chain identifier (`8453` Base mainnet, `84532` Base Sepolia) |
+| `--execution-mode <mode>` | `client-signed` (default) or `brickken-relayed` (recommended) |
+| `--signer-address <address>` | Signer wallet address. Required only for `client-signed`. |
+| `--gas-limit <value>` | Optional explicit gas limit (client-signed) |
 | `--owner-email <email>` / `--email <email>` | Optional tokenizer owner email |
 | `--decimals <value>` | Token decimals (defaults to `18`) |
 | `-f, --file <path>` | JSON/YAML input file (merged with CLI flags) |
-| `--execute` | Prepare, sign locally, send, and pay through x402 |
+| `--execute` | Send and pay the x402 charge (otherwise prepare-only) |
 
 ## create-token
 
@@ -58,7 +59,7 @@ export TOKEN_ADDRESS="$(jq -r '.tokenAddress' create-token-output.json)"
 ```
 
 <Note>
-When `create-token --execute` succeeds, the CLI waits for the deployment receipt and adds `tokenAddress` to the JSON output. Sepolia has a built-in public RPC fallback; for other chains set `--rpc-url`, `BRICKKEN_RPC_URL`, or `BKN_RPC_URL`. Do not continue into `mint` or `burn` unless `tokenAddress` is present.
+The examples below use `--signer-address` / `--agent-wallet` for `client-signed` mode. In `brickken-relayed` mode you omit both — Brickken's relayer becomes the token owner. When `create-token --execute` succeeds, the CLI waits for the deployment receipt and adds `tokenAddress` to the JSON output; set `--rpc-url`, `BRICKKEN_RPC_URL`, or `BKN_RPC_URL` for the target chain. Do not continue into `mint` or `burn` unless `tokenAddress` is present.
 </Note>
 
 ## mint
