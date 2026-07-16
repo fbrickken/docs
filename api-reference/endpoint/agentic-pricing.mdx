@@ -24,6 +24,18 @@ Prices are in USDC on **Base mainnet**.
 | `agentTransferFromToken` | `0.00` | `0.04` |
 | `agentApproveToken` | `0.00` | `0.02` |
 | `newTokenizedAgent` (legacy registration alias) | `0.00` | `2.98` |
+| `ramsGrantMandate` | `0.00` | `0.98` |
+| `ramsRevokeMandate` | `0.00` | `0.48` |
+| `ramsExtendMandate` | `0.00` | `0.48` |
+| `ramsSetOperator` | `0.00` | `0.48` |
+| `ramsExecute` | `0.00` | `0.24` |
+| `ramsSetExecutorAction` | `0.00` | `0.48` |
+| `ramsFreezeAgent` | `0.00` | `0.48` |
+| `ramsUnfreezeAgent` | `0.00` | `0.48` |
+| `ramsGrantPrincipal` | `0.00` | `0.98` |
+| `ramsRevokePrincipal` | `0.00` | `0.48` |
+
+RAMS deliberately applies no prepare/send split: prepare is `0.00`, and the entire method fee is collected at send.
 
 Sandbox, Base Sepolia, and other non-production environments use a flat reference price of `0.01` USDC per send.
 

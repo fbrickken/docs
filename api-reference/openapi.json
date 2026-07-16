@@ -6275,6 +6275,3224 @@
         ]
       }
     },
+    "/x402/rams/grant-mandate": {
+      "post": {
+        "operationId": "prepareRamsGrantMandate",
+        "summary": "Prepare RAMS grant mandate",
+        "description": "Prepare an unsigned ERC-8226 grantMandate transaction on the AgentMandate registry. Maps to the ramsGrantMandate method; do not include a method field. Direct mode: signerAddress must be the principal. Signature mode: provide the principal's EIP-712 GrantMandate signature + deadline (any relayer may send, or pass executionMode brickken-relayed to let Brickken's relayer send). Fails fast when the principal is not eligible with the compliance provider or an active mandate already exists for the agent/principal pair.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "agent",
+                  "principal",
+                  "validUntil",
+                  "identityRef",
+                  "asset",
+                  "maxTransactionValue",
+                  "maxCumulativeValue",
+                  "actions"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "11155111",
+                    "examples": [
+                      "11155111",
+                      "0xaa36a7"
+                    ],
+                    "description": "Target operation chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Required for direct/client-signed mode. Omit for brickken-relayed execution; Brickken supplies its operation signer."
+                  },
+                  "agent": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Agent wallet receiving the mandate."
+                  },
+                  "principal": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Principal delegating authority. Direct mode: must equal signerAddress."
+                  },
+                  "validFrom": {
+                    "oneOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ],
+                    "description": "Mandate start time. Defaults to 0 (immediately valid). Unix timestamp in seconds (uint48)."
+                  },
+                  "validUntil": {
+                    "oneOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ],
+                    "description": "Mandate expiry. Must be greater than now and greater than validFrom. Unix timestamp in seconds (uint48)."
+                  },
+                  "complianceProvider": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Compliance provider contract chosen by the principal. Must be non-zero. Defaults to the chain's configured RAMS ComplianceProvider address."
+                  },
+                  "identityRef": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$",
+                    "description": "Compliance identity reference (bytes32, 0x + 64 hex). Must match the principal's record on the compliance provider."
+                  },
+                  "asset": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Asset (token) the mandate is scoped to."
+                  },
+                  "maxTransactionValue": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Per-transaction value cap. Alias \"max\" / \"unlimited\" (case-insensitive) = 2^256-1 (no cap). Raw base units — no decimals scaling is applied. Decimal string (canonical), 0x hex string, or number accepted."
+                  },
+                  "maxCumulativeValue": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Cumulative value cap over the mandate lifetime. Alias \"max\" / \"unlimited\" = 2^256-1 (no cap). Raw base units — no decimals scaling is applied. Decimal string (canonical), 0x hex string, or number accepted."
+                  },
+                  "metadata": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$",
+                    "description": "Optional opaque metadata (bytes32). Defaults to the zero value."
+                  },
+                  "actions": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "string",
+                      "description": "bytes32 action (0x + 64 hex) or 4-byte selector (0x + 8 hex). Selectors are normalized by right-padding to 32 bytes (left-aligned, Solidity bytes32(selector))."
+                    },
+                    "description": "Allowed actions. Each item is a bytes32 action or a 4-byte function selector, e.g. 0x23b872dd for transferFrom."
+                  },
+                  "signature": {
+                    "type": "string",
+                    "pattern": "^0x([a-fA-F0-9]{2})*$",
+                    "description": "Optional EIP-712 signature from the principal (never the operator). At least 65 bytes for EOAs (r||s||v); longer payloads are allowed for EIP-1271 contract wallets. Omit for direct mode (the transaction sender authorizes on-chain). Obtain the payload to sign from GET /rams/typed-data/{operation}."
+                  },
+                  "deadline": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Unix-seconds signature deadline (uint256). Required when signature is provided and must be greater than now — it must equal the deadline that was signed. Ignored (encoded as 0) in direct mode."
+                  },
+                  "executionMode": {
+                    "type": "string",
+                    "enum": [
+                      "brickken-relayed"
+                    ],
+                    "description": "Optional. Only valid together with signature + deadline: Brickken's relayer becomes the transaction sender and the on-chain authorization rides on the principal's EIP-712 signature. Omit for client-signed execution (default on all /x402/rams facades)."
+                  },
+                  "agentMandateAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Optional AgentMandate contract override; defaults to the chain's configured RAMS AgentMandate address."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit transaction nonce when managing nonces manually."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "transactions": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Single EIP-1559 unsigned transaction: from, to, data, value, nonce, chainId, gasLimit, maxPriorityFeePerGas, maxFeePerGas, type."
+                        },
+                        "txId": {
+                          "type": "string",
+                          "description": "Prepared transaction ID for POST /send-transactions and status polling."
+                        },
+                        "info": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Operation echo. Always includes contractAddress (resolved target), mode (direct | principal-signature | brickken-relayed) and, on signed lifecycle operations, eip712Nonce (current AgentMandate nonce for the principal — detect stale signatures before sending)."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x402/rams/revoke-mandate": {
+      "post": {
+        "operationId": "prepareRamsRevokeMandate",
+        "summary": "Prepare RAMS revoke mandate",
+        "description": "Prepare an unsigned ERC-8226 revokeMandate transaction. Maps to ramsRevokeMandate. Direct mode: signerAddress must be the principal or an approved operator. Signature mode: principal EIP-712 RevokeMandate signature + deadline (relayable). Works on expired-but-not-revoked mandates too; fails fast when no mandate exists or it is already revoked.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "agent",
+                  "principal"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "11155111",
+                    "examples": [
+                      "11155111",
+                      "0xaa36a7"
+                    ],
+                    "description": "Target operation chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Required for direct/client-signed mode. Omit for brickken-relayed execution; Brickken supplies its operation signer."
+                  },
+                  "agent": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Agent whose mandate is revoked."
+                  },
+                  "principal": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Principal that granted the mandate."
+                  },
+                  "signature": {
+                    "type": "string",
+                    "pattern": "^0x([a-fA-F0-9]{2})*$",
+                    "description": "Optional EIP-712 signature from the principal (never the operator). At least 65 bytes for EOAs (r||s||v); longer payloads are allowed for EIP-1271 contract wallets. Omit for direct mode (the transaction sender authorizes on-chain). Obtain the payload to sign from GET /rams/typed-data/{operation}."
+                  },
+                  "deadline": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Unix-seconds signature deadline (uint256). Required when signature is provided and must be greater than now — it must equal the deadline that was signed. Ignored (encoded as 0) in direct mode."
+                  },
+                  "executionMode": {
+                    "type": "string",
+                    "enum": [
+                      "brickken-relayed"
+                    ],
+                    "description": "Optional. Only valid together with signature + deadline: Brickken's relayer becomes the transaction sender and the on-chain authorization rides on the principal's EIP-712 signature. Omit for client-signed execution (default on all /x402/rams facades)."
+                  },
+                  "agentMandateAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Optional AgentMandate contract override; defaults to the chain's configured RAMS AgentMandate address."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit transaction nonce when managing nonces manually."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "transactions": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Single EIP-1559 unsigned transaction: from, to, data, value, nonce, chainId, gasLimit, maxPriorityFeePerGas, maxFeePerGas, type."
+                        },
+                        "txId": {
+                          "type": "string",
+                          "description": "Prepared transaction ID for POST /send-transactions and status polling."
+                        },
+                        "info": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Operation echo. Always includes contractAddress (resolved target), mode (direct | principal-signature | brickken-relayed) and, on signed lifecycle operations, eip712Nonce (current AgentMandate nonce for the principal — detect stale signatures before sending)."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x402/rams/extend-mandate": {
+      "post": {
+        "operationId": "prepareRamsExtendMandate",
+        "summary": "Prepare RAMS extend mandate",
+        "description": "Prepare an unsigned ERC-8226 extendMandate transaction. Maps to ramsExtendMandate. Direct mode: signerAddress must be the principal or an approved operator. Signature mode: principal EIP-712 ExtendMandate signature + deadline (relayable). The cumulative usage counter is preserved by the contract — extending does not reset spent value.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "agent",
+                  "principal",
+                  "newValidUntil"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "11155111",
+                    "examples": [
+                      "11155111",
+                      "0xaa36a7"
+                    ],
+                    "description": "Target operation chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Required for direct/client-signed mode. Omit for brickken-relayed execution; Brickken supplies its operation signer."
+                  },
+                  "agent": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Agent whose mandate is extended."
+                  },
+                  "principal": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Principal that granted the mandate."
+                  },
+                  "newValidUntil": {
+                    "oneOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ],
+                    "description": "New expiry. Must be greater than the mandate's current validUntil; the mandate must be active and not expired. cumulativeUsed is preserved (NOT reset). Unix timestamp in seconds (uint48)."
+                  },
+                  "signature": {
+                    "type": "string",
+                    "pattern": "^0x([a-fA-F0-9]{2})*$",
+                    "description": "Optional EIP-712 signature from the principal (never the operator). At least 65 bytes for EOAs (r||s||v); longer payloads are allowed for EIP-1271 contract wallets. Omit for direct mode (the transaction sender authorizes on-chain). Obtain the payload to sign from GET /rams/typed-data/{operation}."
+                  },
+                  "deadline": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Unix-seconds signature deadline (uint256). Required when signature is provided and must be greater than now — it must equal the deadline that was signed. Ignored (encoded as 0) in direct mode."
+                  },
+                  "executionMode": {
+                    "type": "string",
+                    "enum": [
+                      "brickken-relayed"
+                    ],
+                    "description": "Optional. Only valid together with signature + deadline: Brickken's relayer becomes the transaction sender and the on-chain authorization rides on the principal's EIP-712 signature. Omit for client-signed execution (default on all /x402/rams facades)."
+                  },
+                  "agentMandateAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Optional AgentMandate contract override; defaults to the chain's configured RAMS AgentMandate address."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit transaction nonce when managing nonces manually."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "transactions": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Single EIP-1559 unsigned transaction: from, to, data, value, nonce, chainId, gasLimit, maxPriorityFeePerGas, maxFeePerGas, type."
+                        },
+                        "txId": {
+                          "type": "string",
+                          "description": "Prepared transaction ID for POST /send-transactions and status polling."
+                        },
+                        "info": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Operation echo. Always includes contractAddress (resolved target), mode (direct | principal-signature | brickken-relayed) and, on signed lifecycle operations, eip712Nonce (current AgentMandate nonce for the principal — detect stale signatures before sending)."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x402/rams/set-operator": {
+      "post": {
+        "operationId": "prepareRamsSetOperator",
+        "summary": "Prepare RAMS set operator",
+        "description": "Prepare an unsigned ERC-8226 setOperator transaction. Maps to ramsSetOperator. Direct mode: signerAddress must be the principal. Signature mode: principal EIP-712 SetOperator signature + deadline (relayable). Approved operators may revoke and extend the principal's mandates directly, but signatures always come from the principal.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "principal",
+                  "operator",
+                  "approved"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "11155111",
+                    "examples": [
+                      "11155111",
+                      "0xaa36a7"
+                    ],
+                    "description": "Target operation chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Required for direct/client-signed mode. Omit for brickken-relayed execution; Brickken supplies its operation signer."
+                  },
+                  "principal": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Principal granting or removing operator approval. Direct mode: must equal signerAddress."
+                  },
+                  "operator": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Operator wallet being approved or unapproved."
+                  },
+                  "approved": {
+                    "type": "boolean",
+                    "description": "true to approve the operator, false to remove approval. Strict boolean."
+                  },
+                  "signature": {
+                    "type": "string",
+                    "pattern": "^0x([a-fA-F0-9]{2})*$",
+                    "description": "Optional EIP-712 signature from the principal (never the operator). At least 65 bytes for EOAs (r||s||v); longer payloads are allowed for EIP-1271 contract wallets. Omit for direct mode (the transaction sender authorizes on-chain). Obtain the payload to sign from GET /rams/typed-data/{operation}."
+                  },
+                  "deadline": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Unix-seconds signature deadline (uint256). Required when signature is provided and must be greater than now — it must equal the deadline that was signed. Ignored (encoded as 0) in direct mode."
+                  },
+                  "executionMode": {
+                    "type": "string",
+                    "enum": [
+                      "brickken-relayed"
+                    ],
+                    "description": "Optional. Only valid together with signature + deadline: Brickken's relayer becomes the transaction sender and the on-chain authorization rides on the principal's EIP-712 signature. Omit for client-signed execution (default on all /x402/rams facades)."
+                  },
+                  "agentMandateAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Optional AgentMandate contract override; defaults to the chain's configured RAMS AgentMandate address."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit transaction nonce when managing nonces manually."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "transactions": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Single EIP-1559 unsigned transaction: from, to, data, value, nonce, chainId, gasLimit, maxPriorityFeePerGas, maxFeePerGas, type."
+                        },
+                        "txId": {
+                          "type": "string",
+                          "description": "Prepared transaction ID for POST /send-transactions and status polling."
+                        },
+                        "info": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Operation echo. Always includes contractAddress (resolved target), mode (direct | principal-signature | brickken-relayed) and, on signed lifecycle operations, eip712Nonce (current AgentMandate nonce for the principal — detect stale signatures before sending)."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x402/rams/execute": {
+      "post": {
+        "operationId": "prepareRamsExecute",
+        "summary": "Prepare RAMS execute",
+        "description": "Prepare an unsigned AgentExecutor.execute(target, data) transaction for an agent acting under a mandate. Maps to ramsExecute. Two input shapes, discriminated by the presence of data: raw mode (target + data — full inner calldata) or transfer-helper mode (asset + from + to + amount — the server encodes IERC20.transferFrom). signerAddress MUST be the agent; this operation is never brickken-relayed. The server pre-checks the executor action registration and the on-chain canExecute verdict, and (transfer-helper mode) best-effort reads the principal-to-executor token allowance into info.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "11155111",
+                    "examples": [
+                      "11155111",
+                      "0xaa36a7"
+                    ],
+                    "description": "Target operation chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "MUST be the agent wallet named in the mandate — msg.sender of AgentExecutor.execute is the agent. This operation is always client-signed and can never be brickken-relayed."
+                  },
+                  "target": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Raw mode: the contract the executor will call (e.g. the asset). Required when data is provided."
+                  },
+                  "data": {
+                    "type": "string",
+                    "pattern": "^0x([a-fA-F0-9]{2})*$",
+                    "description": "Raw mode: full inner calldata for target, at least 4 bytes. When present the request is treated as raw mode and asset/from/to/amount are ignored."
+                  },
+                  "asset": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Transfer-helper mode (data absent): token to move; becomes the executor call target."
+                  },
+                  "from": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Transfer-helper mode: token holder — normally the executor's bound principal. The response info warns when it differs from AgentExecutor.principal()."
+                  },
+                  "to": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Transfer-helper mode: transfer recipient."
+                  },
+                  "amount": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Transfer-helper mode: transfer amount. Raw base units — no decimals scaling is applied. Decimal string (canonical), 0x hex string, or number accepted."
+                  },
+                  "executorAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Optional AgentExecutor contract override; defaults to the chain's configured (platform) RAMS AgentExecutor address. Executors are per-principal — pass the principal's executor here."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit transaction nonce when managing nonces manually."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "transactions": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Single EIP-1559 unsigned transaction: from, to, data, value, nonce, chainId, gasLimit, maxPriorityFeePerGas, maxFeePerGas, type."
+                        },
+                        "txId": {
+                          "type": "string",
+                          "description": "Prepared transaction ID for POST /send-transactions and status polling."
+                        },
+                        "info": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Operation echo. Always includes contractAddress (resolved target), mode (direct | principal-signature | brickken-relayed) and, on signed lifecycle operations, eip712Nonce (current AgentMandate nonce for the principal — detect stale signatures before sending)."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x402/rams/set-executor-action": {
+      "post": {
+        "operationId": "prepareRamsSetExecutorAction",
+        "summary": "Prepare RAMS set executor action",
+        "description": "Prepare an unsigned AgentExecutor.setAction transaction registering a function selector on the executor. Maps to ramsSetExecutorAction. signerAddress MUST be the executor owner; never brickken-relayed. Warning: registering a value-bearing selector with hasAmount=false makes its transfers bypass the mandate caps — the response info carries a fixed advisory when supported=true and hasAmount=false.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress",
+                  "supported",
+                  "hasAmount"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "11155111",
+                    "examples": [
+                      "11155111",
+                      "0xaa36a7"
+                    ],
+                    "description": "Target operation chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "MUST be the AgentExecutor owner (pre-checked on-chain). Never brickken-relayed."
+                  },
+                  "selector": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{8}$",
+                    "description": "4-byte function selector to register, e.g. 0x23b872dd for transferFrom. Provide either selector or action."
+                  },
+                  "action": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$",
+                    "description": "Alternative to selector: a left-aligned bytes32 action (bytes 4..31 must be zero); the server extracts the first 4 bytes."
+                  },
+                  "supported": {
+                    "type": "boolean",
+                    "description": "Whether the selector is executable through this executor."
+                  },
+                  "hasAmount": {
+                    "type": "boolean",
+                    "description": "Whether the calldata carries a value amount that must be checked against the mandate caps."
+                  },
+                  "amountIndex": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 255,
+                    "description": "Required when hasAmount is true: zero-based index of the amount word in the calldata (uint8). E.g. 2 for transferFrom(from, to, amount). Ignored (0) when hasAmount is false."
+                  },
+                  "executorAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Optional AgentExecutor contract override; defaults to the chain's configured (platform) RAMS AgentExecutor address. Executors are per-principal — pass the principal's executor here."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit transaction nonce when managing nonces manually."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "transactions": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Single EIP-1559 unsigned transaction: from, to, data, value, nonce, chainId, gasLimit, maxPriorityFeePerGas, maxFeePerGas, type."
+                        },
+                        "txId": {
+                          "type": "string",
+                          "description": "Prepared transaction ID for POST /send-transactions and status polling."
+                        },
+                        "info": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Operation echo. Always includes contractAddress (resolved target), mode (direct | principal-signature | brickken-relayed) and, on signed lifecycle operations, eip712Nonce (current AgentMandate nonce for the principal — detect stale signatures before sending)."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x402/rams/freeze-agent": {
+      "post": {
+        "operationId": "prepareRamsFreezeAgent",
+        "summary": "Prepare RAMS freeze agent",
+        "description": "Prepare an unsigned ERC-8226 freezeAgent(agent) transaction. Maps to ramsFreezeAgent. signerAddress MUST hold ENFORCER_ROLE; never brickken-relayed. The call is idempotent on-chain — the response info sets alreadyInState: true when the agent is already frozen.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress",
+                  "agent"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "11155111",
+                    "examples": [
+                      "11155111",
+                      "0xaa36a7"
+                    ],
+                    "description": "Target operation chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "MUST hold ENFORCER_ROLE on the AgentMandate registry (pre-checked). Never brickken-relayed."
+                  },
+                  "agent": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Agent to freeze."
+                  },
+                  "agentMandateAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Optional AgentMandate contract override; defaults to the chain's configured RAMS AgentMandate address."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit transaction nonce when managing nonces manually."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "transactions": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Single EIP-1559 unsigned transaction: from, to, data, value, nonce, chainId, gasLimit, maxPriorityFeePerGas, maxFeePerGas, type."
+                        },
+                        "txId": {
+                          "type": "string",
+                          "description": "Prepared transaction ID for POST /send-transactions and status polling."
+                        },
+                        "info": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Operation echo. Always includes contractAddress (resolved target), mode (direct | principal-signature | brickken-relayed) and, on signed lifecycle operations, eip712Nonce (current AgentMandate nonce for the principal — detect stale signatures before sending)."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x402/rams/unfreeze-agent": {
+      "post": {
+        "operationId": "prepareRamsUnfreezeAgent",
+        "summary": "Prepare RAMS unfreeze agent",
+        "description": "Prepare an unsigned ERC-8226 unfreezeAgent(agent) transaction. Maps to ramsUnfreezeAgent. signerAddress MUST hold ENFORCER_ROLE; never brickken-relayed. The call is idempotent on-chain — the response info sets alreadyInState: true when the agent is already unfrozen.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress",
+                  "agent"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "11155111",
+                    "examples": [
+                      "11155111",
+                      "0xaa36a7"
+                    ],
+                    "description": "Target operation chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "MUST hold ENFORCER_ROLE on the AgentMandate registry (pre-checked). Never brickken-relayed."
+                  },
+                  "agent": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Agent to unfreeze."
+                  },
+                  "agentMandateAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Optional AgentMandate contract override; defaults to the chain's configured RAMS AgentMandate address."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit transaction nonce when managing nonces manually."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "transactions": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Single EIP-1559 unsigned transaction: from, to, data, value, nonce, chainId, gasLimit, maxPriorityFeePerGas, maxFeePerGas, type."
+                        },
+                        "txId": {
+                          "type": "string",
+                          "description": "Prepared transaction ID for POST /send-transactions and status polling."
+                        },
+                        "info": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Operation echo. Always includes contractAddress (resolved target), mode (direct | principal-signature | brickken-relayed) and, on signed lifecycle operations, eip712Nonce (current AgentMandate nonce for the principal — detect stale signatures before sending)."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x402/rams/grant-principal": {
+      "post": {
+        "operationId": "prepareRamsGrantPrincipal",
+        "summary": "Prepare RAMS grant principal eligibility",
+        "description": "Prepare an unsigned ComplianceProvider.grantPrincipal transaction. Maps to ramsGrantPrincipal. signerAddress MUST be the compliance provider owner; never brickken-relayed. Overwrites any prior record — re-granting after a revoke is valid. Principals must be granted eligibility BEFORE a mandate can be granted to their agents.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress",
+                  "principal",
+                  "identityRef"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "11155111",
+                    "examples": [
+                      "11155111",
+                      "0xaa36a7"
+                    ],
+                    "description": "Target operation chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "MUST be the ComplianceProvider owner (pre-checked). Never brickken-relayed."
+                  },
+                  "principal": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Principal receiving the eligibility record."
+                  },
+                  "identityRef": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$",
+                    "description": "Non-zero compliance identity reference bound to the principal."
+                  },
+                  "expiresAt": {
+                    "oneOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ],
+                    "description": "Optional eligibility expiry. Defaults to 0 (no expiry). If non-zero it must be greater than now. Unix timestamp in seconds (uint48)."
+                  },
+                  "complianceProviderAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Optional ComplianceProvider contract override; defaults to the chain's configured RAMS ComplianceProvider address."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit transaction nonce when managing nonces manually."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "transactions": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Single EIP-1559 unsigned transaction: from, to, data, value, nonce, chainId, gasLimit, maxPriorityFeePerGas, maxFeePerGas, type."
+                        },
+                        "txId": {
+                          "type": "string",
+                          "description": "Prepared transaction ID for POST /send-transactions and status polling."
+                        },
+                        "info": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Operation echo. Always includes contractAddress (resolved target), mode (direct | principal-signature | brickken-relayed) and, on signed lifecycle operations, eip712Nonce (current AgentMandate nonce for the principal — detect stale signatures before sending)."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/x402/rams/revoke-principal": {
+      "post": {
+        "operationId": "prepareRamsRevokePrincipal",
+        "summary": "Prepare RAMS revoke principal eligibility",
+        "description": "Prepare an unsigned ComplianceProvider.revokePrincipal transaction. Maps to ramsRevokePrincipal. signerAddress MUST be the compliance provider owner; never brickken-relayed. Revoking eligibility blocks new grants and disables canExecute for the principal's existing mandates.",
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "chainId",
+                  "signerAddress",
+                  "principal",
+                  "reason"
+                ],
+                "properties": {
+                  "chainId": {
+                    "type": "string",
+                    "default": "11155111",
+                    "examples": [
+                      "11155111",
+                      "0xaa36a7"
+                    ],
+                    "description": "Target operation chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "MUST be the ComplianceProvider owner (pre-checked). Never brickken-relayed."
+                  },
+                  "principal": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Principal whose eligibility is revoked. Must have an active (granted, not revoked) record."
+                  },
+                  "reason": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "COMPLIANT",
+                          "KYC_EXPIRED",
+                          "AML_FLAG",
+                          "NOT_ACCREDITED",
+                          "NOT_QUALIFIED",
+                          "JURISDICTION_BLOCKED",
+                          "IDENTITY_NOT_FOUND",
+                          "ATTESTATION_REVOKED",
+                          "OTHER"
+                        ]
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 8
+                      }
+                    ],
+                    "description": "Revocation reason: enum name or its integer code — COMPLIANT(0), KYC_EXPIRED(1), AML_FLAG(2), NOT_ACCREDITED(3), NOT_QUALIFIED(4), JURISDICTION_BLOCKED(5), IDENTITY_NOT_FOUND(6), ATTESTATION_REVOKED(7), OTHER(8)."
+                  },
+                  "complianceProviderAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Optional ComplianceProvider contract override; defaults to the chain's configured RAMS ComplianceProvider address."
+                  },
+                  "gasLimit": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "description": "Optional explicit gas limit."
+                  },
+                  "nonce": {
+                    "type": "number",
+                    "description": "Optional explicit transaction nonce when managing nonces manually."
+                  },
+                  "ownerEmail": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Optional owner attribution email."
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Alias for ownerEmail where supported."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prepared unsigned transaction payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "transactions": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Single EIP-1559 unsigned transaction: from, to, data, value, nonce, chainId, gasLimit, maxPriorityFeePerGas, maxFeePerGas, type."
+                        },
+                        "txId": {
+                          "type": "string",
+                          "description": "Prepared transaction ID for POST /send-transactions and status polling."
+                        },
+                        "info": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Operation echo. Always includes contractAddress (resolved target), mode (direct | principal-signature | brickken-relayed) and, on signed lifecycle operations, eip712Nonce (current AgentMandate nonce for the principal — detect stale signatures before sending)."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "x402 payment required.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rams/mandate": {
+      "get": {
+        "operationId": "getRamsMandate",
+        "summary": "Get RAMS mandate",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "Inspect the ERC-8226 mandate for an agent/principal pair: full mandate record, derived status (none | revoked | pending | expired | active), agent freeze flag, and the principal's current EIP-712 nonce. The on-chain getter does not return the actions list — check individual actions via GET /rams/can-execute. Requires the x-api-key header.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "11155111"
+            },
+            "description": "Target chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+          },
+          {
+            "name": "agent",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Agent wallet address."
+          },
+          {
+            "name": "principal",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Principal wallet address."
+          },
+          {
+            "name": "agentMandateAddress",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Optional AgentMandate contract override."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "chainId": {
+                          "type": "string"
+                        },
+                        "agentMandateAddress": {
+                          "type": "string"
+                        },
+                        "agent": {
+                          "type": "string"
+                        },
+                        "principal": {
+                          "type": "string"
+                        },
+                        "mandate": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "additionalProperties": true,
+                          "description": "null when no mandate exists for the pair. uint256 values are decimal strings; uint48 timestamps are numbers. remainingCumulativeValue is null when the cumulative cap is unlimited.",
+                          "properties": {
+                            "agent": {
+                              "type": "string"
+                            },
+                            "validFrom": {
+                              "type": "number"
+                            },
+                            "validUntil": {
+                              "type": "number"
+                            },
+                            "principal": {
+                              "type": "string"
+                            },
+                            "revoked": {
+                              "type": "boolean"
+                            },
+                            "complianceProvider": {
+                              "type": "string"
+                            },
+                            "identityRef": {
+                              "type": "string"
+                            },
+                            "asset": {
+                              "type": "string"
+                            },
+                            "maxTransactionValue": {
+                              "type": "string"
+                            },
+                            "maxCumulativeValue": {
+                              "type": "string"
+                            },
+                            "cumulativeUsed": {
+                              "type": "string"
+                            },
+                            "remainingCumulativeValue": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "unlimitedTransactionValue": {
+                              "type": "boolean"
+                            },
+                            "unlimitedCumulativeValue": {
+                              "type": "boolean"
+                            },
+                            "metadata": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "none",
+                            "revoked",
+                            "pending",
+                            "expired",
+                            "active"
+                          ]
+                        },
+                        "frozen": {
+                          "type": "boolean"
+                        },
+                        "nonce": {
+                          "type": "string",
+                          "description": "Current EIP-712 nonce for the principal (decimal string)."
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "chainId": "11155111",
+                    "agentMandateAddress": "0xD68E1bb972cA4EF7F5764FBf6d685a6DfC26778e",
+                    "agent": "0x1111111111111111111111111111111111111111",
+                    "principal": "0x2222222222222222222222222222222222222222",
+                    "mandate": {
+                      "agent": "0x1111111111111111111111111111111111111111",
+                      "validFrom": 0,
+                      "validUntil": 1789000000,
+                      "principal": "0x2222222222222222222222222222222222222222",
+                      "revoked": false,
+                      "complianceProvider": "0xa90D2503D5D9b80ECC27856Ff76F892B8C02f278",
+                      "identityRef": "0x1111111111111111111111111111111111111111111111111111111111111111",
+                      "asset": "0x3333333333333333333333333333333333333333",
+                      "maxTransactionValue": "1000",
+                      "maxCumulativeValue": "1500",
+                      "cumulativeUsed": "500",
+                      "remainingCumulativeValue": "1000",
+                      "unlimitedTransactionValue": false,
+                      "unlimitedCumulativeValue": false,
+                      "metadata": "0x0000000000000000000000000000000000000000000000000000000000000000"
+                    },
+                    "status": "active",
+                    "frozen": false,
+                    "nonce": "3"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rams/can-execute": {
+      "get": {
+        "operationId": "getRamsCanExecute",
+        "summary": "Check RAMS can-execute",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "Dry-run an execution against a mandate: returns the authoritative on-chain canExecute verdict plus a server-derived per-check diagnostic breakdown. Provide exactly one of action (bytes32) or selector (4-byte); selectors are normalized by right-padding to 32 bytes. amount is in raw base units. Requires the x-api-key header.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "11155111"
+            },
+            "description": "Target chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+          },
+          {
+            "name": "agent",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Agent wallet address."
+          },
+          {
+            "name": "principal",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Principal wallet address."
+          },
+          {
+            "name": "asset",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Asset (token) address the mandate is scoped to."
+          },
+          {
+            "name": "amount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "0"
+            },
+            "description": "Execution amount in raw base units (uint256 decimal string). Defaults to \"0\"."
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{64}$"
+            },
+            "description": "bytes32 action. Provide exactly one of action or selector."
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{8}$"
+            },
+            "description": "4-byte function selector, e.g. 0x23b872dd. Provide exactly one of action or selector."
+          },
+          {
+            "name": "agentMandateAddress",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Optional AgentMandate contract override."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "allowed": {
+                          "type": "boolean",
+                          "description": "Authoritative on-chain canExecute result."
+                        },
+                        "agent": {
+                          "type": "string"
+                        },
+                        "principal": {
+                          "type": "string"
+                        },
+                        "asset": {
+                          "type": "string"
+                        },
+                        "action": {
+                          "type": "string"
+                        },
+                        "selector": {
+                          "type": "string"
+                        },
+                        "amount": {
+                          "type": "string"
+                        },
+                        "checks": {
+                          "type": "object",
+                          "description": "Server-derived diagnostic breakdown (not authoritative).",
+                          "properties": {
+                            "mandateExists": {
+                              "type": "boolean"
+                            },
+                            "assetMatches": {
+                              "type": "boolean"
+                            },
+                            "withinValidityWindow": {
+                              "type": "boolean"
+                            },
+                            "notRevoked": {
+                              "type": "boolean"
+                            },
+                            "actionEnabled": {
+                              "type": "boolean"
+                            },
+                            "agentNotFrozen": {
+                              "type": "boolean"
+                            },
+                            "withinTransactionCap": {
+                              "type": "boolean"
+                            },
+                            "withinCumulativeCap": {
+                              "type": "boolean"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "allowed": false,
+                    "agent": "0x1111111111111111111111111111111111111111",
+                    "principal": "0x2222222222222222222222222222222222222222",
+                    "asset": "0x3333333333333333333333333333333333333333",
+                    "action": "0x23b872dd00000000000000000000000000000000000000000000000000000000",
+                    "selector": "0x23b872dd",
+                    "amount": "2000",
+                    "checks": {
+                      "mandateExists": true,
+                      "assetMatches": true,
+                      "withinValidityWindow": true,
+                      "notRevoked": true,
+                      "actionEnabled": true,
+                      "agentNotFrozen": true,
+                      "withinTransactionCap": false,
+                      "withinCumulativeCap": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rams/status": {
+      "get": {
+        "operationId": "getRamsStatus",
+        "summary": "Get RAMS status",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "Lightweight status read: agent freeze flag and the principal's current EIP-712 nonce (the nonce clients need before signing typed data). Optionally checks whether a wallet is an approved operator for the principal. Requires the x-api-key header.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "11155111"
+            },
+            "description": "Target chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+          },
+          {
+            "name": "agent",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Agent wallet address."
+          },
+          {
+            "name": "principal",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Principal wallet address."
+          },
+          {
+            "name": "operator",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Optional wallet to check operator approval for."
+          },
+          {
+            "name": "agentMandateAddress",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Optional AgentMandate contract override."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "agent": {
+                          "type": "string"
+                        },
+                        "principal": {
+                          "type": "string"
+                        },
+                        "isFrozen": {
+                          "type": "boolean"
+                        },
+                        "nonce": {
+                          "type": "string",
+                          "description": "Current EIP-712 nonce for the principal — read this before signing typed data."
+                        },
+                        "operator": {
+                          "type": "string",
+                          "description": "Echoed only when the operator query param is supplied."
+                        },
+                        "isOperator": {
+                          "type": "boolean",
+                          "description": "Present only when the operator query param is supplied."
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "agent": "0x1111111111111111111111111111111111111111",
+                    "principal": "0x2222222222222222222222222222222222222222",
+                    "isFrozen": false,
+                    "nonce": "3",
+                    "operator": "0x4444444444444444444444444444444444444444",
+                    "isOperator": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rams/compliance-status": {
+      "get": {
+        "operationId": "getRamsComplianceStatus",
+        "summary": "Get RAMS compliance status",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "Check a principal's eligibility on a compliance provider via checkPrincipal(principal, identityRef). The reason is returned both as an enum name and as a numeric reasonCode. Requires the x-api-key header.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "11155111"
+            },
+            "description": "Target chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+          },
+          {
+            "name": "principal",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Principal wallet address."
+          },
+          {
+            "name": "identityRef",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{64}$"
+            },
+            "description": "Compliance identity reference (bytes32)."
+          },
+          {
+            "name": "complianceProviderAddress",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Optional ComplianceProvider contract override."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "complianceProviderAddress": {
+                          "type": "string"
+                        },
+                        "principal": {
+                          "type": "string"
+                        },
+                        "identityRef": {
+                          "type": "string"
+                        },
+                        "eligible": {
+                          "type": "boolean"
+                        },
+                        "reason": {
+                          "type": "string",
+                          "enum": [
+                            "COMPLIANT",
+                            "KYC_EXPIRED",
+                            "AML_FLAG",
+                            "NOT_ACCREDITED",
+                            "NOT_QUALIFIED",
+                            "JURISDICTION_BLOCKED",
+                            "IDENTITY_NOT_FOUND",
+                            "ATTESTATION_REVOKED",
+                            "OTHER"
+                          ]
+                        },
+                        "reasonCode": {
+                          "type": "number",
+                          "description": "Numeric form of reason: COMPLIANT(0) … OTHER(8)."
+                        },
+                        "expiresAt": {
+                          "type": "number",
+                          "description": "Eligibility expiry (Unix seconds); 0 = no expiry."
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "complianceProviderAddress": "0xa90D2503D5D9b80ECC27856Ff76F892B8C02f278",
+                    "principal": "0x2222222222222222222222222222222222222222",
+                    "identityRef": "0x1111111111111111111111111111111111111111111111111111111111111111",
+                    "eligible": true,
+                    "reason": "COMPLIANT",
+                    "reasonCode": 0,
+                    "expiresAt": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rams/executor-action": {
+      "get": {
+        "operationId": "getRamsExecutorAction",
+        "summary": "Get RAMS executor action",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "Read an AgentExecutor's registration for a function selector (supported / hasAmount / amountIndex) plus the executor's bound principal, AgentMandate registry, and owner. Provide exactly one of selector (4-byte) or action (left-aligned bytes32). Requires the x-api-key header.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "11155111"
+            },
+            "description": "Target chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+          },
+          {
+            "name": "selector",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{8}$"
+            },
+            "description": "4-byte function selector, e.g. 0x23b872dd. Provide exactly one of selector or action."
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{64}$"
+            },
+            "description": "Left-aligned bytes32 action. Provide exactly one of selector or action."
+          },
+          {
+            "name": "executorAddress",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Optional AgentExecutor contract override."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "executorAddress": {
+                          "type": "string"
+                        },
+                        "principal": {
+                          "type": "string",
+                          "description": "Principal the executor is bound to."
+                        },
+                        "agentMandateAddress": {
+                          "type": "string",
+                          "description": "AgentMandate registry the executor reports usage to."
+                        },
+                        "owner": {
+                          "type": "string",
+                          "description": "Executor owner (the only wallet allowed to call setAction)."
+                        },
+                        "selector": {
+                          "type": "string"
+                        },
+                        "action": {
+                          "type": "string"
+                        },
+                        "spec": {
+                          "type": "object",
+                          "properties": {
+                            "supported": {
+                              "type": "boolean"
+                            },
+                            "hasAmount": {
+                              "type": "boolean"
+                            },
+                            "amountIndex": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "executorAddress": "0xc81949Cf5b52BDc7890Fd5040A9Cd0cdb4B59952",
+                    "principal": "0xB610470ae0fEa78A1B27cD3F0D4011eb5361fAf1",
+                    "agentMandateAddress": "0xD68E1bb972cA4EF7F5764FBf6d685a6DfC26778e",
+                    "owner": "0xB610470ae0fEa78A1B27cD3F0D4011eb5361fAf1",
+                    "selector": "0x23b872dd",
+                    "action": "0x23b872dd00000000000000000000000000000000000000000000000000000000",
+                    "spec": {
+                      "supported": true,
+                      "hasAmount": true,
+                      "amountIndex": 2
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rams/typed-data/grant-mandate": {
+      "get": {
+        "operationId": "getRamsTypedDataGrantMandate",
+        "summary": "Get GrantMandate typed data",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "Build the EIP-712 GrantMandate payload for a principal to sign off-chain (relayed grant flow). The response includes the full EIP-712 payload (domain RAMS/1, primaryType, types, message) with the principal's current on-chain nonce; types omits the EIP712Domain entry (ethers derives it; eth_signTypedData_v4 consumers must add it themselves). Sign with the PRINCIPAL's key, then submit the same parameters + signature + the same deadline to the matching prepare endpoint. Requires the x-api-key header.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "11155111"
+            },
+            "description": "Target chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+          },
+          {
+            "name": "agent",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Agent wallet receiving the mandate."
+          },
+          {
+            "name": "principal",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Principal delegating authority (the signer)."
+          },
+          {
+            "name": "validUntil",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Mandate expiry (Unix seconds, uint48)."
+          },
+          {
+            "name": "validFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Mandate start (Unix seconds, uint48). Defaults to 0 (immediately valid)."
+          },
+          {
+            "name": "complianceProvider",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Compliance provider contract. Defaults to the chain's configured RAMS ComplianceProvider address."
+          },
+          {
+            "name": "identityRef",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{64}$"
+            },
+            "description": "Compliance identity reference (bytes32)."
+          },
+          {
+            "name": "asset",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Asset (token) the mandate is scoped to."
+          },
+          {
+            "name": "maxTransactionValue",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Per-transaction cap in raw base units. Alias \"max\" / \"unlimited\" = 2^256-1."
+          },
+          {
+            "name": "maxCumulativeValue",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Cumulative cap in raw base units. Alias \"max\" / \"unlimited\" = 2^256-1."
+          },
+          {
+            "name": "metadata",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{64}$"
+            },
+            "description": "Optional bytes32 metadata. Defaults to the zero value."
+          },
+          {
+            "name": "actions",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated list of bytes32 actions and/or 4-byte selectors, minimum 1 (e.g. 0x23b872dd). Selectors are normalized to left-aligned bytes32 before signing."
+          },
+          {
+            "name": "deadline",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional signature deadline (Unix seconds). Must be greater than now and at most now + 30 days. Defaults to now + 3600 (1 hour). Submit the SAME deadline with the signature at prepare time."
+          },
+          {
+            "name": "agentMandateAddress",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Optional AgentMandate contract override."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "EIP-712 typed-data envelope ready for wallet._signTypedData(domain, types, message).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "chainId": {
+                          "type": "string"
+                        },
+                        "verifyingContract": {
+                          "type": "string",
+                          "description": "Resolved AgentMandate address (the EIP-712 verifying contract)."
+                        },
+                        "signer": {
+                          "type": "string",
+                          "description": "Wallet that must sign: always the principal."
+                        },
+                        "nonce": {
+                          "type": "string",
+                          "description": "Current on-chain EIP-712 nonce for the principal (decimal string). Shared by all four signed operations."
+                        },
+                        "deadline": {
+                          "type": "string",
+                          "description": "Signature deadline echoed into the message (Unix seconds, decimal string)."
+                        },
+                        "typedDataId": {
+                          "type": "string",
+                          "description": "EIP-712 struct hash (TypedDataEncoder.hash) of the payload."
+                        },
+                        "typedData": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Full EIP-712 payload: domain, primaryType, types, message. types deliberately omits the EIP712Domain entry — ethers derives it; eth_signTypedData_v4 consumers must add it themselves.",
+                          "properties": {
+                            "domain": {
+                              "type": "object",
+                              "additionalProperties": true
+                            },
+                            "primaryType": {
+                              "type": "string"
+                            },
+                            "types": {
+                              "type": "object",
+                              "additionalProperties": true
+                            },
+                            "message": {
+                              "type": "object",
+                              "additionalProperties": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "chainId": "11155111",
+                    "verifyingContract": "0xD68E1bb972cA4EF7F5764FBf6d685a6DfC26778e",
+                    "signer": "0x2222222222222222222222222222222222222222",
+                    "nonce": "3",
+                    "deadline": "1752585600",
+                    "typedDataId": "0x0f4f8a2c000000000000000000000000000000000000000000000000000000000example0",
+                    "typedData": {
+                      "domain": {
+                        "name": "RAMS",
+                        "version": "1",
+                        "chainId": "11155111",
+                        "verifyingContract": "0xD68E1bb972cA4EF7F5764FBf6d685a6DfC26778e"
+                      },
+                      "primaryType": "GrantMandate",
+                      "types": {
+                        "GrantMandate": [
+                          {
+                            "name": "agent",
+                            "type": "address"
+                          },
+                          {
+                            "name": "validFrom",
+                            "type": "uint48"
+                          },
+                          {
+                            "name": "validUntil",
+                            "type": "uint48"
+                          },
+                          {
+                            "name": "principal",
+                            "type": "address"
+                          },
+                          {
+                            "name": "complianceProvider",
+                            "type": "address"
+                          },
+                          {
+                            "name": "identityRef",
+                            "type": "bytes32"
+                          },
+                          {
+                            "name": "asset",
+                            "type": "address"
+                          },
+                          {
+                            "name": "maxTransactionValue",
+                            "type": "uint256"
+                          },
+                          {
+                            "name": "maxCumulativeValue",
+                            "type": "uint256"
+                          },
+                          {
+                            "name": "metadata",
+                            "type": "bytes32"
+                          },
+                          {
+                            "name": "actions",
+                            "type": "bytes32[]"
+                          },
+                          {
+                            "name": "nonce",
+                            "type": "uint256"
+                          },
+                          {
+                            "name": "deadline",
+                            "type": "uint256"
+                          }
+                        ]
+                      },
+                      "message": {
+                        "agent": "0x1111111111111111111111111111111111111111",
+                        "validFrom": 0,
+                        "validUntil": 1789000000,
+                        "principal": "0x2222222222222222222222222222222222222222",
+                        "complianceProvider": "0xa90D2503D5D9b80ECC27856Ff76F892B8C02f278",
+                        "identityRef": "0x1111111111111111111111111111111111111111111111111111111111111111",
+                        "asset": "0x3333333333333333333333333333333333333333",
+                        "maxTransactionValue": "1000000",
+                        "maxCumulativeValue": "5000000",
+                        "metadata": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "actions": [
+                          "0x23b872dd00000000000000000000000000000000000000000000000000000000"
+                        ],
+                        "nonce": "3",
+                        "deadline": "1752585600"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rams/typed-data/revoke-mandate": {
+      "get": {
+        "operationId": "getRamsTypedDataRevokeMandate",
+        "summary": "Get RevokeMandate typed data",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "Build the EIP-712 RevokeMandate payload for a principal to sign off-chain (relayed revoke flow). The response includes the full EIP-712 payload (domain RAMS/1, primaryType, types, message) with the principal's current on-chain nonce; types omits the EIP712Domain entry (ethers derives it; eth_signTypedData_v4 consumers must add it themselves). Sign with the PRINCIPAL's key, then submit the same parameters + signature + the same deadline to the matching prepare endpoint. Requires the x-api-key header.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "11155111"
+            },
+            "description": "Target chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+          },
+          {
+            "name": "agent",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Agent whose mandate is revoked."
+          },
+          {
+            "name": "principal",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Principal that granted the mandate (the signer)."
+          },
+          {
+            "name": "deadline",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional signature deadline (Unix seconds). Must be greater than now and at most now + 30 days. Defaults to now + 3600 (1 hour). Submit the SAME deadline with the signature at prepare time."
+          },
+          {
+            "name": "agentMandateAddress",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Optional AgentMandate contract override."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "EIP-712 typed-data envelope ready for wallet._signTypedData(domain, types, message).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "chainId": {
+                          "type": "string"
+                        },
+                        "verifyingContract": {
+                          "type": "string",
+                          "description": "Resolved AgentMandate address (the EIP-712 verifying contract)."
+                        },
+                        "signer": {
+                          "type": "string",
+                          "description": "Wallet that must sign: always the principal."
+                        },
+                        "nonce": {
+                          "type": "string",
+                          "description": "Current on-chain EIP-712 nonce for the principal (decimal string). Shared by all four signed operations."
+                        },
+                        "deadline": {
+                          "type": "string",
+                          "description": "Signature deadline echoed into the message (Unix seconds, decimal string)."
+                        },
+                        "typedDataId": {
+                          "type": "string",
+                          "description": "EIP-712 struct hash (TypedDataEncoder.hash) of the payload."
+                        },
+                        "typedData": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Full EIP-712 payload: domain, primaryType, types, message. types deliberately omits the EIP712Domain entry — ethers derives it; eth_signTypedData_v4 consumers must add it themselves.",
+                          "properties": {
+                            "domain": {
+                              "type": "object",
+                              "additionalProperties": true
+                            },
+                            "primaryType": {
+                              "type": "string"
+                            },
+                            "types": {
+                              "type": "object",
+                              "additionalProperties": true
+                            },
+                            "message": {
+                              "type": "object",
+                              "additionalProperties": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "chainId": "11155111",
+                    "verifyingContract": "0xD68E1bb972cA4EF7F5764FBf6d685a6DfC26778e",
+                    "signer": "0x2222222222222222222222222222222222222222",
+                    "nonce": "3",
+                    "deadline": "1752585600",
+                    "typedDataId": "0x0f4f8a2c000000000000000000000000000000000000000000000000000000000example0",
+                    "typedData": {
+                      "domain": {
+                        "name": "RAMS",
+                        "version": "1",
+                        "chainId": "11155111",
+                        "verifyingContract": "0xD68E1bb972cA4EF7F5764FBf6d685a6DfC26778e"
+                      },
+                      "primaryType": "RevokeMandate",
+                      "types": {
+                        "RevokeMandate": [
+                          {
+                            "name": "agent",
+                            "type": "address"
+                          },
+                          {
+                            "name": "principal",
+                            "type": "address"
+                          },
+                          {
+                            "name": "nonce",
+                            "type": "uint256"
+                          },
+                          {
+                            "name": "deadline",
+                            "type": "uint256"
+                          }
+                        ]
+                      },
+                      "message": {
+                        "agent": "0x1111111111111111111111111111111111111111",
+                        "principal": "0x2222222222222222222222222222222222222222",
+                        "nonce": "3",
+                        "deadline": "1752585600"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rams/typed-data/extend-mandate": {
+      "get": {
+        "operationId": "getRamsTypedDataExtendMandate",
+        "summary": "Get ExtendMandate typed data",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "Build the EIP-712 ExtendMandate payload for a principal to sign off-chain (relayed extend flow). The response includes the full EIP-712 payload (domain RAMS/1, primaryType, types, message) with the principal's current on-chain nonce; types omits the EIP712Domain entry (ethers derives it; eth_signTypedData_v4 consumers must add it themselves). Sign with the PRINCIPAL's key, then submit the same parameters + signature + the same deadline to the matching prepare endpoint. Requires the x-api-key header.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "11155111"
+            },
+            "description": "Target chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+          },
+          {
+            "name": "agent",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Agent whose mandate is extended."
+          },
+          {
+            "name": "principal",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Principal that granted the mandate (the signer)."
+          },
+          {
+            "name": "newValidUntil",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "New mandate expiry (Unix seconds, uint48). Must be greater than the current validUntil."
+          },
+          {
+            "name": "deadline",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional signature deadline (Unix seconds). Must be greater than now and at most now + 30 days. Defaults to now + 3600 (1 hour). Submit the SAME deadline with the signature at prepare time."
+          },
+          {
+            "name": "agentMandateAddress",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Optional AgentMandate contract override."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "EIP-712 typed-data envelope ready for wallet._signTypedData(domain, types, message).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "chainId": {
+                          "type": "string"
+                        },
+                        "verifyingContract": {
+                          "type": "string",
+                          "description": "Resolved AgentMandate address (the EIP-712 verifying contract)."
+                        },
+                        "signer": {
+                          "type": "string",
+                          "description": "Wallet that must sign: always the principal."
+                        },
+                        "nonce": {
+                          "type": "string",
+                          "description": "Current on-chain EIP-712 nonce for the principal (decimal string). Shared by all four signed operations."
+                        },
+                        "deadline": {
+                          "type": "string",
+                          "description": "Signature deadline echoed into the message (Unix seconds, decimal string)."
+                        },
+                        "typedDataId": {
+                          "type": "string",
+                          "description": "EIP-712 struct hash (TypedDataEncoder.hash) of the payload."
+                        },
+                        "typedData": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Full EIP-712 payload: domain, primaryType, types, message. types deliberately omits the EIP712Domain entry — ethers derives it; eth_signTypedData_v4 consumers must add it themselves.",
+                          "properties": {
+                            "domain": {
+                              "type": "object",
+                              "additionalProperties": true
+                            },
+                            "primaryType": {
+                              "type": "string"
+                            },
+                            "types": {
+                              "type": "object",
+                              "additionalProperties": true
+                            },
+                            "message": {
+                              "type": "object",
+                              "additionalProperties": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "chainId": "11155111",
+                    "verifyingContract": "0xD68E1bb972cA4EF7F5764FBf6d685a6DfC26778e",
+                    "signer": "0x2222222222222222222222222222222222222222",
+                    "nonce": "3",
+                    "deadline": "1752585600",
+                    "typedDataId": "0x0f4f8a2c000000000000000000000000000000000000000000000000000000000example0",
+                    "typedData": {
+                      "domain": {
+                        "name": "RAMS",
+                        "version": "1",
+                        "chainId": "11155111",
+                        "verifyingContract": "0xD68E1bb972cA4EF7F5764FBf6d685a6DfC26778e"
+                      },
+                      "primaryType": "ExtendMandate",
+                      "types": {
+                        "ExtendMandate": [
+                          {
+                            "name": "agent",
+                            "type": "address"
+                          },
+                          {
+                            "name": "principal",
+                            "type": "address"
+                          },
+                          {
+                            "name": "newValidUntil",
+                            "type": "uint48"
+                          },
+                          {
+                            "name": "nonce",
+                            "type": "uint256"
+                          },
+                          {
+                            "name": "deadline",
+                            "type": "uint256"
+                          }
+                        ]
+                      },
+                      "message": {
+                        "agent": "0x1111111111111111111111111111111111111111",
+                        "principal": "0x2222222222222222222222222222222222222222",
+                        "newValidUntil": 1796256000,
+                        "nonce": "3",
+                        "deadline": "1752585600"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rams/typed-data/set-operator": {
+      "get": {
+        "operationId": "getRamsTypedDataSetOperator",
+        "summary": "Get SetOperator typed data",
+        "tags": [
+          "Endpoints"
+        ],
+        "description": "Build the EIP-712 SetOperator payload for a principal to sign off-chain (relayed operator approval flow). The response includes the full EIP-712 payload (domain RAMS/1, primaryType, types, message) with the principal's current on-chain nonce; types omits the EIP712Domain entry (ethers derives it; eth_signTypedData_v4 consumers must add it themselves). Sign with the PRINCIPAL's key, then submit the same parameters + signature + the same deadline to the matching prepare endpoint. Requires the x-api-key header.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "chainId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "11155111"
+            },
+            "description": "Target chain ID. RAMS is available on Ethereum Sepolia (11155111) only at launch. Decimal and 0x hex values are accepted."
+          },
+          {
+            "name": "principal",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Principal granting or removing operator approval (the signer)."
+          },
+          {
+            "name": "operator",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Operator wallet being approved or unapproved."
+          },
+          {
+            "name": "approved",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "true to approve, false to remove approval."
+          },
+          {
+            "name": "deadline",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional signature deadline (Unix seconds). Must be greater than now and at most now + 30 days. Defaults to now + 3600 (1 hour). Submit the SAME deadline with the signature at prepare time."
+          },
+          {
+            "name": "agentMandateAddress",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "description": "Optional AgentMandate contract override."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "EIP-712 typed-data envelope ready for wallet._signTypedData(domain, types, message).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "properties": {
+                        "chainId": {
+                          "type": "string"
+                        },
+                        "verifyingContract": {
+                          "type": "string",
+                          "description": "Resolved AgentMandate address (the EIP-712 verifying contract)."
+                        },
+                        "signer": {
+                          "type": "string",
+                          "description": "Wallet that must sign: always the principal."
+                        },
+                        "nonce": {
+                          "type": "string",
+                          "description": "Current on-chain EIP-712 nonce for the principal (decimal string). Shared by all four signed operations."
+                        },
+                        "deadline": {
+                          "type": "string",
+                          "description": "Signature deadline echoed into the message (Unix seconds, decimal string)."
+                        },
+                        "typedDataId": {
+                          "type": "string",
+                          "description": "EIP-712 struct hash (TypedDataEncoder.hash) of the payload."
+                        },
+                        "typedData": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "Full EIP-712 payload: domain, primaryType, types, message. types deliberately omits the EIP712Domain entry — ethers derives it; eth_signTypedData_v4 consumers must add it themselves.",
+                          "properties": {
+                            "domain": {
+                              "type": "object",
+                              "additionalProperties": true
+                            },
+                            "primaryType": {
+                              "type": "string"
+                            },
+                            "types": {
+                              "type": "object",
+                              "additionalProperties": true
+                            },
+                            "message": {
+                              "type": "object",
+                              "additionalProperties": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "chainId": "11155111",
+                    "verifyingContract": "0xD68E1bb972cA4EF7F5764FBf6d685a6DfC26778e",
+                    "signer": "0x2222222222222222222222222222222222222222",
+                    "nonce": "3",
+                    "deadline": "1752585600",
+                    "typedDataId": "0x0f4f8a2c000000000000000000000000000000000000000000000000000000000example0",
+                    "typedData": {
+                      "domain": {
+                        "name": "RAMS",
+                        "version": "1",
+                        "chainId": "11155111",
+                        "verifyingContract": "0xD68E1bb972cA4EF7F5764FBf6d685a6DfC26778e"
+                      },
+                      "primaryType": "SetOperator",
+                      "types": {
+                        "SetOperator": [
+                          {
+                            "name": "principal",
+                            "type": "address"
+                          },
+                          {
+                            "name": "operator",
+                            "type": "address"
+                          },
+                          {
+                            "name": "approved",
+                            "type": "bool"
+                          },
+                          {
+                            "name": "nonce",
+                            "type": "uint256"
+                          },
+                          {
+                            "name": "deadline",
+                            "type": "uint256"
+                          }
+                        ]
+                      },
+                      "message": {
+                        "principal": "0x2222222222222222222222222222222222222222",
+                        "operator": "0x4444444444444444444444444444444444444444",
+                        "approved": true,
+                        "nonce": "3",
+                        "deadline": "1752585600"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/openapi.json": {
       "get": {
         "summary": "Get x402 discovery OpenAPI",

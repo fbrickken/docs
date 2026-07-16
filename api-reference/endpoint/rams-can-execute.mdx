@@ -1,0 +1,9 @@
+---
+title: 'Check RAMS Execution'
+openapi: 'GET /rams/can-execute'
+description: 'Check whether a mandate currently permits an action and value.'
+---
+
+Requires `x-api-key`. Provide `chainId`, `agent`, `principal`, `asset`, optional raw `amount`, and either a bytes32 `action` or 4-byte `selector`.
+
+The response combines the authoritative on-chain `canExecute` result with diagnostic checks for lifecycle, freeze, asset, action, transaction cap, cumulative cap, and compliance. Treat the top-level on-chain result as authoritative.

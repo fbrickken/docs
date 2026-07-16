@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Brickken API",
-    "description": "Client collection for the Brickken API V2 (Dapp API + Agentic x402 API).\n\n**Authentication**: every business endpoint requires the `x-api-key` header. Request an API key from tech@brickken.com or support@brickken.com. Agentic (x402) endpoints alternatively accept a per-call `X-Payment` header.\n\n**Environments**: import the Sandbox and Production environment files shipped next to this collection, select one, then fill in `apiKey` (and optionally `tokenSymbol`/`chainId`).\n\n**Typical flow**: 1) POST /prepare-transactions \u2192 returns unsigned transactions + txId, 2) sign locally with the whitelisted signer wallet, 3) POST /send-transactions, 4) poll GET /get-transaction-status.\n\nDocs: https://docs.brickken.com",
+    "description": "Client collection for the Brickken API V2 (Dapp API + Agentic x402 API).\n\n**Authentication**: every business endpoint requires the `x-api-key` header. Request an API key from tech@brickken.com or support@brickken.com. Agentic (x402) endpoints alternatively accept a per-call `X-Payment` header.\n\n**Environments**: import the Sandbox and Production environment files shipped next to this collection, select one, then fill in `apiKey` (and optionally `tokenSymbol`/`chainId`).\n\n**Typical flow**: 1) POST /prepare-transactions → returns unsigned transactions + txId, 2) sign locally with the whitelisted signer wallet, 3) POST /send-transactions, 4) poll GET /get-transaction-status.\n\nDocs: https://docs.brickken.com",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -44,6 +44,71 @@
       "key": "chainId",
       "value": "aa36a7",
       "type": "string"
+    },
+    {
+      "key": "signerAddress",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "principalAddress",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "agentAddress",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "assetAddress",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "identityRef",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "recipientAddress",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "operatorAddress",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ramsSignature",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ramsDeadline",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ramsTypedData",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ramsAgentMandateAddress",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ramsComplianceProviderAddress",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ramsAgentExecutorAddress",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -83,7 +148,7 @@
           "response": []
         },
         {
-          "name": "Prepare Transactions \u2014 New Tokenization",
+          "name": "Prepare Transactions — New Tokenization",
           "request": {
             "method": "POST",
             "header": [
@@ -115,7 +180,7 @@
           "response": []
         },
         {
-          "name": "Prepare Transactions \u2014 New STO",
+          "name": "Prepare Transactions — New STO",
           "request": {
             "method": "POST",
             "header": [
@@ -147,7 +212,7 @@
           "response": []
         },
         {
-          "name": "Prepare Transactions \u2014 New Invest",
+          "name": "Prepare Transactions — New Invest",
           "request": {
             "method": "POST",
             "header": [
@@ -179,7 +244,7 @@
           "response": []
         },
         {
-          "name": "Prepare Transactions \u2014 Claim Tokens",
+          "name": "Prepare Transactions — Claim Tokens",
           "request": {
             "method": "POST",
             "header": [
@@ -211,7 +276,7 @@
           "response": []
         },
         {
-          "name": "Prepare Transactions \u2014 Close Offer",
+          "name": "Prepare Transactions — Close Offer",
           "request": {
             "method": "POST",
             "header": [
@@ -243,7 +308,7 @@
           "response": []
         },
         {
-          "name": "Prepare Transactions \u2014 Mint Token",
+          "name": "Prepare Transactions — Mint Token",
           "request": {
             "method": "POST",
             "header": [
@@ -275,7 +340,7 @@
           "response": []
         },
         {
-          "name": "Prepare Transactions \u2014 Whitelist",
+          "name": "Prepare Transactions — Whitelist",
           "request": {
             "method": "POST",
             "header": [
@@ -307,7 +372,7 @@
           "response": []
         },
         {
-          "name": "Prepare Transactions \u2014 Burn Token",
+          "name": "Prepare Transactions — Burn Token",
           "request": {
             "method": "POST",
             "header": [
@@ -339,7 +404,7 @@
           "response": []
         },
         {
-          "name": "Prepare Transactions \u2014 Transfer From",
+          "name": "Prepare Transactions — Transfer From",
           "request": {
             "method": "POST",
             "header": [
@@ -371,7 +436,7 @@
           "response": []
         },
         {
-          "name": "Prepare Transactions \u2014 Transfer To",
+          "name": "Prepare Transactions — Transfer To",
           "request": {
             "method": "POST",
             "header": [
@@ -403,7 +468,7 @@
           "response": []
         },
         {
-          "name": "Prepare Transactions \u2014 Approve",
+          "name": "Prepare Transactions — Approve",
           "request": {
             "method": "POST",
             "header": [
@@ -435,7 +500,7 @@
           "response": []
         },
         {
-          "name": "Prepare Transactions \u2014 Dividend Distribution",
+          "name": "Prepare Transactions — Dividend Distribution",
           "request": {
             "method": "POST",
             "header": [
@@ -1301,6 +1366,996 @@
                   ]
                 },
                 "description": "Prepare agent token allowance\n\nPrepare an unsigned transaction that approves an ERC-20 allowance for an agent token. The method is fixed by this facade endpoint; do not include a method field."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "RAMS Mandates (ERC-8226)",
+          "item": [
+            {
+              "name": "1. Get GrantMandate typed data",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const response = pm.response.json();",
+                      "const envelope = response.data || response;",
+                      "pm.collectionVariables.set('ramsTypedData', JSON.stringify(envelope.typedData));",
+                      "pm.collectionVariables.set('ramsDeadline', String(envelope.deadline || envelope.typedData.message.deadline));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-api-key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/rams/typed-data/grant-mandate?chainId={{chainId}}&agent={{agentAddress}}&principal={{principalAddress}}&validUntil=1789000000&identityRef={{identityRef}}&asset={{assetAddress}}&maxTransactionValue=1000000&maxCumulativeValue=5000000&actions=0x23b872dd",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "rams",
+                    "typed-data",
+                    "grant-mandate"
+                  ],
+                  "query": [
+                    {
+                      "key": "chainId",
+                      "value": "{{chainId}}"
+                    },
+                    {
+                      "key": "agent",
+                      "value": "{{agentAddress}}"
+                    },
+                    {
+                      "key": "principal",
+                      "value": "{{principalAddress}}"
+                    },
+                    {
+                      "key": "validUntil",
+                      "value": "1789000000"
+                    },
+                    {
+                      "key": "identityRef",
+                      "value": "{{identityRef}}"
+                    },
+                    {
+                      "key": "asset",
+                      "value": "{{assetAddress}}"
+                    },
+                    {
+                      "key": "maxTransactionValue",
+                      "value": "1000000"
+                    },
+                    {
+                      "key": "maxCumulativeValue",
+                      "value": "5000000"
+                    },
+                    {
+                      "key": "actions",
+                      "value": "0x23b872dd"
+                    }
+                  ]
+                },
+                "description": "Fetch and save the complete EIP-712 envelope and deadline. Sign ramsTypedData locally with ethers _signTypedData/signTypedData; Postman cannot securely sign EIP-712. Paste the signature into ramsSignature before the next request."
+              },
+              "response": []
+            },
+            {
+              "name": "2. Prepare relayed grant",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Base64 x402 payment payload. The prepare call is free; payment is normally required by send-transactions."
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"chainId\": \"{{chainId}}\",\n  \"agent\": \"{{agentAddress}}\",\n  \"principal\": \"{{principalAddress}}\",\n  \"validUntil\": \"1789000000\",\n  \"identityRef\": \"{{identityRef}}\",\n  \"asset\": \"{{assetAddress}}\",\n  \"maxTransactionValue\": \"1000000\",\n  \"maxCumulativeValue\": \"5000000\",\n  \"actions\": [\n    \"0x23b872dd\"\n  ],\n  \"signature\": \"{{ramsSignature}}\",\n  \"deadline\": \"{{ramsDeadline}}\",\n  \"executionMode\": \"brickken-relayed\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/x402/rams/grant-mandate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "rams",
+                    "grant-mandate"
+                  ]
+                },
+                "description": "Prepare the same grant using the locally produced principal signature and saved deadline, with Brickken relaying the blockchain transaction. Omit signerAddress: Brickken supplies the operation signer."
+              },
+              "response": []
+            },
+            {
+              "name": "Grant mandate",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Base64 x402 payment payload. The prepare call is free; payment is normally required by send-transactions."
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"chainId\": \"{{chainId}}\",\n  \"signerAddress\": \"{{signerAddress}}\",\n  \"agent\": \"{{agentAddress}}\",\n  \"principal\": \"{{principalAddress}}\",\n  \"validUntil\": \"1789000000\",\n  \"identityRef\": \"{{identityRef}}\",\n  \"asset\": \"{{assetAddress}}\",\n  \"maxTransactionValue\": \"1000000\",\n  \"maxCumulativeValue\": \"5000000\",\n  \"actions\": [\n    \"0x23b872dd\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/x402/rams/grant-mandate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "rams",
+                    "grant-mandate"
+                  ]
+                },
+                "description": "Prepare ramsGrantMandate. Direct signer: principal; or provide a principal EIP-712 signature."
+              },
+              "response": []
+            },
+            {
+              "name": "Revoke mandate",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Base64 x402 payment payload. The prepare call is free; payment is normally required by send-transactions."
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"chainId\": \"{{chainId}}\",\n  \"signerAddress\": \"{{signerAddress}}\",\n  \"agent\": \"{{agentAddress}}\",\n  \"principal\": \"{{principalAddress}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/x402/rams/revoke-mandate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "rams",
+                    "revoke-mandate"
+                  ]
+                },
+                "description": "Prepare ramsRevokeMandate. Direct signer: principal or approved operator."
+              },
+              "response": []
+            },
+            {
+              "name": "Extend mandate",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Base64 x402 payment payload. The prepare call is free; payment is normally required by send-transactions."
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"chainId\": \"{{chainId}}\",\n  \"signerAddress\": \"{{signerAddress}}\",\n  \"agent\": \"{{agentAddress}}\",\n  \"principal\": \"{{principalAddress}}\",\n  \"newValidUntil\": \"1790000000\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/x402/rams/extend-mandate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "rams",
+                    "extend-mandate"
+                  ]
+                },
+                "description": "Prepare ramsExtendMandate. Extending preserves cumulative usage."
+              },
+              "response": []
+            },
+            {
+              "name": "Set operator",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Base64 x402 payment payload. The prepare call is free; payment is normally required by send-transactions."
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"chainId\": \"{{chainId}}\",\n  \"signerAddress\": \"{{signerAddress}}\",\n  \"principal\": \"{{principalAddress}}\",\n  \"operator\": \"{{operatorAddress}}\",\n  \"approved\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/x402/rams/set-operator",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "rams",
+                    "set-operator"
+                  ]
+                },
+                "description": "Prepare ramsSetOperator. Direct signer: principal."
+              },
+              "response": []
+            },
+            {
+              "name": "Execute mandated transfer",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Base64 x402 payment payload. The prepare call is free; payment is normally required by send-transactions."
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"chainId\": \"{{chainId}}\",\n  \"signerAddress\": \"{{signerAddress}}\",\n  \"asset\": \"{{assetAddress}}\",\n  \"from\": \"{{principalAddress}}\",\n  \"to\": \"{{recipientAddress}}\",\n  \"amount\": \"2500\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/x402/rams/execute",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "rams",
+                    "execute"
+                  ]
+                },
+                "description": "Prepare ramsExecute using the transferFrom helper. signerAddress must be the agent; never brickken-relayed."
+              },
+              "response": []
+            },
+            {
+              "name": "Set executor action",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Base64 x402 payment payload. The prepare call is free; payment is normally required by send-transactions."
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"chainId\": \"{{chainId}}\",\n  \"signerAddress\": \"{{signerAddress}}\",\n  \"selector\": \"0x23b872dd\",\n  \"supported\": true,\n  \"hasAmount\": true,\n  \"amountIndex\": 2\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/x402/rams/set-executor-action",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "rams",
+                    "set-executor-action"
+                  ]
+                },
+                "description": "Prepare ramsSetExecutorAction. signerAddress must be the AgentExecutor owner."
+              },
+              "response": []
+            },
+            {
+              "name": "Freeze agent",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Base64 x402 payment payload. The prepare call is free; payment is normally required by send-transactions."
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"chainId\": \"{{chainId}}\",\n  \"signerAddress\": \"{{signerAddress}}\",\n  \"agent\": \"{{agentAddress}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/x402/rams/freeze-agent",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "rams",
+                    "freeze-agent"
+                  ]
+                },
+                "description": "Prepare ramsFreezeAgent. signerAddress must hold ENFORCER_ROLE."
+              },
+              "response": []
+            },
+            {
+              "name": "Unfreeze agent",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Base64 x402 payment payload. The prepare call is free; payment is normally required by send-transactions."
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"chainId\": \"{{chainId}}\",\n  \"signerAddress\": \"{{signerAddress}}\",\n  \"agent\": \"{{agentAddress}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/x402/rams/unfreeze-agent",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "rams",
+                    "unfreeze-agent"
+                  ]
+                },
+                "description": "Prepare ramsUnfreezeAgent. signerAddress must hold ENFORCER_ROLE."
+              },
+              "response": []
+            },
+            {
+              "name": "Grant principal eligibility",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Base64 x402 payment payload. The prepare call is free; payment is normally required by send-transactions."
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"chainId\": \"{{chainId}}\",\n  \"signerAddress\": \"{{signerAddress}}\",\n  \"principal\": \"{{principalAddress}}\",\n  \"identityRef\": \"{{identityRef}}\",\n  \"expiresAt\": 0\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/x402/rams/grant-principal",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "rams",
+                    "grant-principal"
+                  ]
+                },
+                "description": "Prepare ramsGrantPrincipal. signerAddress must own the ComplianceProvider."
+              },
+              "response": []
+            },
+            {
+              "name": "Revoke principal eligibility",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Payment",
+                    "value": "",
+                    "disabled": true,
+                    "description": "Base64 x402 payment payload. The prepare call is free; payment is normally required by send-transactions."
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"chainId\": \"{{chainId}}\",\n  \"signerAddress\": \"{{signerAddress}}\",\n  \"principal\": \"{{principalAddress}}\",\n  \"reason\": \"KYC_EXPIRED\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/x402/rams/revoke-principal",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "x402",
+                    "rams",
+                    "revoke-principal"
+                  ]
+                },
+                "description": "Prepare ramsRevokePrincipal. signerAddress must own the ComplianceProvider."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "RAMS Reads & Typed Data",
+          "item": [
+            {
+              "name": "Get mandate",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-api-key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/rams/mandate?chainId={{chainId}}&agent={{agentAddress}}&principal={{principalAddress}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "rams",
+                    "mandate"
+                  ],
+                  "query": [
+                    {
+                      "key": "chainId",
+                      "value": "{{chainId}}"
+                    },
+                    {
+                      "key": "agent",
+                      "value": "{{agentAddress}}"
+                    },
+                    {
+                      "key": "principal",
+                      "value": "{{principalAddress}}"
+                    }
+                  ]
+                },
+                "description": "Read the mandate, lifecycle status, freeze flag, and EIP-712 nonce."
+              },
+              "response": []
+            },
+            {
+              "name": "Can execute",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-api-key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/rams/can-execute?chainId={{chainId}}&agent={{agentAddress}}&principal={{principalAddress}}&asset={{assetAddress}}&amount=2500&selector=0x23b872dd",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "rams",
+                    "can-execute"
+                  ],
+                  "query": [
+                    {
+                      "key": "chainId",
+                      "value": "{{chainId}}"
+                    },
+                    {
+                      "key": "agent",
+                      "value": "{{agentAddress}}"
+                    },
+                    {
+                      "key": "principal",
+                      "value": "{{principalAddress}}"
+                    },
+                    {
+                      "key": "asset",
+                      "value": "{{assetAddress}}"
+                    },
+                    {
+                      "key": "amount",
+                      "value": "2500"
+                    },
+                    {
+                      "key": "selector",
+                      "value": "0x23b872dd"
+                    }
+                  ]
+                },
+                "description": "Check authoritative canExecute plus diagnostic conditions."
+              },
+              "response": []
+            },
+            {
+              "name": "Get RAMS status",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-api-key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/rams/status?chainId={{chainId}}&agent={{agentAddress}}&principal={{principalAddress}}&operator={{operatorAddress}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "rams",
+                    "status"
+                  ],
+                  "query": [
+                    {
+                      "key": "chainId",
+                      "value": "{{chainId}}"
+                    },
+                    {
+                      "key": "agent",
+                      "value": "{{agentAddress}}"
+                    },
+                    {
+                      "key": "principal",
+                      "value": "{{principalAddress}}"
+                    },
+                    {
+                      "key": "operator",
+                      "value": "{{operatorAddress}}"
+                    }
+                  ]
+                },
+                "description": "Read freeze, nonce, and operator approval."
+              },
+              "response": []
+            },
+            {
+              "name": "Check compliance",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-api-key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/rams/compliance-status?chainId={{chainId}}&principal={{principalAddress}}&identityRef={{identityRef}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "rams",
+                    "compliance-status"
+                  ],
+                  "query": [
+                    {
+                      "key": "chainId",
+                      "value": "{{chainId}}"
+                    },
+                    {
+                      "key": "principal",
+                      "value": "{{principalAddress}}"
+                    },
+                    {
+                      "key": "identityRef",
+                      "value": "{{identityRef}}"
+                    }
+                  ]
+                },
+                "description": "Read principal eligibility from the ComplianceProvider."
+              },
+              "response": []
+            },
+            {
+              "name": "Get executor action",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-api-key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/rams/executor-action?chainId={{chainId}}&selector=0x23b872dd",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "rams",
+                    "executor-action"
+                  ],
+                  "query": [
+                    {
+                      "key": "chainId",
+                      "value": "{{chainId}}"
+                    },
+                    {
+                      "key": "selector",
+                      "value": "0x23b872dd"
+                    }
+                  ]
+                },
+                "description": "Read selector support and amount extraction configuration."
+              },
+              "response": []
+            },
+            {
+              "name": "Typed data — GrantMandate",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-api-key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/rams/typed-data/grant-mandate?chainId={{chainId}}&agent={{agentAddress}}&principal={{principalAddress}}&validUntil=1789000000&identityRef={{identityRef}}&asset={{assetAddress}}&maxTransactionValue=1000000&maxCumulativeValue=5000000&actions=0x23b872dd",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "rams",
+                    "typed-data",
+                    "grant-mandate"
+                  ],
+                  "query": [
+                    {
+                      "key": "chainId",
+                      "value": "{{chainId}}"
+                    },
+                    {
+                      "key": "agent",
+                      "value": "{{agentAddress}}"
+                    },
+                    {
+                      "key": "principal",
+                      "value": "{{principalAddress}}"
+                    },
+                    {
+                      "key": "validUntil",
+                      "value": "1789000000"
+                    },
+                    {
+                      "key": "identityRef",
+                      "value": "{{identityRef}}"
+                    },
+                    {
+                      "key": "asset",
+                      "value": "{{assetAddress}}"
+                    },
+                    {
+                      "key": "maxTransactionValue",
+                      "value": "1000000"
+                    },
+                    {
+                      "key": "maxCumulativeValue",
+                      "value": "5000000"
+                    },
+                    {
+                      "key": "actions",
+                      "value": "0x23b872dd"
+                    }
+                  ]
+                },
+                "description": "Fetch complete GrantMandate EIP-712 typed data."
+              },
+              "response": []
+            },
+            {
+              "name": "Typed data — RevokeMandate",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-api-key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/rams/typed-data/revoke-mandate?chainId={{chainId}}&agent={{agentAddress}}&principal={{principalAddress}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "rams",
+                    "typed-data",
+                    "revoke-mandate"
+                  ],
+                  "query": [
+                    {
+                      "key": "chainId",
+                      "value": "{{chainId}}"
+                    },
+                    {
+                      "key": "agent",
+                      "value": "{{agentAddress}}"
+                    },
+                    {
+                      "key": "principal",
+                      "value": "{{principalAddress}}"
+                    }
+                  ]
+                },
+                "description": "Fetch complete RevokeMandate EIP-712 typed data."
+              },
+              "response": []
+            },
+            {
+              "name": "Typed data — ExtendMandate",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-api-key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/rams/typed-data/extend-mandate?chainId={{chainId}}&agent={{agentAddress}}&principal={{principalAddress}}&newValidUntil=1790000000",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "rams",
+                    "typed-data",
+                    "extend-mandate"
+                  ],
+                  "query": [
+                    {
+                      "key": "chainId",
+                      "value": "{{chainId}}"
+                    },
+                    {
+                      "key": "agent",
+                      "value": "{{agentAddress}}"
+                    },
+                    {
+                      "key": "principal",
+                      "value": "{{principalAddress}}"
+                    },
+                    {
+                      "key": "newValidUntil",
+                      "value": "1790000000"
+                    }
+                  ]
+                },
+                "description": "Fetch complete ExtendMandate EIP-712 typed data."
+              },
+              "response": []
+            },
+            {
+              "name": "Typed data — SetOperator",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "x-api-key",
+                    "value": "{{apiKey}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/rams/typed-data/set-operator?chainId={{chainId}}&principal={{principalAddress}}&operator={{operatorAddress}}&approved=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "rams",
+                    "typed-data",
+                    "set-operator"
+                  ],
+                  "query": [
+                    {
+                      "key": "chainId",
+                      "value": "{{chainId}}"
+                    },
+                    {
+                      "key": "principal",
+                      "value": "{{principalAddress}}"
+                    },
+                    {
+                      "key": "operator",
+                      "value": "{{operatorAddress}}"
+                    },
+                    {
+                      "key": "approved",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Fetch complete SetOperator EIP-712 typed data."
               },
               "response": []
             }

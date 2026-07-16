@@ -1,0 +1,92 @@
+---
+title: 'RAMS Mandate Workflow'
+description: 'End-to-end Ethereum Sepolia setup and execution for a compliant principal and AI-agent wallet.'
+---
+
+This guide crosses several on-chain roles. Use separate keys for the ComplianceProvider owner, principal, agent, AgentExecutor owner, enforcer, and optional relayer. Never paste them into a shared shell history.
+
+## Prerequisites
+
+- `BRICKKEN_API_KEY` for reads and typed-data fetches
+- Sepolia native gas for every client-signed role
+- x402 payment asset for the wallet executing CLI sends
+- AgentExecutor granted `RECORDER_ROLE` on AgentMandate
+- A distinct `ENFORCER_ROLE` wallet (the registry admin cannot be its enforcer)
+- Principal token allowance granted to the executor before value-moving execution
+
+```bash
+export CHAIN=11155111
+export PRINCIPAL=0x...
+export AGENT=0x...
+export ASSET=0x...
+export IDENTITY_REF=0x... # 32 bytes
+export EXECUTOR=0x...
+```
+
+## 1. Grant principal eligibility
+
+Configure the ComplianceProvider owner key, then:
+
+```bash
+brickken rams grant-principal \
+  --chain "$CHAIN" --signer-address "$COMPLIANCE_OWNER" \
+  --principal "$PRINCIPAL" --identity-ref "$IDENTITY_REF" \
+  --execute --json
+```
+
+Confirm it with `brickken rams compliance-status --chain "$CHAIN" --principal "$PRINCIPAL" --identity-ref "$IDENTITY_REF"`.
+
+## 2. Sign and relay the mandate
+
+With the principal key configured, create `signature.json` using [`rams sign`](/cli/commands/rams#rams-sign). Switch to the relayer/payer key and run [`rams grant`](/cli/commands/rams#relayed-grant-walkthrough) with the exact same fields, signature, and deadline.
+
+Then inspect:
+
+```bash
+brickken rams inspect --chain "$CHAIN" --agent "$AGENT" --principal "$PRINCIPAL" --json
+```
+
+## 3. Configure the executor
+
+With the executor-owner key, register ERC-20 `transferFrom(address,address,uint256)` (`0x23b872dd`). Its amount is ABI word index `2`:
+
+```bash
+brickken rams set-action \
+  --chain "$CHAIN" --signer-address "$EXECUTOR_OWNER" \
+  --executor-address "$EXECUTOR" --selector 0x23b872dd \
+  --supported true --has-amount true --amount-index 2 \
+  --execute --json
+```
+
+The principal must separately call `approve(EXECUTOR, allowance)` on `ASSET`.
+
+## 4. Check and execute
+
+```bash
+brickken rams can-execute \
+  --chain "$CHAIN" --agent "$AGENT" --principal "$PRINCIPAL" \
+  --asset "$ASSET" --amount 2500 --selector 0x23b872dd --json
+
+brickken rams execute \
+  --chain "$CHAIN" --signer-address "$AGENT" \
+  --executor-address "$EXECUTOR" \
+  --asset "$ASSET" --from "$PRINCIPAL" --to "$RECIPIENT" --amount 2500 \
+  --execute --json
+```
+
+The execute command must use the agent key and cannot be Brickken-relayed.
+
+## 5. Enforcement and lifecycle
+
+An enforcer can freeze/unfreeze the agent globally:
+
+```bash
+brickken rams freeze --chain "$CHAIN" --signer-address "$ENFORCER" --agent "$AGENT" --execute
+brickken rams unfreeze --chain "$CHAIN" --signer-address "$ENFORCER" --agent "$AGENT" --execute
+```
+
+Finally, the principal or approved operator can revoke the mandate directly, or the principal can sign a relayed revocation. Re-run `inspect` and `can-execute`; a revoked mandate remains recorded but is inactive.
+
+<Warning>
+Do not run this sequence against the shared deployed contracts until the chain-ops roles and token allowance are confirmed. Failed on-chain writes can still consume native gas and x402 payment.
+</Warning>

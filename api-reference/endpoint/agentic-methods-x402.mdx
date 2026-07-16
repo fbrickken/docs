@@ -1,11 +1,11 @@
 ---
 title: 'Agentic API'
-description: 'x402-paid Agentic API for ERC-8004 agent identity, reputation, and agent-token workflows on Base.'
+description: 'x402-paid Agentic API for ERC-8004 workflows on Base and ERC-8226 RAMS mandates on Ethereum Sepolia.'
 ---
 
 ## Overview
 
-The Agentic API is the x402-paid surface for Brickken agentic methods. It covers ERC-8004 agent identity, reputation, and agent-owned ERC-20 token operations on **Base mainnet** and **Base Sepolia**.
+The Agentic API is the x402-paid surface for Brickken agentic methods. It covers ERC-8004 identity, reputation, and agent-owned ERC-20 operations on **Base**, plus ERC-8226 RAMS mandates on **Ethereum Sepolia**.
 
 Every agentic operation is a two-step flow:
 
@@ -162,12 +162,21 @@ Facade requests use the same body fields as the matching backend `method`, excep
   <Card title="Agent Tokens" icon="coins" href="/api-reference/endpoint/x402-token-create">
     Create and operate agent-owned ERC-20 tokens.
   </Card>
+  <Card title="RAMS Mandates" icon="file-signature" href="/api-reference/endpoint/rams-overview">
+    Delegate compliance-gated, scoped, capped authority to AI-agent wallets with ERC-8226.
+  </Card>
   <Card title="Pricing" icon="badge-dollar-sign" href="/api-reference/endpoint/agentic-pricing">
     Review free prepare and per-operation send prices.
   </Card>
 </CardGroup>
 
 Advanced clients can also call `POST /prepare-transactions` directly and pass `method` explicitly. `newTokenizedAgent` remains a legacy alias for agent registration, but it is not published in x402scan discovery.
+
+The ten RAMS methods (`ramsGrantMandate`, `ramsRevokeMandate`, `ramsExtendMandate`, `ramsSetOperator`, `ramsExecute`, `ramsSetExecutorAction`, `ramsFreezeAgent`, `ramsUnfreezeAgent`, `ramsGrantPrincipal`, and `ramsRevokePrincipal`) are also eligible through `/prepare-transactions`. Their semantic facades live under `/x402/rams/*`.
+
+<Note>
+RAMS facades default to `client-signed`, unlike ERC-8004 facades that inject the relayed mode by default. Only the four signature-authorized lifecycle calls may use `brickken-relayed`; see [RAMS Mandates](/api-reference/endpoint/rams-overview).
+</Note>
 
 ## Common Fields
 

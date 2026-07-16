@@ -67,6 +67,18 @@ For sandbox:
 }
 ```
 
+For pre-merge testing in Forge:
+
+```json
+{
+  "env": "forge",
+  "privateKey": "0xYOUR_PRIVATE_KEY",
+  "apiKey": ""
+}
+```
+
+The `forge` environment resolves to `https://forge.apigw.brickken.rocks/api`. A custom `baseUrl` still overrides the selected environment when needed.
+
 <Warning>
 Only configure a private key in MCP clients and environments you trust. `get_config` returns booleans such as `hasApiKey` and `hasPrivateKey`, never the secret values.
 </Warning>
@@ -106,6 +118,9 @@ These tools map to ERC-8004 and agent-token methods on Base. Preparing is free; 
 | Agent identity | `agent_register`, `agent_set_uri`, `agent_set_metadata`, `agent_set_wallet`, `agent_transfer_ownership` |
 | Reputation | `agent_give_feedback`, `agent_revoke_feedback`, `agent_append_feedback_response` |
 | Agent-owned tokens | `agent_create_token`, `agent_mint_token`, `agent_burn_token`, `agent_transfer_token`, `agent_transfer_from_token`, `agent_approve_token` |
+| RAMS mandates (ERC-8226) | `rams_grant_mandate`, `rams_revoke_mandate`, `rams_extend_mandate`, `rams_set_operator`, `rams_execute`, `rams_set_executor_action`, `rams_freeze_agent`, `rams_unfreeze_agent`, `rams_grant_principal`, `rams_revoke_principal`, `rams_get_mandate`, `rams_can_execute`, `rams_get_status`, `rams_check_compliance`, `rams_get_executor_action`, `rams_get_typed_data` |
+
+RAMS reads and typed-data fetches require an API key. `rams_get_typed_data` auto-signs when the session has a private key matching the principal; otherwise it returns the envelope with a warning for external signing. Pass the result's signature and deadline to the matching lifecycle tool with `executionMode: "brickken-relayed"`. The other six RAMS writes are client-signed only.
 
 ## Networks
 

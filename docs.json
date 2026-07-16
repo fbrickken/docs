@@ -108,6 +108,33 @@
             ]
           },
           {
+            "group": "RAMS Mandates (ERC-8226)",
+            "pages": [
+              "api-reference/endpoint/rams-overview",
+              "api-reference/endpoint/x402-rams-grant-mandate",
+              "api-reference/endpoint/x402-rams-revoke-mandate",
+              "api-reference/endpoint/x402-rams-extend-mandate",
+              "api-reference/endpoint/x402-rams-set-operator",
+              "api-reference/endpoint/x402-rams-execute",
+              "api-reference/endpoint/x402-rams-set-executor-action",
+              "api-reference/endpoint/x402-rams-freeze-agent",
+              "api-reference/endpoint/x402-rams-unfreeze-agent",
+              "api-reference/endpoint/x402-rams-grant-principal",
+              "api-reference/endpoint/x402-rams-revoke-principal"
+            ]
+          },
+          {
+            "group": "RAMS Reads & Typed Data",
+            "pages": [
+              "api-reference/endpoint/rams-get-mandate",
+              "api-reference/endpoint/rams-can-execute",
+              "api-reference/endpoint/rams-status",
+              "api-reference/endpoint/rams-compliance-status",
+              "api-reference/endpoint/rams-executor-action",
+              "api-reference/endpoint/rams-typed-data"
+            ]
+          },
+          {
             "group": "Reference",
             "pages": [
               "api-reference/endpoint/agentic-pricing"
@@ -149,7 +176,8 @@
           {
             "group": "Guides",
             "pages": [
-              "cli/guides/agent-and-token-workflow"
+              "cli/guides/agent-and-token-workflow",
+              "cli/guides/rams-mandate-workflow"
             ]
           }
         ]

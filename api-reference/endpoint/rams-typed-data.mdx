@@ -1,0 +1,27 @@
+---
+title: 'RAMS EIP-712 Typed Data'
+openapi: 'GET /rams/typed-data/grant-mandate'
+description: 'Fetch complete typed-data envelopes for signature-authorized RAMS lifecycle operations.'
+---
+
+All four API-key authenticated routes return the same envelope shape:
+
+| Operation | Endpoint |
+| --- | --- |
+| Grant | `GET /rams/typed-data/grant-mandate` |
+| Revoke | `GET /rams/typed-data/revoke-mandate` |
+| Extend | `GET /rams/typed-data/extend-mandate` |
+| Set operator | `GET /rams/typed-data/set-operator` |
+
+## Client flow
+
+1. Fetch typed data with the exact operation parameters.
+2. Sign the returned `typedData.domain`, `types`, and `message` locally with the principal wallet (`ethers._signTypedData` / `signTypedData`). The API's `types` intentionally omit `EIP712Domain`.
+3. Prepare the matching RAMS write using the same parameters, the returned `deadline`, and the signature.
+4. Client-sign the returned transaction, or request `executionMode: "brickken-relayed"`; then send and settle x402.
+
+The domain is `RAMS` version `1`, and the verifying contract is the selected AgentMandate. The default deadline is one hour; caller-supplied deadlines cannot exceed 30 days.
+
+<Warning>
+The nonce is read on-chain and is shared per principal across all four signed operations. Never default it to zero. Direct lifecycle calls do not consume it, but any successful signature-authorized call invalidates other envelopes using the old nonce.
+</Warning>

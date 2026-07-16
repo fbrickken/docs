@@ -1,0 +1,13 @@
+---
+title: 'Set RAMS Executor Action'
+openapi: 'POST /x402/rams/set-executor-action'
+description: 'Register a function selector and amount extraction rule on an AgentExecutor.'
+---
+
+Maps to `ramsSetExecutorAction`. `signerAddress` must be the AgentExecutor owner; the operation is always client-signed.
+
+Pass either `selector` (4 bytes) or its left-aligned bytes32 `action`, plus `supported`, `hasAmount`, and `amountIndex` when the action carries value.
+
+<Warning>
+Registering a value-bearing selector with `hasAmount: false` bypasses mandate transaction and cumulative caps. Use the correct zero-based ABI word index.
+</Warning>

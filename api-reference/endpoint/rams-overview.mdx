@@ -1,0 +1,96 @@
+---
+title: 'RAMS Mandates (ERC-8226)'
+description: 'Compliance-gated, value-capped on-chain mandates that let principals delegate execution authority to AI agents.'
+---
+
+## Overview
+
+RAMS (ERC-8226) is Brickken's on-chain **mandate** system: a principal grants an AI agent a delegated, compliance-gated, value-capped authority to act on a specific asset. The mandate lives on the **AgentMandate** registry, eligibility is attested by a **ComplianceProvider**, and executions run through a per-principal **AgentExecutor** that enforces the caps and records usage.
+
+<Note>
+RAMS is available on **Ethereum Sepolia (`11155111`)** only at launch. All `/x402/rams/*` prepare facades default to `chainId: "11155111"`.
+</Note>
+
+Every write follows the standard two-step flow: **prepare** (free, unsigned transaction) → **send** (`POST /send-transactions`, x402 USDC charged there). Unlike the ERC-8004 facades, `/x402/rams/*` facades are **client-signed by default** — most RAMS operations require `msg.sender` to hold a specific role, so Brickken's relayer cannot send them. Only the four signed lifecycle operations can be relayed, and only with a principal EIP-712 signature.
+
+## Actors
+
+| Actor | Who | What they can do |
+| --- | --- | --- |
+| **Principal** | Wallet delegating authority | Grant, revoke, extend mandates; approve operators; sign the EIP-712 payloads |
+| **Agent** | Wallet acting under the mandate | Send `execute` transactions through the AgentExecutor (`msg.sender` must be the agent) |
+| **Operator** | Wallet approved by the principal | Revoke and extend the principal's mandates directly (signatures still come from the principal) |
+| **Enforcer** | Holder of `ENFORCER_ROLE` on AgentMandate | Freeze and unfreeze agents |
+| **Compliance provider owner** | Owner of the ComplianceProvider contract | Grant and revoke principal eligibility records |
+| **Executor owner** | Owner of the AgentExecutor | Register function selectors via `setAction` |
+
+## Mandate lifecycle
+
+```text
+grantPrincipal (compliance)      grantMandate                extendMandate
+        │                             │                            │
+        ▼                             ▼                            ▼
+   eligible ──────────────────► active mandate ──────────► extended validUntil
+                                      │                            │
+                    freezeAgent ◄─────┼─────► unfreezeAgent        │
+                                      │                            │
+                                      ▼                            ▼
+                            revokeMandate / expiry ──────────► inactive
+```
+
+A mandate's derived status is `none → revoked → pending (now < validFrom) → expired (now > validUntil) → active`. Extending preserves `cumulativeUsed` — spent value is **not** reset. Freezing is an enforcement overlay: a frozen agent fails `canExecute` regardless of mandate state.
+
+## Two signing flows
+
+The four lifecycle operations — `grant-mandate`, `revoke-mandate`, `extend-mandate`, `set-operator` — support two modes:
+
+1. **Direct.** The transaction sender authorizes on-chain: the principal (or, for revoke/extend, an approved operator) is `signerAddress`, and `signature` is omitted (encoded as `0x`).
+2. **EIP-712 signature.** The principal signs a typed-data payload off-chain (domain `{ name: "RAMS", version: "1" }`, verifying contract = AgentMandate); any relayer wallet can then send the transaction — including Brickken's relayer via `executionMode: "brickken-relayed"`. Fetch the payload from [`GET /rams/typed-data/{operation}`](/api-reference/endpoint/rams-typed-data) and submit the **same parameters and the same `deadline`** with the signature at prepare time.
+
+The per-principal EIP-712 **nonce is shared by all four signed operations** and increments only on signature-verified calls — direct calls do not consume it. Signatures always come from the principal, never the operator.
+
+All other operations (`execute`, `set-executor-action`, `freeze-agent`, `unfreeze-agent`, `grant-principal`, `revoke-principal`) are **always client-signed** — `signerAddress` must be the role holder itself, and `executionMode: "brickken-relayed"` is rejected with `400`.
+
+## Actions and caps
+
+- **Actions** are `bytes32` values holding a **left-aligned 4-byte function selector** (Solidity `bytes32(selector)`: the selector in bytes 0–3, zeros after). Everywhere an action is accepted you may pass either the full bytes32 or the bare selector (e.g. `0x23b872dd` for `transferFrom`); the server right-pads selectors to 32 bytes.
+- **Caps** (`maxTransactionValue`, `maxCumulativeValue`) are denominated in the asset's **raw base units** — no decimals scaling is applied, because the backend cannot know arbitrary-asset decimals. This intentionally differs from the agent-token operations' human-readable amounts.
+- The alias `"max"` / `"unlimited"` (case-insensitive) sets a cap to `2^256-1`, the contract's "no cap" value.
+
+## Executor setup checklist
+
+Before an agent's `execute` can succeed, the operational chain must be set up in this order:
+
+1. Deploy or choose the per-principal **AgentExecutor** (Brickken's Sepolia default is bound to the platform principal).
+2. Grant the executor **`RECORDER_ROLE`** on the AgentMandate registry so it can record usage.
+3. Register each selector with **`setAction`** ([Set Executor Action](/api-reference/endpoint/x402-rams-set-executor-action)). <Warning>Registering a value-bearing selector with `hasAmount: false` makes its transfers **bypass the mandate caps**. Always set `hasAmount: true` and the correct `amountIndex` for selectors that move value.</Warning>
+4. The principal calls **`token.approve(executor, …)`** on the asset — the executor moves funds via `transferFrom`, and the token-level allowance is not checked by the mandate.
+5. Grant a wallet **`ENFORCER_ROLE`** for freeze/unfreeze. The AgentMandate admin **cannot** be its own enforcer (`AdminEnforcerOverlap`).
+6. The compliance provider owner runs [`grant-principal`](/api-reference/endpoint/x402-rams-grant-principal) **before** any `grant-mandate` — an ineligible principal fails the grant pre-check.
+
+## Sepolia contracts
+
+| Contract | Address |
+| --- | --- |
+| AgentMandate (registry, EIP-712 verifier) | `0xD68E1bb972cA4EF7F5764FBf6d685a6DfC26778e` |
+| ComplianceProvider (Brickken default) | `0xa90D2503D5D9b80ECC27856Ff76F892B8C02f278` |
+| AgentExecutor (platform default) | `0xc81949Cf5b52BDc7890Fd5040A9Cd0cdb4B59952` |
+
+Each endpoint accepts an optional override (`agentMandateAddress`, `complianceProviderAddress`, `executorAddress`) when you run your own contracts.
+
+## Endpoint groups
+
+<CardGroup cols={2}>
+  <Card title="Grant Mandate" icon="file-signature" href="/api-reference/endpoint/x402-rams-grant-mandate">
+    Grant, revoke, extend mandates and manage operators — direct or relayed with an EIP-712 signature.
+  </Card>
+  <Card title="Execute" icon="play" href="/api-reference/endpoint/x402-rams-execute">
+    Run agent executions through the AgentExecutor, raw calldata or the transferFrom helper.
+  </Card>
+  <Card title="Reads & Typed Data" icon="magnifying-glass" href="/api-reference/endpoint/rams-get-mandate">
+    Inspect mandates, dry-run executions, and fetch EIP-712 payloads to sign.
+  </Card>
+  <Card title="Pricing" icon="badge-dollar-sign" href="/api-reference/endpoint/agentic-pricing">
+    Free prepare; the full x402 fee is collected at send.
+  </Card>
+</CardGroup>
