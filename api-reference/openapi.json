@@ -7156,8 +7156,8 @@
     "/x402/rams/set-executor-action": {
       "post": {
         "operationId": "prepareRamsSetExecutorAction",
-        "summary": "Prepare RAMS set executor action",
-        "description": "Prepare an unsigned AgentExecutor.setAction transaction registering a function selector on the executor. Maps to ramsSetExecutorAction. signerAddress MUST be the executor owner; never brickken-relayed. Warning: registering a value-bearing selector with hasAmount=false makes its transfers bypass the mandate caps — the response info carries a fixed advisory when supported=true and hasAmount=false.",
+        "summary": "Prepare RAMS selector ActionSpec registration",
+        "description": "Prepare an unsigned AgentExecutor.setAction transaction that registers or updates the ActionSpec for a function selector (supported, hasAmount, amountIndex). Maps to ramsSetExecutorAction. signerAddress MUST be the executor owner; never brickken-relayed. Warning: registering a value-bearing selector with hasAmount=false makes its transfers bypass the mandate caps — the response info carries a fixed advisory when supported=true and hasAmount=false.",
         "security": [
           {
             "x402Payment": []
@@ -8480,11 +8480,11 @@
     "/rams/executor-action": {
       "get": {
         "operationId": "getRamsExecutorAction",
-        "summary": "Get RAMS executor action",
+        "summary": "Get RAMS selector ActionSpec",
         "tags": [
           "Endpoints"
         ],
-        "description": "Read an AgentExecutor's registration for a function selector (supported / hasAmount / amountIndex) plus the executor's bound principal, AgentMandate registry, and owner. Provide exactly one of selector (4-byte) or action (left-aligned bytes32). Requires the x-api-key header.",
+        "description": "Return the ActionSpec for an AgentExecutor function selector (supported, hasAmount, amountIndex), plus the executor's bound principal, AgentMandate registry, and owner. Provide exactly one of selector (4-byte) or action (left-aligned bytes32). Requires the x-api-key header.",
         "security": [
           {
             "apiKeyAuth": []
