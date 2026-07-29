@@ -51,9 +51,13 @@ If a file opens in the browser instead of downloading, right-click the card and 
 
 ## Authentication
 
-Every business endpoint requires an API key sent in the `x-api-key` header. To request an API key (sandbox or production) and whitelist your `signerAddress`, contact [support@brickken.com](mailto:support@brickken.com) or [tech@brickken.com](mailto:tech@brickken.com).
+Business endpoints are authenticated with an API key in the `x-api-key` header, and your `signerAddress` must be whitelisted before writes are accepted.
 
-Agentic (x402) endpoints alternatively accept a per-call payment via the `X-Payment` header — see [Agentic Methods](/api-reference/endpoint/agentic-methods-x402).
+<Card title="Request an API key" icon="envelope" href="/get-started/request-api-key">
+  The form sends a complete request — key and signer whitelist — to `tech@brickken.com`.
+</Card>
+
+Agentic (x402) endpoints alternatively accept a per-call payment via the `X-Payment` header. See [Authentication](/get-started/authentication) for the full credential matrix.
 
 ## Typical Workflow
 

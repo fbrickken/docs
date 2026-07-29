@@ -1,11 +1,11 @@
 ---
 title: 'Agentic API'
-description: 'x402-paid Agentic API for ERC-8004 agent identity, reputation, and agent-token workflows on Base.'
+description: 'x402-paid Agentic API for ERC-8004 workflows on Base and ERC-8226 RAMS mandates on Ethereum Sepolia.'
 ---
 
 ## Overview
 
-The Agentic API is the x402-paid surface for Brickken agentic methods. It covers ERC-8004 agent identity, reputation, and agent-owned ERC-20 token operations on **Base mainnet** and **Base Sepolia**.
+The Agentic API is the x402-paid surface for Brickken agentic methods. It covers ERC-8004 identity, reputation, and agent-owned ERC-20 operations on **Base**, plus ERC-8226 RAMS mandates on **Ethereum Sepolia**.
 
 Every agentic operation is a two-step flow:
 
@@ -162,6 +162,9 @@ Facade requests use the same body fields as the matching backend `method`, excep
   <Card title="Agent Tokens" icon="coins" href="/api-reference/endpoint/x402-token-create">
     Create and operate agent-owned ERC-20 tokens.
   </Card>
+  <Card title="RAMS Mandates" icon="file-signature" href="/api-reference/endpoint/rams-overview">
+    Delegate compliance-gated, scoped, capped authority to AI-agent wallets with ERC-8226.
+  </Card>
   <Card title="Pricing" icon="badge-dollar-sign" href="/api-reference/endpoint/agentic-pricing">
     Review free prepare and per-operation send prices.
   </Card>
@@ -169,13 +172,19 @@ Facade requests use the same body fields as the matching backend `method`, excep
 
 Advanced clients can also call `POST /prepare-transactions` directly and pass `method` explicitly. `newTokenizedAgent` remains a legacy alias for agent registration, but it is not published in x402scan discovery.
 
+The ten RAMS methods (`ramsGrantMandate`, `ramsRevokeMandate`, `ramsExtendMandate`, `ramsSetOperator`, `ramsExecute`, `ramsSetExecutorAction`, `ramsFreezeAgent`, `ramsUnfreezeAgent`, `ramsGrantPrincipal`, and `ramsRevokePrincipal`) are also eligible through `/prepare-transactions`. Their semantic facades live under `/x402/rams/*`.
+
+<Note>
+RAMS facades default to `client-signed`, unlike ERC-8004 facades that inject the relayed mode by default. Only the four signature-authorized lifecycle calls may use `brickken-relayed`; see [RAMS Mandates](/api-reference/endpoint/rams-overview).
+</Note>
+
 ## Common Fields
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `chainId` | string | Yes | Target chain ID. Use `8453` for Base mainnet or `84532` for Base Sepolia. Decimal and hex values are accepted. |
 | `method` | string | Yes for `/prepare-transactions`; no for `/x402/...` facades | One of the eligible method names. Facades derive it from the path. |
-| `executionMode` | string | No | `brickken-relayed` (Brickken signs and broadcasts) or `client-signed` (default). |
+| `executionMode` | string | No | `brickken-relayed` (Brickken signs and broadcasts) or `client-signed`. **The default depends on the facade**: `/x402/agent/*` and `/x402/token/*` inject `brickken-relayed`; `/x402/rams/*` default to `client-signed`. Calling `/prepare-transactions` directly defaults to `client-signed`. |
 | `signerAddress` | string | Conditional | Required in `client-signed` mode. Omit in `brickken-relayed` mode — Brickken sets its relayer as the signer. |
 | `gasLimit` | string or number | No | Optional explicit gas limit (client-signed). |
 | `nonce` | number | No | Optional explicit nonce when managing nonces manually (client-signed). |

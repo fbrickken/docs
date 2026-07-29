@@ -3,7 +3,9 @@ title: 'Pricing'
 description: 'x402 pricing for Agentic API operations: free prepare, paid send.'
 ---
 
-Preparing a transaction (building the unsigned calldata) is **free**. The x402 USDC charge is collected only at `POST /send-transactions`, when Brickken broadcasts the operation. The send price below carries the full per-operation cost.
+import RamsSepoliaNote from '/snippets/rams-sepolia-note.mdx';
+
+For `brickken-relayed` operations, preparing the unsigned calldata is **free** and the x402 USDC charge is collected entirely at `POST /send-transactions`, when Brickken broadcasts the operation. Client-signed RAMS writes split the same total across both steps — see [How RAMS is priced](#how-rams-is-priced).
 
 Prices are in USDC on **Base mainnet**.
 
@@ -24,6 +26,28 @@ Prices are in USDC on **Base mainnet**.
 | `agentTransferFromToken` | `0.00` | `0.04` |
 | `agentApproveToken` | `0.00` | `0.02` |
 | `newTokenizedAgent` (legacy registration alias) | `0.00` | `2.98` |
+| `ramsGrantMandate` | `0.00` | `0.98` |
+| `ramsRevokeMandate` | `0.00` | `0.48` |
+| `ramsExtendMandate` | `0.00` | `0.48` |
+| `ramsSetOperator` | `0.00` | `0.48` |
+| `ramsExecute` | `0.00` | `0.24` |
+| `ramsSetExecutorAction` | `0.00` | `0.48` |
+| `ramsFreezeAgent` | `0.00` | `0.48` |
+| `ramsUnfreezeAgent` | `0.00` | `0.48` |
+| `ramsGrantPrincipal` | `0.00` | `0.98` |
+| `ramsRevokePrincipal` | `0.00` | `0.48` |
+
+## How RAMS is priced
+
+<RamsSepoliaNote />
+
+The table above shows the `brickken-relayed` price, where the whole fee is collected at send. **RAMS defaults to `client-signed`**, and on that path the same total is split evenly across prepare and send — for example `ramsGrantMandate` becomes `0.49` + `0.49` rather than `0.00` + `0.98`. Only `grant-mandate`, `revoke-mandate`, `extend-mandate`, and `set-operator` can be relayed at all; the other six RAMS writes are always client-signed.
+
+The nine RAMS read and typed-data endpoints (`GET /rams/*`) are priced at the cheaper `GETTER` tier, not the transaction tier. They are also callable with an `x-api-key` instead of paying.
+
+<Note>
+Prices are resolved from a database table at request time and environment defaults are only a fallback, so the `GETTER` amount is not fixed here. Read it from the `PAYMENT-REQUIRED` header of the `402` response.
+</Note>
 
 Sandbox, Base Sepolia, and other non-production environments use a flat reference price of `0.01` USDC per send.
 

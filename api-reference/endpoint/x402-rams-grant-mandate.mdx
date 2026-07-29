@@ -1,0 +1,23 @@
+---
+title: 'Grant RAMS Mandate'
+openapi: 'POST /x402/rams/grant-mandate'
+description: 'Prepare a compliance-gated ERC-8226 mandate, directly or with a principal EIP-712 signature.'
+---
+
+Maps to `ramsGrantMandate`. The principal must already be eligible with the selected ComplianceProvider.
+
+## Authorization modes
+
+| Mode | `signerAddress` | Signature fields |
+| --- | --- | --- |
+| Direct | Principal | Omit `signature`; the transaction encodes `0x` |
+| Principal signature | Any transaction sender/relayer | `signature` and the same `deadline` returned by [Typed Data](/api-reference/endpoint/rams-typed-data) |
+| Brickken relayed | Brickken relayer | Principal signature fields plus `executionMode: "brickken-relayed"` |
+
+## Key fields
+
+`agent`, `principal`, `validUntil`, `identityRef`, `asset`, both value caps, and at least one `actions` entry are required. `validFrom` defaults to immediate. Values are raw base units; caps accept `max`/`unlimited`. Actions accept bytes32 values or 4-byte selectors.
+
+## Response
+
+Returns `txId`, unsigned `transactions`, and `info` with the contract, authorization `mode`, and EIP-712 nonce when applicable. Preparing is free; x402 is charged at send.

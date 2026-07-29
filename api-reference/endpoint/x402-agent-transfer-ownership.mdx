@@ -4,13 +4,15 @@ openapi: 'POST /x402/agent/transfer-ownership'
 description: 'Prepare an ERC-8004 identity ownership transfer through x402.'
 ---
 
+import X402AuthNote from '/snippets/x402-auth-note.mdx';
+
 Prepares an unsigned ERC-721 `safeTransferFrom` that moves an ERC-8004 agent identity from Brickken custody to a wallet you control. This facade maps to `agentTransferOwnership`.
 
 By default Brickken is the on-chain owner of the agent identity in `brickken-relayed` mode. Call this method only when you explicitly want to take custody of the identity NFT yourself.
 
 ## Authentication
 
-Omit `x-api-key`. Prepare is free. On `POST /send-transactions` the API returns `402 Payment Required`; sign the x402 payment locally and retry with `X-PAYMENT`. In `brickken-relayed` mode Brickken's relayer (the current owner) signs and broadcasts the transfer once payment is verified.
+<X402AuthNote />
 
 ## Key Fields
 

@@ -1,9 +1,9 @@
 ---
 title: 'CLI'
-description: 'Public Brickken CLI for x402-paid agentic transaction workflows.'
+description: 'Public Brickken CLI for x402-paid agentic workflows and ERC-8226 RAMS mandates.'
 ---
 
-The **Brickken CLI** is the public terminal client for the [Agentic API](/api-reference/endpoint/agentic-methods-x402) on Base. It prepares Brickken agentic transactions for free and pays the send through x402. In the recommended `brickken-relayed` mode, Brickken's relayer signs and broadcasts the operation; in `client-signed` mode the CLI signs locally with your private key.
+The **Brickken CLI** is the public terminal client for the [Agentic API](/api-reference/endpoint/agentic-methods-x402). It supports ERC-8004 on Base and ERC-8226 RAMS mandates on Ethereum Sepolia. It prepares writes for free and pays the send through x402; RAMS reads and typed-data fetches use API-key authentication.
 
 <CardGroup cols={2}>
   <Card title="npm package" icon="box" href="https://www.npmjs.com/package/brickken-cli">
@@ -30,13 +30,18 @@ npx brickken-cli --help
 
 ## Authentication
 
-The CLI is x402-only. It ignores `BRICKKEN_API_KEY` and `BKN_API_KEY`.
+Writes use x402. RAMS reads and online EIP-712 typed-data fetches use an API key.
 
 ```bash
+export BRICKKEN_API_KEY=...
 export BRICKKEN_PRIVATE_KEY=0x...
 ```
 
-`BKN_PRIVATE_KEY` is accepted as an alias. The private key signs the x402 payment, and — in `client-signed` mode only — the blockchain transaction. In `brickken-relayed` mode it signs the x402 payment only.
+`BKN_API_KEY` and `BKN_PRIVATE_KEY` are accepted aliases. The private key signs the x402 payment, client-signed transactions, and requested RAMS typed data locally.
+
+<Warning>
+**The CLI does not reach the legacy Dapp API.** It has no commands for tokenization, STOs, or the Dapp reads, and it only attaches `x-api-key` to RAMS reads. For those workflows use the [MCP server](/mcp/introduction) or the [REST API](/api-reference/introduction) — see [Choose your surface](/get-started/choose-your-surface).
+</Warning>
 
 <Warning>
 Never paste production private keys into shared terminals, tickets, or chat logs. Prefer environment variables or an `.env` file that is not committed.
@@ -54,6 +59,8 @@ brickken --env sandbox --help
 brickken --env production --help
 ```
 
+An internal `forge` environment exists for Brickken pre-release QA — contact `tech@brickken.com` for its base URL.
+
 Override the API base URL directly when needed:
 
 ```bash
@@ -68,7 +75,7 @@ Pass the target operation chain with `--chain`. Decimal and hex values are accep
 | --- | --- | --- |
 | Base mainnet | `8453` | `0x2105` |
 | Base Sepolia | `84532` | `0x14a34` |
-| Ethereum Sepolia (legacy) | `11155111` | `0xaa36a7` |
+| Ethereum Sepolia (RAMS) | `11155111` | `0xaa36a7` |
 
 Some commands, especially `create-token --execute`, wait for a deployment receipt to recover `tokenAddress`. Set an RPC URL for that lookup:
 
@@ -120,12 +127,15 @@ brickken create-token \
 | `brickken transfer` | `agentTransferToken` | Transfer an agent-owned token. |
 | `brickken transfer-from` | `agentTransferFromToken` | Transfer through allowance. |
 | `brickken approve` | `agentApproveToken` | Approve an allowance. |
+| `brickken rams <command>` | `rams*` / `GET /rams/*` | Manage ERC-8226 mandates, compliance, execution, reads, and signatures. |
 | `brickken tx prepare --method <method>` | any supported method | Prepare a raw backend method. |
 | `brickken tx sign` | local only | Sign prepared transaction JSON locally. |
 | `brickken tx send` | `POST /send-transactions` | Submit signed transactions. |
 | `brickken tx status` | `GET /get-transaction-status` | Poll transaction status. |
 | `brickken skill path` | local only | Print the bundled Brickken AI-agent skill path. |
 | `brickken skill install` | local only | Install the bundled skill into an agent skills directory. |
+
+See the complete [`brickken rams` command reference](/cli/commands/rams) and [end-to-end mandate workflow](/cli/guides/rams-mandate-workflow).
 
 ## AI Agent Skill
 

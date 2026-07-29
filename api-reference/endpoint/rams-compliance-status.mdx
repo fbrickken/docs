@@ -1,0 +1,13 @@
+---
+title: 'Check RAMS Compliance'
+openapi: 'GET /rams/compliance-status'
+description: 'Read a principal eligibility record from a ComplianceProvider.'
+---
+
+import RamsReadAuth from '/snippets/rams-read-auth.mdx';
+
+<RamsReadAuth />
+
+Provide `chainId`, `principal`, and the bytes32 `identityRef`; optionally override `complianceProviderAddress`.
+
+The response reports eligibility, expiry, and revocation reason details. A mandate can exist while compliance is ineligible, but `canExecute` will reject it.

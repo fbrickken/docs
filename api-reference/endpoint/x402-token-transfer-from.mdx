@@ -4,11 +4,13 @@ openapi: 'POST /x402/token/transfer-from'
 description: 'Prepare an agent-owned ERC-20 allowance transfer through x402.'
 ---
 
+import X402AuthNote from '/snippets/x402-auth-note.mdx';
+
 Prepares unsigned transactions for transferring an agent-owned ERC-20 token through allowance. This facade maps to `agentTransferFromToken`.
 
 ## Authentication
 
-Omit `x-api-key`. Prepare is free; the x402 payment is charged on `POST /send-transactions`, where the API returns `402 Payment Required`. Sign the x402 payment locally and retry with `X-PAYMENT`. In `brickken-relayed` mode (recommended) Brickken's relayer signs and broadcasts; in `client-signed` mode you sign the prepared transaction first.
+<X402AuthNote />
 
 ## Key Fields
 

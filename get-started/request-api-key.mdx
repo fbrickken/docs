@@ -1,0 +1,40 @@
+---
+title: 'Request an API key'
+description: 'Fill in the form to send a complete API key request to tech@brickken.com.'
+icon: 'envelope'
+---
+
+import { ApiKeyRequestForm } from '/snippets/api-key-request-form.jsx';
+
+Brickken issues API keys by hand. This form assembles a complete request so the first reply you get is your key rather than a list of follow-up questions.
+
+## What a key gets you
+
+- The full **Dapp API**: tokenization, STOs, security-token operations, and reads — over HTTP or through the [MCP server](/mcp/introduction).
+- The **Agentic API** in `client-signed` mode, without paying x402 per call.
+- A plan with a **separate credit balance for each write method**, and higher rate limits on `prepare-transactions`.
+
+Sandbox and production keys are separate. See [Authentication](/get-started/authentication) for what each credential reaches.
+
+## What Brickken needs from you
+
+The form asks for all of it, but if you would rather just write the email yourself, include:
+
+- Your name, company or project, and a reply-to address
+- The **email registered on your Brickken account** — keys are issued against it
+- Sandbox, production, or both
+- The **signer address(es)** you need whitelisted, so writes work from day one
+- The networks you intend to use, and the token symbols you plan to issue
+- What you are building, roughly which methods you expect to call, and your expected volume
+
+<ApiKeyRequestForm />
+
+## What happens next
+
+A Brickken engineer replies to the address you gave, from `tech@brickken.com`. If you asked for a signer whitelist, that is handled in the same thread.
+
+Going to production? [Book an onboarding call](https://meetings.hubspot.com/ludovico-rossi/t1) so the right plan and limits are in place before you launch.
+
+<Warning>
+Never include a private key or seed phrase in this request. Brickken only ever needs your **public** signer addresses.
+</Warning>

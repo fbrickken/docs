@@ -2,6 +2,10 @@
 title: 'Dapp API'
 description: 'API-key authenticated Brickken API for tokenization, STOs, security-token operations, and reads.'
 ---
+
+import Environments from '/snippets/environments.mdx';
+import NetworksDapp from '/snippets/networks-dapp.mdx';
+
 <img
   className="block dark:hidden"
   src="/images/hero-light.png"
@@ -21,10 +25,7 @@ Use the [Agentic API](/api-reference/endpoint/agentic-methods-x402), [MCP](/mcp/
 
 ## Base URLs
 
-| Environment | Base URL |
-| --- | --- |
-| Sandbox | `https://api.sandbox.brickken.com` |
-| Production | `https://api.brickken.com` |
+<Environments />
 
 ## Authentication
 
@@ -34,11 +35,21 @@ Send your API key in every request:
 x-api-key: YOUR_BRICKKEN_API_KEY
 ```
 
-Request a key from `tech@brickken.com` with the email tied to your Brickken account.
+Two prerequisites before your first write:
 
-<Card title="Postman Collection" icon="download" href="/api-reference/postman">
-  Download the official Postman collection and environments to explore every endpoint with ready-to-run example requests.
-</Card>
+1. **You need a key.** [Request one](/get-started/request-api-key) with the email tied to your Brickken account.
+2. **Your `signerAddress` must be whitelisted by Brickken.** A prepare call will not accept an unknown signer. Ask for the whitelist in the same request as the key.
+
+Your key is also scoped: it can only act on token symbols it tokenized, and each write method has its own credit balance. See [Authentication](/get-started/authentication) for the credential matrix, plans, limits, and error codes.
+
+<CardGroup cols={2}>
+  <Card title="Postman Collection" icon="download" href="/api-reference/postman">
+    Ready-to-run example requests for every endpoint.
+  </Card>
+  <Card title="Drive this API from an AI agent" icon="plug" href="/mcp/introduction">
+    The MCP server exposes every endpoint below as a tool, using the same API key.
+  </Card>
+</CardGroup>
 
 ## Transaction Flow
 
@@ -111,8 +122,8 @@ curl --request POST 'https://api.sandbox.brickken.com/send-transactions' \
 | `GET /get-network-info` | Read chain metadata and supported network configuration. |
 | `GET /get-token-info` | Read token information by symbol or chain. |
 | `GET /get-tokenizer-info` | Read tokenizer account information. |
-| `GET /get-stos` | List STOs for a token. |
-| `GET /get-sto-by-id` | Read one STO by ID. |
+| [`GET /get-stos`](/api-reference/endpoint/get-stos) | List STOs for a token. |
+| [`GET /get-sto-by-id`](/api-reference/endpoint/get-sto-by-id) | Read one STO by ID. |
 | `GET /get-investments-by-sto-id` | List investments for one STO. |
 | `GET /get-investor-info` | Read investor status by token and email. |
 | `GET /get-allowance` | Read allowance between owner and spender. |
@@ -130,16 +141,7 @@ curl --request GET \
 
 ## Networks
 
-Pass `chainId` as decimal or hex. Client tooling normalizes common values.
-
-| Network | Decimal | Hex |
-| --- | --- | --- |
-| Ethereum mainnet | `1` | `0x1` |
-| Base mainnet | `8453` | `0x2105` |
-| BNB Smart Chain | `56` | `0x38` |
-| Polygon mainnet | `137` | `0x89` |
-| Sepolia testnet | `11155111` | `0xaa36a7` |
-| Polygon Amoy testnet | `80002` | `0x13882` |
+<NetworksDapp />
 
 <Warning>
 Prepared transactions are on-chain actions. Verify `chainId`, `signerAddress`, token symbol or token address, and all recipient addresses before signing.

@@ -1,0 +1,246 @@
+---
+title: 'Authentication'
+description: 'The two Brickken credentials, which surface accepts which, and how the x402 payment handshake works.'
+icon: 'key'
+---
+
+import Environments from '/snippets/environments.mdx';
+import X402BaseSepoliaAsset from '/snippets/x402-base-sepolia-asset.mdx';
+
+Brickken accepts **two credentials**, and they are alternatives rather than layers. Which one you use decides which parts of the platform you can reach and who pays for the transaction.
+
+## The two credentials
+
+| | API key | x402 payment |
+| --- | --- | --- |
+| **Header** | `x-api-key` | `X-PAYMENT` |
+| **Who issues it** | Brickken, on request | Nobody — you pay per call |
+| **What it costs** | Your plan's credits | USDC per operation |
+| **Needs a Brickken account** | Yes | No |
+| **Reaches the Dapp API** | Yes | No |
+| **Reaches the Agentic API** | Yes, client-signed only | Yes, including relayed |
+
+There is a third secret in play that is **not** a Brickken credential: your **private key**. It never leaves your machine and is never sent to the API. It signs the x402 payment authorization and, in `client-signed` mode, the blockchain transaction itself.
+
+<Warning>
+Never send a private key or seed phrase to the Brickken API, and never paste one into a ticket, a shared terminal, or a chat. No Brickken endpoint or employee will ever ask for one.
+</Warning>
+
+## Which credential works where
+
+| What you are calling | API key | x402 |
+| --- | --- | --- |
+| Dapp API writes (`/prepare-transactions/*` for tokenization and STO methods) | Required | Not accepted |
+| Dapp API reads (`/get-*`) | Required, with exceptions below | Not accepted |
+| `PATCH /patch-token-docs` | Required | Not accepted |
+| `POST /prepare-transactions` for x402-eligible agentic methods | Optional | Not needed — preparing is free |
+| Agentic writes in `client-signed` mode | Accepted | Accepted |
+| Agentic sends in `brickken-relayed` mode | **Rejected** | Required |
+| RAMS reads and typed data (`/rams/*`) | Accepted | Accepted |
+| `GET /get-transaction-status` for a relayed transaction | Not needed | Not needed |
+| `GET /.well-known/x402`, `GET /openapi.json` | Not needed | Not needed |
+
+**Sending both does not help you.** If `x-api-key` is present it is validated and the whole x402 path is skipped, so no payment is taken — which also means no relayed execution. To pay with x402, omit the key entirely.
+
+<Warning>
+`brickken-relayed` sends reject API keys outright, with `brickken-relayed execution requires x402 payment; API keys are not accepted`. Because the `/x402/...` facades force relayed mode, the facade → send round trip cannot be paid for with a key at all. If you want to use a key on an agentic method, prepare it in `client-signed` mode.
+</Warning>
+
+## Using an API key
+
+Send it as a header on every request:
+
+```http
+x-api-key: YOUR_BRICKKEN_API_KEY
+```
+
+```bash
+curl --request GET \
+  'https://api.sandbox.brickken.com/get-token-info?chainId=11155111&tokenSymbol=EXMPL' \
+  --header 'x-api-key: YOUR_BRICKKEN_API_KEY'
+```
+
+No key yet? [Request one](/get-started/request-api-key) — the form opens a prefilled email to `tech@brickken.com`.
+
+### Your signer address must be whitelisted
+
+An API key alone is not enough to write. The wallet you pass as `signerAddress` must be **whitelisted by Brickken** before any `prepare-transactions` call will accept it. Ask for the whitelist in the same request as the key — the form has a field for it.
+
+Once that wallet performs a `newTokenization`, it becomes the **tokenizer** for the resulting token. Only the tokenizer can mint it, distribute its dividends, or manage its investor whitelist.
+
+### Sandbox and production keys are separate
+
+<Environments />
+
+There is no environment flag on a key. Separation comes from the deployment: a key issued against sandbox is unknown to production and vice versa. Request both if you need both.
+
+### Plans and credits
+
+Every key belongs to a plan, and the plan grants a **separate credit balance for each write method** — not one shared pool.
+
+| Plan | Initial credits per method |
+| --- | --- |
+| Starter | 10 |
+| Professional | 100 |
+| Enterprise | 10 000 |
+
+Metered methods: `newTokenization`, `whitelist`, `mintToken`, `burnToken`, `transferTo`, `transferFrom`, `approve`, `dividendDistribution`, `newSto`, `newInvest`, `claimTokens`, `closeOffer`, and `patch-token-docs`. When a balance runs out, the call fails with `Out of credits for <method>`.
+
+<Note>
+Per-tier request throttles and quotas are configured on the usage plan attached to your key and are not published here. Ask `tech@brickken.com` for the limits on your tier.
+</Note>
+
+### Your key is scoped to the tokens it created
+
+A key may only act on token symbols whose tokenizer email matches a `newTokenization` performed under that same key. Anything else returns `Unauthorized token symbol`. This affects `get-stos`, `get-sto-by-id`, `get-investor-info`, `get-whitelist-status`, `get-allowance`, and `get-token-info`.
+
+The payment tokens `HAI`, `BKN`, `USDC`, `USDt`, and `USDT` are exempt and readable by any key.
+
+### Rate limits
+
+Rate limiting applies to `POST /prepare-transactions` only.
+
+| | Burst | Per minute | Concurrent |
+| --- | ---: | ---: | ---: |
+| Without a key | 30 per IP | 10 per IP, 5 per wallet | 20 |
+| With a key | 120 | 60 | 500 |
+
+Exceeding a limit returns `429` with `Retry-After: 60`.
+
+### Not every endpoint enforces a key the same way
+
+Authentication is applied per endpoint rather than globally, and the behaviour is not uniform. Three examples from sandbox:
+
+| Call | Without a key |
+| --- | --- |
+| `GET /get-network-info` | `200` — this read is public |
+| `GET /get-token-info` | `401 API key is required for this endpoint` |
+| `GET /get-stos` | `400 API key is missing from headers.` |
+
+Treat both `400` and `401` as "you need a key here", and do not assume a read is public because a neighbouring one is.
+
+## Using x402 payment
+
+x402 lets a client pay per call in USDC instead of holding an account. It is the only way to use `brickken-relayed` execution, where Brickken signs and broadcasts the blockchain transaction and pays the native gas.
+
+<Steps>
+  <Step title="Prepare — free">
+    Call a facade such as `POST /x402/agent/register`, or `POST /prepare-transactions` with an eligible `method`. No credential is required. The response returns `txId`, `transactions`, and an `x402Requirements` preview of what the send will cost.
+  </Step>
+  <Step title="Send — get the challenge">
+    Call `POST /send-transactions`. The API answers `402 Payment Required` with a `PAYMENT-REQUIRED` header describing the exact chain, asset, transfer method, amount, recipient, and timeout.
+  </Step>
+  <Step title="Sign the payment locally">
+    Sign the payment authorization with the payer's private key. The key stays on your machine.
+  </Step>
+  <Step title="Retry with the payment">
+    Repeat the send with the payment header attached.
+
+    ```http
+    X-PAYMENT: BASE64_ENCODED_X402_PAYMENT_PAYLOAD
+    ```
+  </Step>
+  <Step title="Read the settlement">
+    Brickken verifies the payment, runs the operation, and returns the settlement in the `PAYMENT-RESPONSE` header.
+  </Step>
+</Steps>
+
+### Header names
+
+The API accepts four spellings of the payment header — `X-PAYMENT`, `X-Payment`, `x-payment`, and `payment-signature`. Use whichever your HTTP client produces.
+
+Browser clients can read the handshake: both `PAYMENT-REQUIRED` and `PAYMENT-RESPONSE` are listed in `Access-Control-Expose-Headers`.
+
+### The payment is reserved, then settled
+
+Your payment is **reserved** when you pay, the operation runs, and only then is it **settled**. If the operation reverts, errors, or its authorization expires before confirmation, the reservation is released instead of charged.
+
+Polling a relayed operation with `GET /get-transaction-status` needs no credential. A `status: "pending"` means it was broadcast but not yet confirmed — do not pay or resubmit the same `txId`.
+
+### Payment asset
+
+<X402BaseSepoliaAsset />
+
+## Per surface
+
+| Surface | API key | x402 | How you configure it |
+| --- | --- | --- | --- |
+| REST | Yes | Yes | `x-api-key` / `X-PAYMENT` headers |
+| MCP | Yes | Yes | `configure` tool, or `BRICKKEN_API_KEY` / `BRICKKEN_PRIVATE_KEY` |
+| CLI | RAMS reads only | Yes | `BRICKKEN_API_KEY` / `BRICKKEN_PRIVATE_KEY`, or `--api-key` / `--private-key` |
+| Skill | Yes | Yes | Environment variables, per the agent client |
+
+| Variable | Alias | Purpose |
+| --- | --- | --- |
+| `BRICKKEN_API_KEY` | `BKN_API_KEY` | Brickken API key |
+| `BRICKKEN_PRIVATE_KEY` | `BKN_PRIVATE_KEY` | Signs x402 payments and client-signed transactions |
+| `BRICKKEN_ENV` | `BKN_ENV` | `sandbox` or `production` |
+| `BRICKKEN_BASE_URL` | `BKN_BASE_URL` | Override the API base URL |
+| `BRICKKEN_RPC_URL` | `BKN_RPC_URL` | RPC used to wait for deployment receipts |
+
+## Using the Dapp API from the CLI and MCP
+
+The Dapp API is not only reachable over plain HTTP. This is what each client can actually do with an API key today.
+
+### MCP — full Dapp API access with an API key
+
+The hosted MCP server is the client to use when you want an AI agent to drive the Dapp API. Configure it with an API key and nothing else, and every Dapp tool works: the 13 read tools (`get_stos`, `get_token_info`, `get_investor_info`, and the rest) and the 11 write tools that go through `prepare-transactions` (`create_tokenization`, `create_sto`, `mint_tokens`, `whitelist_investor`, `burn_tokens`, `transfer_tokens`, `approve_tokens`, `distribute_dividend`, `invest_in_sto`, `claim_sto`, `close_sto`).
+
+```json
+{
+  "env": "production",
+  "apiKey": "YOUR_BRICKKEN_API_KEY"
+}
+```
+
+The MCP server attaches `x-api-key` to every outbound request when one is configured, and it only falls back to the x402 handshake when the key is **absent**. So a session is either API-key mode or x402 mode, never both — set `"apiKey": ""` to force x402.
+
+See [MCP](/mcp/introduction) for the connection details and the full tool list.
+
+### CLI — RAMS reads only
+
+<Warning>
+**The CLI cannot drive the legacy Dapp API.** It sends `x-api-key` only on RAMS reads and typed-data fetches (`brickken rams inspect`, `status`, `can-execute`, `compliance-status`, `executor-action`, `sign`). Every other command goes out without a key, and the CLI has no commands for the Dapp methods at all — there is no `newTokenization`, `newSto`, `mintToken`, or `get-stos` mapper. `brickken tx prepare --method newTokenization` forwards the method name but the backend rejects it with `API key is required for this method`.
+
+For Dapp API work from an agent or a script, use **MCP** or call the REST API directly.
+</Warning>
+
+Set the key for RAMS reads like this:
+
+```bash
+export BRICKKEN_API_KEY=...
+brickken rams status --chain 11155111 --agent 0x… --principal 0x…
+```
+
+## Error reference
+
+| Response | Meaning |
+| --- | --- |
+| `401 API key is required for this endpoint` | This endpoint needs a key and none was sent |
+| `400 API key is missing from headers.` | Same cause, different endpoint, different status code |
+| `401 API key is required for this method` | This method is not x402-eligible, so a key is mandatory |
+| `401 API key is required. x402 payment is not enabled.` | x402 is switched off on this deployment |
+| `401 API key is required for this endpoint on the requested chain.` | x402 is not enabled for that `chainId` |
+| `400 brickken-relayed execution requires x402 payment; API keys are not accepted` | Drop the key, or prepare in `client-signed` mode |
+| `402 Payment Required` | Read `PAYMENT-REQUIRED`, sign, and retry with `X-PAYMENT` |
+| `Out of credits for <method>` | Your plan's balance for that method is exhausted |
+| `Unauthorized token symbol` | Your key did not tokenize that symbol |
+| `429` with `Retry-After: 60` | Rate limited on `prepare-transactions` |
+
+## Security rules
+
+1. Never transmit a private key or seed phrase to any Brickken endpoint.
+2. Keep API keys out of source control, tickets, screenshots, and chat. Use environment variables or a secret store.
+3. Use sandbox keys for development. A production key can move real value.
+4. Verify `chainId`, `signerAddress`, the token address, and every recipient before signing — on-chain actions and x402 payments are non-refundable.
+5. Read the amount, asset, and chain from `PAYMENT-REQUIRED` rather than hardcoding them.
+6. Rotate a key by requesting a replacement from `tech@brickken.com` and retiring the old one.
+
+<CardGroup cols={2}>
+  <Card title="Request an API key" icon="envelope" href="/get-started/request-api-key">
+    Start here if you do not have a key yet.
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/get-started/quickstart">
+    Make your first call on any surface.
+  </Card>
+</CardGroup>

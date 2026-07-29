@@ -1,0 +1,139 @@
+---
+title: 'rams'
+description: 'Manage ERC-8226 mandates, compliance, executor actions, reads, and EIP-712 signatures from the Brickken CLI.'
+---
+
+`brickken rams` targets Ethereum Sepolia (`11155111`) at launch. Writes are prepare-only by default; add `--execute` for prepare → local transaction signing → send and x402 settlement. Reads and online typed-data fetches require `BRICKKEN_API_KEY`.
+
+## Shared write options
+
+| Flag | Description |
+| --- | --- |
+| `--chain <chain>` | Decimal or hex chain identifier |
+| `--signer-address <address>` | Wallet that signs the returned blockchain transaction |
+| `--mandate-address <address>` | Optional AgentMandate override |
+| `--gas-limit <value>` | Optional gas limit |
+| `-f, --file <path>` | JSON/YAML input merged with flags |
+| `--execute` | Sign/send instead of prepare-only |
+
+Only `grant`, `revoke`, `extend`, and `set-operator` accept `--signature`, `--deadline`, and `--execution-mode brickken-relayed`. All other RAMS writes are client-signed only.
+
+## rams grant
+
+Grant scoped authority from a compliant principal to an agent (`ramsGrantMandate`).
+
+| Flags | Required / meaning |
+| --- | --- |
+| `--agent`, `--principal`, `--valid-until` | Required mandate parties and expiry |
+| `--identity-ref`, `--asset` | Required compliance identity and asset |
+| `--max-transaction-value`, `--max-cumulative-value` | Raw base-unit caps; accept `max`/`unlimited` |
+| `--action <value>` | Required, repeatable bytes32 action or 4-byte selector |
+| `--valid-from`, `--compliance-provider`, `--metadata` | Optional mandate details |
+
+Direct mode is signed by the principal. Signature mode may use any sender/relayer.
+
+## rams revoke / extend / set-operator
+
+| Command | Required flags | Direct signer |
+| --- | --- | --- |
+| `rams revoke` | `--agent`, `--principal` | Principal or approved operator |
+| `rams extend` | `--agent`, `--principal`, `--new-valid-until` | Principal or approved operator |
+| `rams set-operator` | `--principal`, `--operator`, `--approved` | Principal |
+
+Each accepts the signed-lifecycle options for relaying. The EIP-712 signature always belongs to the principal, including when an operator could call directly.
+
+## rams execute
+
+The agent executes through AgentExecutor (`ramsExecute`). `--signer-address` must be the agent and the operation is never relayed.
+
+| Mode | Flags |
+| --- | --- |
+| Raw calldata | `--target`, `--data` |
+| ERC-20 helper | `--asset`, `--from`, `--to`, `--amount` |
+
+`--executor-address` overrides the per-principal executor. Amounts are raw base units.
+
+## rams set-action
+
+Register an executor selector (`ramsSetExecutorAction`). The signer is the AgentExecutor owner.
+
+| Flag | Meaning |
+| --- | --- |
+| `--selector` or `--action` | 4-byte selector or left-aligned bytes32 action |
+| `--supported` | Enable/disable the selector |
+| `--has-amount` | Whether calldata carries a cap-gated amount |
+| `--amount-index` | Zero-based ABI word index; required when `hasAmount` is true |
+| `--executor-address` | Optional executor override |
+
+<Warning>A value-moving selector registered with `--has-amount false` bypasses mandate caps.</Warning>
+
+## rams freeze / unfreeze
+
+Both commands require `--agent`; the signer must hold `ENFORCER_ROLE`. They are never relayed. The registry admin cannot be its own enforcer.
+
+## rams grant-principal / revoke-principal
+
+ComplianceProvider owner operations; both are client-signed only.
+
+| Command | Required flags | Optional flags |
+| --- | --- | --- |
+| `rams grant-principal` | `--principal`, `--identity-ref` | `--expires-at`, `--compliance-provider-address` |
+| `rams revoke-principal` | `--principal`, `--reason` | `--compliance-provider-address` |
+
+Run grant-principal before granting a mandate with the same provider/identity reference.
+
+## Authenticated reads
+
+Set `BRICKKEN_API_KEY` or pass global `--api-key`. These commands never send a transaction:
+
+| Command | Required flags | Result |
+| --- | --- | --- |
+| `rams inspect` | `--chain`, `--agent`, `--principal` | Mandate, lifecycle status, freeze, nonce |
+| `rams can-execute` | `--chain`, `--agent`, `--principal`, `--asset`, `--action` or `--selector` | Authoritative result and diagnostic checks |
+| `rams status` | `--chain`, `--agent`, `--principal`; optional `--operator` | Freeze, nonce, operator approval |
+| `rams compliance-status` | `--chain`, `--principal`, `--identity-ref` | Eligibility, expiry, reason |
+| `rams executor-action` | `--chain`, `--selector` or `--action` | ActionSpec (`supported`, `hasAmount`, `amountIndex`) |
+
+## rams sign
+
+Fetch and locally sign EIP-712 data for `grant-mandate`, `revoke-mandate`, `extend-mandate`, or `set-operator`:
+
+```bash
+brickken rams sign \
+  --operation grant-mandate \
+  --chain 11155111 \
+  --agent "$AGENT" \
+  --principal "$PRINCIPAL" \
+  --valid-until 1789000000 \
+  --identity-ref "$IDENTITY_REF" \
+  --asset "$ASSET" \
+  --max-transaction-value 1000000 \
+  --max-cumulative-value 5000000 \
+  --action 0x23b872dd \
+  --json > signature.json
+```
+
+Online signing requires the API key and principal private key. `--typed-data-file envelope.json` skips the GET and signs offline without an API key. The CLI verifies that the configured private key matches the server's expected signer.
+
+## Relayed grant walkthrough
+
+Reuse exactly the fields and deadline from the signed envelope:
+
+```bash
+brickken rams grant \
+  --chain 11155111 \
+  --agent "$AGENT" \
+  --principal "$PRINCIPAL" \
+  --valid-until 1789000000 \
+  --identity-ref "$IDENTITY_REF" \
+  --asset "$ASSET" \
+  --max-transaction-value 1000000 \
+  --max-cumulative-value 5000000 \
+  --action 0x23b872dd \
+  --signature "$(jq -r .signature signature.json)" \
+  --deadline "$(jq -r .deadline signature.json)" \
+  --execution-mode brickken-relayed \
+  --execute --json
+```
+
+Omit `--signer-address` in Brickken-relayed mode: the backend supplies its operation signer. The configured private key is the x402 payer key and does not need to be the principal.

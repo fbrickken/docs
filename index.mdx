@@ -1,6 +1,6 @@
 ---
 title: 'Brickken Developer Documentation'
-description: 'Official docs for the Brickken Dapp API, Agentic API, MCP server, CLI, and Skill.'
+description: 'Tokenize real-world assets and give AI agents on-chain authority, through one API.'
 ---
 <img
   className="block dark:hidden"
@@ -13,46 +13,60 @@ description: 'Official docs for the Brickken Dapp API, Agentic API, MCP server, 
   alt="Hero Dark"
 />
 
-## Welcome
+import Environments from '/snippets/environments.mdx';
 
-Brickken exposes the tokenization platform through five developer and agent surfaces:
+Brickken turns real-world assets into compliant on-chain tokens, and gives AI agents identity, reputation, and delegated spending authority. Both run on the same API.
 
-- **Dapp API** for API-key authenticated tokenization, STO, security-token, and read workflows.
-- **Agentic API** for private-key based ERC-8004 agent and agent-token workflows.
-- **MCP** for MCP-compatible AI agents.
-- **CLI** for local terminal workflows using the public `brickken-cli` package.
-- **Skill** for AI agents that need Brickken-specific API, CLI, and MCP guidance.
+<CardGroup cols={3}>
+  <Card title="What you can do" icon="list-check" href="/get-started/what-you-can-do">
+    Every capability, and which client reaches it.
+  </Card>
+  <Card title="Choose your surface" icon="diagram-project" href="/get-started/choose-your-surface">
+    HTTP, CLI, MCP, or the AI agent Skill.
+  </Card>
+  <Card title="Authentication" icon="key" href="/get-started/authentication">
+    API key or x402 — which one you need.
+  </Card>
+</CardGroup>
+
+## Two APIs
+
+| | Dapp API | Agentic API |
+| --- | --- | --- |
+| **What it does** | Tokenize assets, run offerings, manage investors and dividends | ERC-8004 agent identity and reputation, agent-owned tokens, ERC-8226 mandates |
+| **Credential** | API key | x402 payment, or an API key in `client-signed` mode |
+| **Networks** | Ethereum, Base, BNB Chain, Polygon, and their testnets | Base and Base Sepolia; Ethereum Sepolia for RAMS |
+| **Who it's for** | Issuers, platforms, and their backends | Autonomous agents and the people who run them |
+| **Start here** | [Dapp API](/api-reference/introduction) | [Agentic API](/api-reference/endpoint/agentic-methods-x402) |
+
+Every write on both APIs follows the same three steps: **prepare** an unsigned transaction, **sign** it, **send** it. Preparing is always free.
+
+## Clients
 
 <CardGroup cols={2}>
-  <Card title="Dapp API" icon="key" href="/api-reference/introduction">
-    Use an API key to prepare, sign, send, and read Brickken Dapp transactions.
+  <Card title="REST API" icon="code" href="/api-reference/introduction">
+    Plain HTTP. Reaches everything.
   </Card>
-  <Card title="Agentic API" icon="wallet" href="/api-reference/endpoint/agentic-methods-x402">
-    Use a private key to pay x402 requests and sign ERC-8004 transactions locally.
-  </Card>
-  <Card title="MCP" icon="plug" href="/mcp/introduction">
-    Connect AI agents to the hosted Brickken MCP endpoint.
+  <Card title="MCP server" icon="plug" href="/mcp/introduction">
+    Hosted, 57 tools. The only client that drives the full Dapp API with just an API key.
   </Card>
   <Card title="CLI" icon="terminal" href="/cli/introduction">
-    Install the public npm CLI and run x402-paid workflows from your terminal.
+    `brickken-cli` on npm, for agentic and RAMS workflows.
   </Card>
   <Card title="Skill" icon="sparkles" href="/skill/introduction">
-    Install the Brickken AI-agent skill with or without the CLI package.
+    Brickken knowledge for AI coding agents.
   </Card>
 </CardGroup>
 
 ## Environments
 
-| Environment | API URL | App URL |
-| --- | --- | --- |
-| Sandbox | `https://api.sandbox.brickken.com` | `https://dapp.sandbox.brickken.com` |
-| Production | `https://api.brickken.com` | `https://dapp.brickken.com` |
+<Environments />
 
-## Access
+## Get access
 
 <CardGroup cols={2}>
-  <Card title="Request an API key" icon="envelope" href="mailto:tech@brickken.com">
-    Contact `tech@brickken.com` with your Brickken user email.
+  <Card title="Request an API key" icon="envelope" href="/get-started/request-api-key">
+    Fill in the form — it sends a complete request to `tech@brickken.com`.
   </Card>
   <Card title="Go live" icon="calendar" href="https://meetings.hubspot.com/ludovico-rossi/t1">
     Schedule a production onboarding call.
