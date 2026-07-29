@@ -5,26 +5,28 @@ description: 'Hosted Brickken MCP server for API-key and x402 workflows in MCP-c
 
 ## Overview
 
-The Brickken MCP server exposes the Brickken Dapp API and Agentic API as tools for MCP-compatible AI agents.
+The Brickken MCP server exposes the Brickken Dapp API and Agentic API as 57 tools for MCP-compatible AI agents.
+
+It is also **the only client that reaches the full Dapp API with nothing but an API key** — 13 read tools and 11 write tools that go through `prepare-transactions`. The CLI cannot do this; see [Choose your surface](/get-started/choose-your-surface).
 
 <CardGroup cols={2}>
-  <Card title="MCP" icon="plug" href="https://mcp.brickken.com/">
+  <Card title="MCP server page" icon="plug" href="https://mcp.brickken.com/">
     Open the official Brickken MCP page.
   </Card>
-  <Card title="Health check" icon="activity" href="https://mcp.brickken.com/health">
+  <Card title="Health check" icon="heart-pulse" href="https://mcp.brickken.com/health">
     Check hosted server availability.
   </Card>
 </CardGroup>
 
 ## Connect
 
-Use the hosted endpoint in Claude Code, Codex, or any MCP-compatible client:
+Use the hosted endpoint in Claude Code, Codex, or any MCP-compatible client. Note the `/mcp` path — the bare host serves an HTML landing page, not the MCP endpoint:
 
 ```json
 {
   "mcpServers": {
     "brickken": {
-      "url": "https://mcp.brickken.com/"
+      "url": "https://mcp.brickken.com/mcp"
     }
   }
 }
@@ -34,9 +36,13 @@ Use the hosted endpoint in Claude Code, Codex, or any MCP-compatible client:
 
 Every MCP session is isolated. Configure credentials at runtime with the `configure` tool, then use `get_config` to verify the active environment without exposing secrets.
 
+<Note>
+A session is **either API-key mode or x402 mode, never both.** When an API key is configured the server attaches `x-api-key` to every outbound request and never falls back to the payment handshake. Set `"apiKey": ""` to force x402.
+</Note>
+
 ### API-key mode
 
-Use this mode for the [Dapp API](/api-reference/introduction).
+Use this mode for the [Dapp API](/api-reference/introduction). An API key alone unlocks every Dapp tool listed below — tokenization, STOs, security-token operations, and all reads.
 
 ```json
 {
@@ -67,20 +73,12 @@ For sandbox:
 }
 ```
 
-For pre-merge testing in Forge:
-
-```json
-{
-  "env": "forge",
-  "privateKey": "0xYOUR_PRIVATE_KEY",
-  "apiKey": ""
-}
-```
-
-The `forge` environment resolves to `https://d4aqanatl1.execute-api.eu-west-1.amazonaws.com/forge`. A custom `baseUrl` still overrides the selected environment when needed.
+A custom `baseUrl` overrides the selected environment when needed. An internal `forge` environment exists for Brickken pre-release QA — contact `tech@brickken.com` for its base URL.
 
 <Warning>
 Only configure a private key in MCP clients and environments you trust. `get_config` returns booleans such as `hasApiKey` and `hasPrivateKey`, never the secret values.
+
+The hosted `/mcp` endpoint has no inbound authentication — anyone can connect, and every credential is supplied by the client per session. Nothing you configure is persisted server-side beyond the life of your session.
 </Warning>
 
 ## Configuration Tools
@@ -100,7 +98,9 @@ Only configure a private key in MCP clients and environments you trust. `get_con
 
 ## Dapp API Tools
 
-These tools map to API-key authenticated dapp flows. If a private key is configured, write tools can prepare, sign, and send automatically; otherwise they return prepared transactions for external signing.
+These tools map to API-key authenticated dapp flows and are **the legacy Dapp API, reachable from an AI agent with nothing but an API key**. If a private key is also configured, write tools can prepare, sign, and send automatically; otherwise they return prepared transactions for external signing.
+
+The signer wallet must be whitelisted by Brickken before a write is accepted, and your key can only act on token symbols it tokenized. See [Authentication](/get-started/authentication).
 
 | Area | Tools |
 | --- | --- |
@@ -120,7 +120,7 @@ These tools map to ERC-8004 and agent-token methods on Base. Preparing is free; 
 | Agent-owned tokens | `agent_create_token`, `agent_mint_token`, `agent_burn_token`, `agent_transfer_token`, `agent_transfer_from_token`, `agent_approve_token` |
 | RAMS mandates (ERC-8226) | `rams_grant_mandate`, `rams_revoke_mandate`, `rams_extend_mandate`, `rams_set_operator`, `rams_execute`, `rams_set_executor_action`, `rams_freeze_agent`, `rams_unfreeze_agent`, `rams_grant_principal`, `rams_revoke_principal`, `rams_get_mandate`, `rams_can_execute`, `rams_get_status`, `rams_check_compliance`, `rams_get_executor_action`, `rams_get_typed_data` |
 
-RAMS reads and typed-data fetches require an API key. `rams_get_typed_data` auto-signs when the session has a private key matching the principal; otherwise it returns the envelope with a warning for external signing. Pass the result's signature and deadline to the matching lifecycle tool with `executionMode: "brickken-relayed"`. The other six RAMS writes are client-signed only.
+RAMS reads and typed-data fetches use the session's API key when one is set, and fall back to x402 when it is not. `rams_get_typed_data` auto-signs when the session has a private key matching the principal; otherwise it returns the envelope with a warning for external signing. Pass the result's signature and deadline to the matching lifecycle tool with `executionMode: "brickken-relayed"`. The other six RAMS writes are client-signed only.
 
 ## Networks
 

@@ -9,19 +9,59 @@
   },
   "favicon": "/favicon.svg",
   "navigation": {
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Authentication",
+          "icon": "key",
+          "href": "/get-started/authentication"
+        },
+        {
+          "anchor": "Request an API key",
+          "icon": "envelope",
+          "href": "/get-started/request-api-key"
+        }
+      ]
+    },
     "tabs": [
+      {
+        "tab": "Get Started",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "index",
+              "get-started/what-you-can-do",
+              "get-started/choose-your-surface"
+            ]
+          },
+          {
+            "group": "Access",
+            "pages": [
+              "get-started/authentication",
+              "get-started/request-api-key"
+            ]
+          },
+          {
+            "group": "First call",
+            "pages": [
+              "get-started/quickstart"
+            ]
+          }
+        ]
+      },
       {
         "tab": "Dapp API",
         "groups": [
           {
-            "group": "API Documentation",
+            "group": "Overview",
             "pages": [
               "api-reference/introduction",
               "api-reference/postman"
             ]
           },
           {
-            "group": "Create Transaction",
+            "group": "Prepare Transactions",
             "pages": [
               "api-reference/endpoint/create",
               "api-reference/endpoint/prepare-newTokenization",
@@ -39,30 +79,31 @@
             ]
           },
           {
-            "group": "Send Transaction",
+            "group": "Send Transactions",
             "pages": [
               "api-reference/endpoint/send"
             ]
           },
           {
-            "group": "Information Endpoints",
+            "group": "Read Endpoints",
             "pages": [
-              "api-reference/endpoint/get-stos",
-              "api-reference/endpoint/get-sto-balance",
-              "api-reference/endpoint/get-investors-info",
-              "api-reference/endpoint/get-investments-by-sto",
-              "api-reference/endpoint/get-transaction-status",
-              "api-reference/endpoint/get-allowance",
-              "api-reference/endpoint/get-balance-whitelist",
-              "api-reference/endpoint/get-dividend-distribution",
               "api-reference/endpoint/get-network-info",
-              "api-reference/endpoint/get-token-info",
               "api-reference/endpoint/get-tokenizer-info",
-              "api-reference/endpoint/get-whitelist-status"
+              "api-reference/endpoint/get-token-info",
+              "api-reference/endpoint/get-stos",
+              "api-reference/endpoint/get-sto-by-id",
+              "api-reference/endpoint/get-sto-balance",
+              "api-reference/endpoint/get-investments-by-sto",
+              "api-reference/endpoint/get-investors-info",
+              "api-reference/endpoint/get-whitelist-status",
+              "api-reference/endpoint/get-balance-whitelist",
+              "api-reference/endpoint/get-allowance",
+              "api-reference/endpoint/get-dividend-distribution",
+              "api-reference/endpoint/get-transaction-status"
             ]
           },
           {
-            "group": "Management Endpoints",
+            "group": "Token Documents",
             "pages": [
               "api-reference/endpoint/update-docs"
             ]
@@ -73,9 +114,10 @@
         "tab": "Agentic API",
         "groups": [
           {
-            "group": "API Documentation",
+            "group": "Overview",
             "pages": [
-              "api-reference/endpoint/agentic-methods-x402"
+              "api-reference/endpoint/agentic-methods-x402",
+              "api-reference/endpoint/agentic-pricing"
             ]
           },
           {
@@ -133,12 +175,6 @@
               "api-reference/endpoint/rams-executor-action",
               "api-reference/endpoint/rams-typed-data"
             ]
-          },
-          {
-            "group": "Reference",
-            "pages": [
-              "api-reference/endpoint/agentic-pricing"
-            ]
           }
         ]
       },
@@ -170,6 +206,7 @@
             "pages": [
               "cli/commands/agent",
               "cli/commands/token-economics",
+              "cli/commands/rams",
               "cli/commands/tx"
             ]
           },
@@ -193,9 +230,75 @@
           }
         ]
       }
-    ],
-    "global": {}
+    ]
   },
+  "redirects": [
+    {
+      "source": "/essentials/:slug*",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/quickstart",
+      "destination": "/get-started/quickstart",
+      "permanent": true
+    },
+    {
+      "source": "/development",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/authentication",
+      "destination": "/get-started/authentication",
+      "permanent": false
+    },
+    {
+      "source": "/auth",
+      "destination": "/get-started/authentication",
+      "permanent": false
+    },
+    {
+      "source": "/api-key",
+      "destination": "/get-started/request-api-key",
+      "permanent": false
+    },
+    {
+      "source": "/request-api-key",
+      "destination": "/get-started/request-api-key",
+      "permanent": false
+    },
+    {
+      "source": "/api-reference",
+      "destination": "/api-reference/introduction",
+      "permanent": false
+    },
+    {
+      "source": "/cli",
+      "destination": "/cli/introduction",
+      "permanent": false
+    },
+    {
+      "source": "/mcp",
+      "destination": "/mcp/introduction",
+      "permanent": false
+    },
+    {
+      "source": "/skill",
+      "destination": "/skill/introduction",
+      "permanent": false
+    },
+    {
+      "source": "/pricing",
+      "destination": "/api-reference/endpoint/agentic-pricing",
+      "permanent": false
+    },
+    {
+      "source": "/rams",
+      "destination": "/api-reference/endpoint/rams-overview",
+      "permanent": false
+    }
+  ],
   "contextual": {
     "display": "toc",
     "options": [
@@ -225,6 +328,10 @@
   },
   "navbar": {
     "links": [
+      {
+        "label": "Get an API key",
+        "href": "https://docs.brickken.com/get-started/request-api-key"
+      },
       {
         "label": "Support",
         "href": "mailto:support@brickken.com"

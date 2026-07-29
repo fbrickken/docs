@@ -1,0 +1,28 @@
+On Base Sepolia the x402 payment asset is Circle USDC:
+
+```text
+0x036CbD53842c5426634e7929541eC2318f3dCF7e
+```
+
+It has 6 decimals and uses the EIP-3009 transfer method (EIP-712 name `USDC`, version `2`, 300-second authorization window). A live sandbox quote looks like this:
+
+```json
+{
+  "scheme": "exact",
+  "network": "eip155:84532",
+  "asset": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+  "amount": "10000",
+  "payTo": "0x6b0173489007dE9E2e619eccd98E8fa9c610849a",
+  "maxTimeoutSeconds": 300,
+  "extra": {
+    "tokenSymbol": "USDC",
+    "displayPrice": "0.010000000000000000 USDC",
+    "assetTransferMethod": "eip3009",
+    "routeKey": "POST /send-transactions"
+  }
+}
+```
+
+<Warning>
+Read the chain, asset, transfer method, amount, and recipient from the `PAYMENT-REQUIRED` header of the live `402` response. Never hardcode the values above — they are an illustration, not a contract.
+</Warning>

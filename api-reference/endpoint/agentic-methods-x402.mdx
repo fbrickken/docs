@@ -184,7 +184,7 @@ RAMS facades default to `client-signed`, unlike ERC-8004 facades that inject the
 | --- | --- | --- | --- |
 | `chainId` | string | Yes | Target chain ID. Use `8453` for Base mainnet or `84532` for Base Sepolia. Decimal and hex values are accepted. |
 | `method` | string | Yes for `/prepare-transactions`; no for `/x402/...` facades | One of the eligible method names. Facades derive it from the path. |
-| `executionMode` | string | No | `brickken-relayed` (Brickken signs and broadcasts) or `client-signed` (default). |
+| `executionMode` | string | No | `brickken-relayed` (Brickken signs and broadcasts) or `client-signed`. **The default depends on the facade**: `/x402/agent/*` and `/x402/token/*` inject `brickken-relayed`; `/x402/rams/*` default to `client-signed`. Calling `/prepare-transactions` directly defaults to `client-signed`. |
 | `signerAddress` | string | Conditional | Required in `client-signed` mode. Omit in `brickken-relayed` mode — Brickken sets its relayer as the signer. |
 | `gasLimit` | string or number | No | Optional explicit gas limit (client-signed). |
 | `nonce` | number | No | Optional explicit nonce when managing nonces manually (client-signed). |

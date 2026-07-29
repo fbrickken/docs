@@ -3,13 +3,13 @@ title: 'RAMS Mandates (ERC-8226)'
 description: 'Compliance-gated, value-capped on-chain mandates that let principals delegate execution authority to AI agents.'
 ---
 
+import RamsSepoliaNote from '/snippets/rams-sepolia-note.mdx';
+
 ## Overview
 
 RAMS (ERC-8226) is Brickken's on-chain **mandate** system: a principal grants an AI agent a delegated, compliance-gated, value-capped authority to act on a specific asset. The mandate lives on the **AgentMandate** registry, eligibility is attested by a **ComplianceProvider**, and executions run through a per-principal **AgentExecutor** that enforces the caps and records usage.
 
-<Note>
-RAMS is available on **Ethereum Sepolia (`11155111`)** only at launch. All `/x402/rams/*` prepare facades default to `chainId: "11155111"`.
-</Note>
+<RamsSepoliaNote />
 
 Every write follows the standard two-step flow: **prepare** (free, unsigned transaction) → **send** (`POST /send-transactions`, x402 USDC charged there). Unlike the ERC-8004 facades, `/x402/rams/*` facades are **client-signed by default** — most RAMS operations require `msg.sender` to hold a specific role, so Brickken's relayer cannot send them. Only the four signed lifecycle operations can be relayed, and only with a principal EIP-712 signature.
 

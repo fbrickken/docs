@@ -4,11 +4,13 @@ openapi: 'POST /x402/agent/set-metadata'
 description: 'Prepare an ERC-8004 agent metadata update through x402.'
 ---
 
+import X402AuthNote from '/snippets/x402-auth-note.mdx';
+
 Prepares unsigned transactions for writing an ERC-8004 agent metadata key/value pair. This facade maps to `agentSetMetadata`.
 
 ## Authentication
 
-Omit `x-api-key`. Prepare is free; the x402 payment is charged on `POST /send-transactions`, where the API returns `402 Payment Required`. Sign the x402 payment locally and retry with `X-PAYMENT`. In `brickken-relayed` mode (recommended) Brickken's relayer signs and broadcasts; in `client-signed` mode you sign the prepared transaction first.
+<X402AuthNote />
 
 ## Key Fields
 

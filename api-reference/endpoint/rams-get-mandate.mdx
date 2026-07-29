@@ -4,6 +4,10 @@ openapi: 'GET /rams/mandate'
 description: 'Read an ERC-8226 mandate and its derived lifecycle status.'
 ---
 
-Requires `x-api-key`. Query by `chainId`, `agent`, and `principal`; `agentMandateAddress` is an optional contract override.
+import RamsReadAuth from '/snippets/rams-read-auth.mdx';
+
+<RamsReadAuth />
+
+Query by `chainId`, `agent`, and `principal`; `agentMandateAddress` is an optional contract override.
 
 The response includes the raw mandate, derived `status` (`none`, `pending`, `active`, `expired`, or `revoked`), agent freeze state, and the principal's current EIP-712 nonce. On-chain read failures are returned as errors and never replaced with defaults.

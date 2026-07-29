@@ -1,0 +1,183 @@
+---
+title: 'Quickstart'
+description: 'Make your first Brickken call on whichever surface you picked.'
+icon: 'rocket'
+---
+
+Four first calls, one per surface. All of them run against **sandbox** — nothing here moves real value.
+
+<Tabs>
+  <Tab title="REST — with an API key">
+    Start with a read that needs no key at all, to confirm you can reach the API:
+
+    ```bash
+    curl 'https://api.sandbox.brickken.com/get-network-info?chainId=11155111'
+    ```
+
+    Then a read that does need one:
+
+    ```bash
+    curl 'https://api.sandbox.brickken.com/get-token-info?chainId=11155111&tokenSymbol=EXMPL' \
+      --header 'x-api-key: YOUR_BRICKKEN_API_KEY'
+    ```
+
+    Now prepare a write. This returns unsigned transactions and a `txId` — nothing is on-chain yet:
+
+    ```bash
+    curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
+      --header 'Content-Type: application/json' \
+      --header 'x-api-key: YOUR_BRICKKEN_API_KEY' \
+      --data '{
+        "chainId": "11155111",
+        "method": "newTokenization",
+        "tokenizerEmail": "issuer@example.com",
+        "signerAddress": "0xYourWhitelistedWallet",
+        "tokenName": "Example Asset",
+        "tokenSymbol": "EXMPL",
+        "tokenType": "RWA_TOKEN",
+        "supplyCap": "1000000",
+        "url": "https://example.com/token-docs"
+      }'
+    ```
+
+    Sign each returned transaction with the wallet matching `signerAddress`, then send:
+
+    ```bash
+    curl --request POST 'https://api.sandbox.brickken.com/send-transactions' \
+      --header 'Content-Type: application/json' \
+      --header 'x-api-key: YOUR_BRICKKEN_API_KEY' \
+      --data '{
+        "txId": "0xPreparedTransactionId",
+        "signedTransactions": ["0xSignedRawTransaction"]
+      }'
+    ```
+
+    Poll `GET /get-transaction-status` until it confirms.
+
+    <Note>
+    `signerAddress` must be whitelisted by Brickken first. Ask for it when you [request your key](/get-started/request-api-key).
+    </Note>
+  </Tab>
+
+  <Tab title="Agentic API — with a wallet">
+    Preparing costs nothing and needs no credential. Try it right now:
+
+    ```bash
+    curl --request POST 'https://api.sandbox.brickken.com/x402/agent/register' \
+      --header 'Content-Type: application/json' \
+      --data '{
+        "chainId": "84532",
+        "executionMode": "brickken-relayed",
+        "name": "Research Agent",
+        "description": "Autonomous research agent",
+        "image": "https://example.com/agent.png",
+        "services": [
+          {
+            "name": "A2A",
+            "endpoint": "https://agent.example/.well-known/agent-card.json",
+            "version": "0.3.0"
+          }
+        ],
+        "aiModelName": "Research Model",
+        "aiModelProvider": "OpenAI",
+        "x402Support": true,
+        "active": true
+      }'
+    ```
+
+    The response carries `txId`, one prepared `transactions` entry, and an `x402Requirements` preview of what the send will cost.
+
+    Send it. The first attempt is meant to fail:
+
+    ```bash
+    curl -i --request POST 'https://api.sandbox.brickken.com/send-transactions' \
+      --header 'Content-Type: application/json' \
+      --data '{ "txId": "0xPreparedTransactionId", "transactions": [ { "to": "0xRegistry", "data": "0x...", "value": "0x0" } ] }'
+    ```
+
+    You get `402 Payment Required` with a `PAYMENT-REQUIRED` header. Sign that payment locally with your funded wallet and retry with `X-PAYMENT`. Brickken's relayer then signs, pays the gas, and broadcasts.
+
+    Fund the wallet with Base Sepolia USDC first — the exact asset and amount are in the header.
+  </Tab>
+
+  <Tab title="CLI">
+    ```bash
+    npm install -g brickken-cli
+    ```
+
+    ```bash
+    export BRICKKEN_PRIVATE_KEY=0x...
+    export BRICKKEN_RPC_URL="https://sepolia.base.org"
+    ```
+
+    Prepare only — free, nothing sent:
+
+    ```bash
+    brickken create-token --chain 84532 --execution-mode brickken-relayed --name "Research Agent Token" --symbol RAGT
+    ```
+
+    Add `--execute` to prepare, pay the x402 charge, and broadcast in one step:
+
+    ```bash
+    brickken create-token --chain 84532 --execution-mode brickken-relayed --name "Research Agent Token" --symbol RAGT --execute --json
+    ```
+
+    <Note>
+    The CLI is for agentic and RAMS workflows. It has no Dapp API commands — use MCP or plain HTTP for tokenization and STOs.
+    </Note>
+  </Tab>
+
+  <Tab title="MCP">
+    Add the hosted server to your MCP client:
+
+    ```json
+    {
+      "mcpServers": {
+        "brickken": {
+          "url": "https://mcp.brickken.com/mcp"
+        }
+      }
+    }
+    ```
+
+    Configure the session with the `configure` tool. With an API key you get the full Dapp API:
+
+    ```json
+    {
+      "env": "sandbox",
+      "apiKey": "YOUR_BRICKKEN_API_KEY"
+    }
+    ```
+
+    Then ask the agent to call `get_stos`, `get_token_info`, or `create_tokenization`.
+
+    For x402 agentic workflows instead, clear the key and set a private key:
+
+    ```json
+    {
+      "env": "sandbox",
+      "privateKey": "0xYOUR_PRIVATE_KEY",
+      "apiKey": ""
+    }
+    ```
+
+    Verify with `get_config` — it reports `hasApiKey` and `hasPrivateKey` as booleans, never the values.
+  </Tab>
+</Tabs>
+
+## Where next
+
+<CardGroup cols={2}>
+  <Card title="What you can do" icon="list-check" href="/get-started/what-you-can-do">
+    Every capability, and which client reaches it.
+  </Card>
+  <Card title="Authentication" icon="key" href="/get-started/authentication">
+    Credentials, the 402 handshake, plans, limits, and errors.
+  </Card>
+  <Card title="Dapp API reference" icon="code" href="/api-reference/introduction">
+    Every tokenization, STO, and read endpoint.
+  </Card>
+  <Card title="Postman collection" icon="download" href="/api-reference/postman">
+    Ready-to-run requests for every endpoint.
+  </Card>
+</CardGroup>

@@ -1,0 +1,68 @@
+---
+title: 'Choose your surface'
+description: 'Four ways to call the same Brickken backend — and which one fits what you are building.'
+icon: 'diagram-project'
+---
+
+The REST API, the CLI, the MCP server, and the Skill all talk to the same backend at `api.brickken.com`. They differ in who is driving and which credential they carry.
+
+## Start from what you already have
+
+| You have | Use | Because |
+| --- | --- | --- |
+| An API key and a Brickken account | **REST API** or **MCP** | These are the only two clients that reach the Dapp API |
+| A funded wallet and no API key | **Agentic API** or **CLI** | Pay per call with x402; no account needed |
+| An MCP-capable AI agent | **MCP** | One hosted endpoint, 57 tools, credentials set per session |
+| A terminal and an agentic workflow | **CLI** | `npm i -g brickken-cli`, then one command per operation |
+| An AI coding agent, any of the above | **Skill** | Teaches the agent when to use which surface |
+
+## The four surfaces
+
+<CardGroup cols={2}>
+  <Card title="REST API" icon="code" href="/api-reference/introduction">
+    Plain HTTP. Everything the platform can do. API key for the Dapp API, x402 or API key for agentic methods.
+  </Card>
+  <Card title="MCP server" icon="plug" href="/mcp/introduction">
+    Hosted at `https://mcp.brickken.com/mcp`. The only client that reaches the **full Dapp API with just an API key**.
+  </Card>
+  <Card title="CLI" icon="terminal" href="/cli/introduction">
+    `brickken-cli` on npm. Agentic and RAMS workflows from your terminal. Does not reach the Dapp API.
+  </Card>
+  <Card title="Skill" icon="sparkles" href="/skill/introduction">
+    Brickken knowledge for AI coding agents, with or without the CLI installed.
+  </Card>
+</CardGroup>
+
+## What each surface can reach
+
+| | REST | MCP | CLI | Skill |
+| --- | :---: | :---: | :---: | :---: |
+| Dapp API writes | Yes | Yes | **No** | Guides the agent |
+| Dapp API reads | Yes | Yes | **No** | Guides the agent |
+| Agentic writes (ERC-8004, agent tokens) | Yes | Yes | Yes | Guides the agent |
+| RAMS writes | Yes | Yes | Yes | Guides the agent |
+| RAMS reads | Yes | Yes | Yes | Guides the agent |
+| Accepts an API key | Yes | Yes | RAMS reads only | — |
+| Pays with x402 | Yes | Yes | Yes | — |
+| Where it runs | Your code | Hosted by Brickken | Your machine | Your agent |
+
+<Warning>
+**The CLI cannot call the legacy Dapp API.** Two independent reasons: it has no commands or method mappers for the Dapp methods, and it attaches `x-api-key` only to RAMS reads and typed-data fetches. `brickken tx prepare --method newTokenization` forwards the method name, but the backend answers `API key is required for this method`.
+
+For Dapp API work, use **MCP** if an agent is driving, or plain **HTTP** if your own code is.
+</Warning>
+
+## Same backend, same rules
+
+Whichever surface you pick, the mechanics are identical: writes are **prepared** into unsigned transactions, **signed**, then **sent**; preparing an agentic operation is free and only the send costs anything; and your private key never leaves your machine.
+
+The surface changes the ergonomics, not the semantics — you can prepare with the CLI and send with curl.
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/get-started/authentication">
+    The credential matrix in full.
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/get-started/quickstart">
+    A first call on each of the four surfaces.
+  </Card>
+</CardGroup>

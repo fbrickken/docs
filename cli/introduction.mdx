@@ -30,7 +30,7 @@ npx brickken-cli --help
 
 ## Authentication
 
-Writes use x402. RAMS reads and online EIP-712 typed-data fetches require an API key.
+Writes use x402. RAMS reads and online EIP-712 typed-data fetches use an API key.
 
 ```bash
 export BRICKKEN_API_KEY=...
@@ -40,6 +40,10 @@ export BRICKKEN_PRIVATE_KEY=0x...
 `BKN_API_KEY` and `BKN_PRIVATE_KEY` are accepted aliases. The private key signs the x402 payment, client-signed transactions, and requested RAMS typed data locally.
 
 <Warning>
+**The CLI does not reach the legacy Dapp API.** It has no commands for tokenization, STOs, or the Dapp reads, and it only attaches `x-api-key` to RAMS reads. For those workflows use the [MCP server](/mcp/introduction) or the [REST API](/api-reference/introduction) — see [Choose your surface](/get-started/choose-your-surface).
+</Warning>
+
+<Warning>
 Never paste production private keys into shared terminals, tickets, or chat logs. Prefer environment variables or an `.env` file that is not committed.
 </Warning>
 
@@ -47,15 +51,15 @@ Never paste production private keys into shared terminals, tickets, or chat logs
 
 | Environment | Base URL |
 | --- | --- |
-| `forge` | `https://d4aqanatl1.execute-api.eu-west-1.amazonaws.com/forge` |
 | `sandbox` (default) | `https://api.sandbox.brickken.com` |
 | `production` | `https://api.brickken.com` |
 
 ```bash
-brickken --env forge --help
 brickken --env sandbox --help
 brickken --env production --help
 ```
+
+An internal `forge` environment exists for Brickken pre-release QA — contact `tech@brickken.com` for its base URL.
 
 Override the API base URL directly when needed:
 

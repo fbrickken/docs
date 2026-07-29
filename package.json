@@ -1,5 +1,14 @@
 {
+  "name": "brickken-docs",
+  "private": true,
+  "scripts": {
+    "dev": "mint dev",
+    "check": "mint broken-links"
+  },
   "dependencies": {
     "sharp": "^0.34.2"
+  },
+  "devDependencies": {
+    "mint": "^4.2.754"
   }
 }

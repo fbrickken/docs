@@ -1,0 +1,139 @@
+---
+title: 'What you can do'
+description: 'Every capability the Brickken APIs expose, and which client can reach it.'
+icon: 'list-check'
+---
+
+import RamsSepoliaNote from '/snippets/rams-sepolia-note.mdx';
+
+Brickken exposes two products through one API host:
+
+- **The Dapp API** tokenizes real-world assets and runs everything that follows — offerings, investors, dividends, compliance. It is authenticated with an API key.
+- **The Agentic API** gives AI agents an on-chain identity, their own tokens, and delegated spending authority. It is paid per call with x402, and most of it also accepts an API key.
+
+Everything below is a real endpoint today. Where a client cannot reach a capability, the table says so.
+
+## Tokenize and operate a real-world asset
+
+The Dapp API's core loop. Every write follows the same shape: **prepare** an unsigned transaction, **sign** it with your whitelisted wallet, **send** it.
+
+| Capability | Method | HTTP | MCP | CLI |
+| --- | --- | :---: | :---: | :---: |
+| Create a tokenized asset | `newTokenization` | Yes | Yes | No |
+| Mint tokens | `mintToken` | Yes | Yes | No |
+| Burn tokens | `burnToken` | Yes | Yes | No |
+| Whitelist or remove an investor | `whitelist` | Yes | Yes | No |
+| Transfer tokens | `transferTo` | Yes | Yes | No |
+| Transfer through an allowance | `transferFrom` | Yes | Yes | No |
+| Approve an allowance | `approve` | Yes | Yes | No |
+| Distribute dividends | `dividendDistribution` | Yes | Yes | No |
+| Update token documents and branding | `PATCH /patch-token-docs` | Yes | Yes | No |
+
+## Run a Security Token Offering
+
+| Capability | Method | HTTP | MCP | CLI |
+| --- | --- | :---: | :---: | :---: |
+| Launch an offering | `newSto` | Yes | Yes | No |
+| Take an investment | `newInvest` | Yes | Yes | No |
+| Let investors claim their tokens | `claimTokens` | Yes | Yes | No |
+| Close the offering | `closeOffer` | Yes | Yes | No |
+
+## Read platform state
+
+Thirteen read endpoints cover chains, tokens, offerings, investors, allowances, dividends, and transaction status.
+
+| Capability | Endpoint | HTTP | MCP | CLI |
+| --- | --- | :---: | :---: | :---: |
+| Chain metadata and contract addresses | `GET /get-network-info` | Yes | Yes | No |
+| Token information | `GET /get-token-info` | Yes | Yes | No |
+| Tokenizer account | `GET /get-tokenizer-info` | Yes | Yes | No |
+| List offerings for a token | `GET /get-stos` | Yes | Yes | No |
+| One offering by ID | `GET /get-sto-by-id` | Yes | Yes | No |
+| Offering balance and status | `GET /get-sto-balance` | Yes | Yes | No |
+| Investments in an offering | `GET /get-investments-by-sto-id` | Yes | Yes | No |
+| Investor status | `GET /get-investor-info` | Yes | Yes | No |
+| Whitelist status of a wallet | `GET /get-whitelist-status` | Yes | Yes | No |
+| Balance and whitelist together | `GET /get-balance-whitelist` | Yes | Yes | No |
+| Allowance between two parties | `GET /get-allowance` | Yes | Yes | No |
+| Dividend distribution | `GET /get-dividend-distribution` | Yes | Yes | No |
+| Transaction status | `GET /get-transaction-status` | Yes | Yes | Yes |
+
+<Note>
+The **No** column for the CLI is not an oversight. The CLI is built for agentic workflows and has no commands for the Dapp methods. Use HTTP or MCP for everything above — see [Choose your surface](/get-started/choose-your-surface).
+</Note>
+
+## Give an AI agent an on-chain identity
+
+ERC-8004 identity and reputation on Base. Preparing is free; the send costs USDC through x402, or an API key in `client-signed` mode.
+
+| Capability | Method | Endpoint |
+| --- | --- | --- |
+| Register an agent identity | `agentRegister` | `POST /x402/agent/register` |
+| Update the agent profile URI | `agentSetURI` | `POST /x402/agent/set-uri` |
+| Write a metadata key/value | `agentSetMetadata` | `POST /x402/agent/set-metadata` |
+| Rotate the agent's operational wallet | `agentSetWallet` | `POST /x402/agent/set-wallet` |
+| Transfer identity ownership | `agentTransferOwnership` | `POST /x402/agent/transfer-ownership` |
+| Give reputation feedback | `agentGiveFeedback` | `POST /x402/agent/feedback/give` |
+| Revoke feedback | `agentRevokeFeedback` | `POST /x402/agent/feedback/revoke` |
+| Respond to feedback | `agentAppendFeedbackResponse` | `POST /x402/agent/feedback/respond` |
+
+## Let an agent own and operate a token
+
+An agent-owned ERC-20, deployed and operated by the agent itself.
+
+| Capability | Method | Endpoint |
+| --- | --- | --- |
+| Deploy an agent-owned ERC-20 | `agentCreateToken` | `POST /x402/token/create` |
+| Mint | `agentMintToken` | `POST /x402/token/mint` |
+| Burn | `agentBurnToken` | `POST /x402/token/burn` |
+| Transfer | `agentTransferToken` | `POST /x402/token/transfer` |
+| Transfer through an allowance | `agentTransferFromToken` | `POST /x402/token/transfer-from` |
+| Approve an allowance | `agentApproveToken` | `POST /x402/token/approve` |
+
+## Delegate spending authority to an agent
+
+RAMS (ERC-8226) lets a principal grant an agent a **compliance-gated, value-capped mandate** to act on a specific asset. Caps are enforced on-chain, usage is recorded, and an enforcer can freeze an agent across every mandate at once.
+
+<RamsSepoliaNote />
+
+| Capability | Method | Endpoint |
+| --- | --- | --- |
+| Grant a mandate | `ramsGrantMandate` | `POST /x402/rams/grant-mandate` |
+| Revoke a mandate | `ramsRevokeMandate` | `POST /x402/rams/revoke-mandate` |
+| Extend a mandate | `ramsExtendMandate` | `POST /x402/rams/extend-mandate` |
+| Approve an operator | `ramsSetOperator` | `POST /x402/rams/set-operator` |
+| Execute under a mandate | `ramsExecute` | `POST /x402/rams/execute` |
+| Register an executor selector | `ramsSetExecutorAction` | `POST /x402/rams/set-executor-action` |
+| Freeze an agent | `ramsFreezeAgent` | `POST /x402/rams/freeze-agent` |
+| Unfreeze an agent | `ramsUnfreezeAgent` | `POST /x402/rams/unfreeze-agent` |
+| Make a principal eligible | `ramsGrantPrincipal` | `POST /x402/rams/grant-principal` |
+| Revoke eligibility | `ramsRevokePrincipal` | `POST /x402/rams/revoke-principal` |
+| Read a mandate and its status | — | `GET /rams/mandate` |
+| Dry-run an execution | — | `GET /rams/can-execute` |
+| Read freeze state and nonce | — | `GET /rams/status` |
+| Read compliance eligibility | — | `GET /rams/compliance-status` |
+| Read a registered selector | — | `GET /rams/executor-action` |
+| Fetch an EIP-712 payload to sign | — | `GET /rams/typed-data/{operation}` |
+
+<Card title="RAMS mandates" icon="file-signature" href="/api-reference/endpoint/rams-overview">
+  Actors, lifecycle, caps, and the executor setup checklist.
+</Card>
+
+## What you cannot do yet
+
+Being explicit about the edges saves you an afternoon:
+
+- **The CLI cannot call the Dapp API.** No Dapp commands exist, and it only sends an API key on RAMS reads.
+- **`brickken-relayed` sends cannot be paid with an API key.** Brickken pays the gas, so the x402 payment is mandatory.
+- **RAMS runs on Ethereum Sepolia only** at launch, on both sandbox and production.
+- **The MCP packages are not published to npm.** Use the hosted server at `https://mcp.brickken.com/mcp`.
+- **Six of the ten RAMS writes cannot be relayed.** Only grant, revoke, extend, and set-operator support `brickken-relayed`, and only with a principal EIP-712 signature; the rest check `msg.sender` against a role.
+
+<CardGroup cols={2}>
+  <Card title="Choose your surface" icon="diagram-project" href="/get-started/choose-your-surface">
+    Decide between HTTP, CLI, MCP, and the Skill.
+  </Card>
+  <Card title="Authentication" icon="key" href="/get-started/authentication">
+    Which credential reaches which capability.
+  </Card>
+</CardGroup>

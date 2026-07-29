@@ -3,9 +3,26 @@ title: 'Authentication & Configuration'
 description: 'x402 write authentication, RAMS API-key reads, private-key signing, environments, and CLI configuration.'
 ---
 
-## Write and read authentication
+## What the CLI can authenticate
 
-Transaction writes are x402-paid. The CLI deliberately does not attach an API key to prepare or send, even when one is configured. Preparing is free; the send is paid through x402:
+The CLI is an x402 client. It attaches `x-api-key` to exactly one class of request — RAMS reads and typed-data fetches — and to nothing else.
+
+| Request | Credential the CLI sends |
+| --- | --- |
+| Every write (`agent`, `create-token`, `mint`, `burn`, `transfer`, `rams` writes, `tx prepare`, `tx send`) | x402 payment only |
+| `tx status` | none |
+| `rams inspect`, `status`, `can-execute`, `compliance-status`, `executor-action`, `sign` | `x-api-key` if configured, otherwise x402 |
+| Legacy Dapp API methods | **not supported — see below** |
+
+<Warning>
+**The CLI cannot drive the legacy Dapp API.** There are no commands or method mappers for `newTokenization`, `newSto`, `mintToken`, `whitelist`, `get-stos`, or any other Dapp method, and no API key is attached even if you set one. `brickken tx prepare --method newTokenization` forwards the method name, but the backend rejects it with `API key is required for this method`.
+
+Use the [MCP server](/mcp/introduction) if an AI agent should drive the Dapp API, or call the [REST API](/api-reference/introduction) directly from your own code.
+</Warning>
+
+## Write authentication
+
+Transaction writes are x402-paid. Preparing is free; the send is paid through x402:
 
 1. The CLI prepares a transaction with `/prepare-transactions` (free).
 2. On send, the API responds `402 Payment Required` with a `PAYMENT-REQUIRED` header.
@@ -13,7 +30,9 @@ Transaction writes are x402-paid. The CLI deliberately does not attach an API ke
 
 In the recommended `brickken-relayed` mode the private key signs **only the x402 payment** — Brickken's relayer signs and broadcasts the operation. In the default `client-signed` mode the same key also **signs the blockchain transaction** locally.
 
-RAMS read and typed-data endpoints are different: set an API key and the CLI sends it only for those authenticated GETs.
+## RAMS read authentication
+
+RAMS read and typed-data endpoints are the exception: set an API key and the CLI sends it on those authenticated GETs.
 
 ```bash
 export BRICKKEN_API_KEY=...
@@ -40,15 +59,10 @@ Select the environment with `--env` or `BRICKKEN_ENV` (default: `sandbox`):
 
 | Environment | Base URL |
 | --- | --- |
-| `forge` | `https://d4aqanatl1.execute-api.eu-west-1.amazonaws.com/forge` |
 | `sandbox` (default) | `https://api.sandbox.brickken.com` |
 | `production` | `https://api.brickken.com` |
 
-Override the base URL directly with `--base-url` or `BRICKKEN_BASE_URL` when needed.
-
-<Note>
-The CLI's default sandbox base URL is `https://api.sandbox.brickken.com`. Some older API Reference pages show `https://api-sandbox.brickken.com` — use the value above for the CLI.
-</Note>
+Override the base URL directly with `--base-url` or `BRICKKEN_BASE_URL` when needed. An internal `forge` environment exists for Brickken pre-release QA — contact `tech@brickken.com` for its base URL.
 
 ## Networks and chain IDs
 

@@ -4,6 +4,10 @@ openapi: 'GET /rams/status'
 description: 'Read agent freeze state, principal nonce, and operator approval.'
 ---
 
-Requires `x-api-key`. Provide `chainId`, `agent`, and `principal`; optionally pass `operator` to read its approval.
+import RamsReadAuth from '/snippets/rams-read-auth.mdx';
+
+<RamsReadAuth />
+
+Provide `chainId`, `agent`, and `principal`; optionally pass `operator` to read its approval.
 
 Use the returned nonce only as an observation. Fetch a fresh [typed-data envelope](/api-reference/endpoint/rams-typed-data) immediately before signing because all four signature-based lifecycle operations share and consume the same per-principal nonce.

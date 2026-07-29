@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Brickken API",
-    "description": "Client collection for the Brickken API V2 (Dapp API + Agentic x402 API).\n\n**Authentication**: every business endpoint requires the `x-api-key` header. Request an API key from tech@brickken.com or support@brickken.com. Agentic (x402) endpoints alternatively accept a per-call `X-Payment` header.\n\n**Environments**: import the Sandbox and Production environment files shipped next to this collection, select one, then fill in `apiKey` (and optionally `tokenSymbol`/`chainId`).\n\n**Typical flow**: 1) POST /prepare-transactions → returns unsigned transactions + txId, 2) sign locally with the whitelisted signer wallet, 3) POST /send-transactions, 4) poll GET /get-transaction-status.\n\nDocs: https://docs.brickken.com",
+    "description": "Client collection for the Brickken API V2 (Dapp API + Agentic x402 API).\n\n**Authentication**: every business endpoint requires the `x-api-key` header. Request an API key from tech@brickken.com, or use the form at https://docs.brickken.com/get-started/request-api-key. Agentic (x402) endpoints alternatively accept a per-call `X-Payment` header.\n\n**Environments**: import the Sandbox and Production environment files shipped next to this collection, select one, then fill in `apiKey` (and optionally `tokenSymbol`/`chainId`).\n\n**Typical flow**: 1) POST /prepare-transactions → returns unsigned transactions + txId, 2) sign locally with the whitelisted signer wallet, 3) POST /send-transactions, 4) poll GET /get-transaction-status.\n\nDocs: https://docs.brickken.com",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {

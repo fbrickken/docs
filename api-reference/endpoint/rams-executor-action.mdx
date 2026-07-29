@@ -4,6 +4,10 @@ openapi: 'GET /rams/executor-action'
 description: 'Return the ActionSpec for a function selector from an AgentExecutor.'
 ---
 
-Requires `x-api-key`. Provide `chainId` and either a 4-byte `selector` or left-aligned bytes32 `action`; optionally override `executorAddress`.
+import RamsReadAuth from '/snippets/rams-read-auth.mdx';
+
+<RamsReadAuth />
+
+Provide `chainId` and either a 4-byte `selector` or left-aligned bytes32 `action`; optionally override `executorAddress`.
 
 The returned `ActionSpec` contains `supported`, `hasAmount`, and `amountIndex`. The response also includes the executor's principal, owner, and AgentMandate binding. Verify value-bearing selectors have amount extraction enabled before relying on RAMS caps.
