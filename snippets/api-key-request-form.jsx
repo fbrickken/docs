@@ -5,7 +5,10 @@ export const ApiKeyRequestForm = () => {
   // come from production. Move to https://api.brickken.com/request-api-key once the
   // endpoint is deployed there. Forge can be redeployed by any feature branch, so
   // when it is unreachable the form falls back to the prefilled-email flow below.
-  const ENDPOINT = "https://d4aqanatl1.execute-api.eu-west-1.amazonaws.com/forge/request-api-key";
+  //
+  // Note this is the *public* microservice gateway, which is not the same gateway as
+  // the forge base URL used by the CLI and MCP docs — each microservice deploys its own.
+  const ENDPOINT = "https://3rfhw2uk53.execute-api.eu-west-1.amazonaws.com/forge/request-api-key";
 
   // Public reCAPTCHA v3 site key. Safe to commit — it is the public half of the
   // pair whose secret lives in the backend vault. While this is the placeholder,
