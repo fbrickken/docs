@@ -1,5 +1,12 @@
 export const ApiKeyRequestForm = () => {
   const TO = "tech@brickken.com";
+  const ENDPOINT = "https://api.brickken.com/request-api-key";
+
+  // Public reCAPTCHA v3 site key. Safe to commit — it is the public half of the
+  // pair whose secret lives in the backend vault. While this is the placeholder,
+  // the form skips the endpoint and falls back to the prefilled-email flow.
+  const RECAPTCHA_SITE_KEY = "RECAPTCHA_SITE_KEY_TO_FILL";
+  const recaptchaReady = RECAPTCHA_SITE_KEY.indexOf("TO_FILL") === -1;
 
   const NETWORKS = [
     "Ethereum mainnet (1)",
@@ -27,16 +34,26 @@ export const ApiKeyRequestForm = () => {
   const [networks, setNetworks] = useState([]);
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
   const [showFallback, setShowFallback] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const set = useCallback(
-    (key) => (e) => {
-      const v = e.target.value;
-      setValues((prev) => ({ ...prev, [key]: v }));
-    },
-    []
-  );
+  // Load the reCAPTCHA script lazily, so it costs nothing on the other 80 pages.
+  useEffect(() => {
+    if (!recaptchaReady) return;
+    if (document.getElementById("bkn-recaptcha")) return;
+    const s = document.createElement("script");
+    s.id = "bkn-recaptcha";
+    s.src = "https://www.google.com/recaptcha/api.js?render=" + RECAPTCHA_SITE_KEY;
+    s.async = true;
+    document.head.appendChild(s);
+  }, [recaptchaReady]);
+
+  const set = useCallback((key) => (e) => {
+    const v = e.target.value;
+    setValues((prev) => ({ ...prev, [key]: v }));
+  }, []);
 
   const toggleNetwork = useCallback(
     (n) => () =>
@@ -60,37 +77,36 @@ export const ApiKeyRequestForm = () => {
     return next;
   }, [values, networks]);
 
-  const body = useMemo(() => {
-    return [
-      "Brickken API key request",
-      "",
-      "Name:                   " + values.name,
-      "Reply-to email:         " + values.email,
-      "Company / project:      " + values.company,
-      "Brickken account email: " + values.accountEmail,
-      "Environment:            " + values.environment,
-      "Plan of interest:       " + values.plan,
-      "Networks:               " + (networks.join(", ") || "-"),
-      "Token symbols to issue: " + (values.symbols.trim() || "-"),
-    ]
-      .concat([
+  const body = useMemo(
+    () =>
+      [
+        "Brickken API key request",
+        "",
+        "Name:                   " + values.name,
+        "Reply-to email:         " + values.email,
+        "Company / project:      " + values.company,
+        "Brickken account email: " + values.accountEmail,
+        "Environment:            " + values.environment,
+        "Plan of interest:       " + values.plan,
+        "Networks:               " + (networks.join(", ") || "-"),
+        "Token symbols to issue: " + (values.symbols.trim() || "-"),
         "",
         "Use case:",
         values.useCase.trim(),
         "",
         "Sent from https://docs.brickken.com/get-started/request-api-key",
-      ])
-      .join("\r\n");
-  }, [values, networks]);
+      ].join("\r\n"),
+    [values, networks]
+  );
 
   const subject = useMemo(
     () => "API key request — " + (values.company.trim() || "Unnamed") + " — " + values.environment,
     [values.company, values.environment]
   );
 
-  // encodeURIComponent turns "\r\n" into %0D%0A, which is what mail clients expect.
   const mailto = useMemo(
-    () => "mailto:" + TO + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body),
+    () =>
+      "mailto:" + TO + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body),
     [subject, body]
   );
 
@@ -99,8 +115,28 @@ export const ApiKeyRequestForm = () => {
     [subject, body]
   );
 
+  const getRecaptchaToken = () =>
+    new Promise((resolve, reject) => {
+      const g = window.grecaptcha;
+      if (!g || !g.ready) return reject(new Error("recaptcha unavailable"));
+      g.ready(() => {
+        g.execute(RECAPTCHA_SITE_KEY, { action: "api_key_request" }).then(resolve, reject);
+      });
+    });
+
+  // Last resort when the endpoint cannot be reached: hand the user a draft they
+  // can send themselves, so the request is never simply lost.
+  const fallbackToEmail = useCallback(
+    (reason) => {
+      setShowFallback(true);
+      setStatus(reason + " Opening a prefilled email instead — if nothing happens, copy the message below.");
+      if (mailto.length <= 1800) window.location.href = mailto;
+    },
+    [mailto]
+  );
+
   const onSubmit = useCallback(
-    (e) => {
+    async (e) => {
       e.preventDefault();
       const next = validate();
       const firstBad = FIELD_ORDER.find((k) => next[k]);
@@ -110,16 +146,45 @@ export const ApiKeyRequestForm = () => {
         if (el && el.focus) el.focus();
         return;
       }
-      // Always reveal the copy block: a missing mailto handler is undetectable from JS.
-      setShowFallback(true);
-      if (mailto.length > 1800) {
-        setStatus("Your message is too long for a prefilled email link. Copy the message below and send it manually.");
+
+      if (!recaptchaReady) {
+        fallbackToEmail("Direct submission is not configured yet.");
         return;
       }
-      setStatus("Opening your email app with a prefilled draft. If nothing happens, copy the message below.");
-      window.location.href = mailto;
+
+      setSending(true);
+      setStatus("Sending your request…");
+
+      try {
+        const recaptchaToken = await getRecaptchaToken();
+        const response = await fetch(ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            recaptchaToken,
+            name: values.name.trim(),
+            email: values.email.trim(),
+            company: values.company.trim(),
+            accountEmail: values.accountEmail.trim(),
+            environment: values.environment.toLowerCase(),
+            plan: values.plan,
+            networks,
+            tokenSymbols: values.symbols.trim(),
+            useCase: values.useCase.trim(),
+          }),
+        });
+
+        if (!response.ok) throw new Error("HTTP " + response.status);
+
+        setSent(true);
+        setStatus("");
+      } catch (err) {
+        fallbackToEmail("We could not submit the form.");
+      } finally {
+        setSending(false);
+      }
     },
-    [validate, mailto]
+    [validate, values, networks, recaptchaReady, fallbackToEmail]
   );
 
   const onCopy = useCallback(() => {
@@ -169,6 +234,7 @@ export const ApiKeyRequestForm = () => {
       fontSize: "0.875rem",
       fontWeight: 500,
       cursor: "pointer",
+      opacity: sending ? 0.6 : 1,
     },
     copyBtn: {
       borderRadius: "0.375rem",
@@ -195,13 +261,31 @@ export const ApiKeyRequestForm = () => {
     pre: { overflowX: "auto", whiteSpace: "pre-wrap", fontSize: "0.75rem", margin: 0 },
     status: { marginTop: "0.75rem", fontSize: "0.875rem", opacity: 0.8 },
     intro: { fontSize: "0.875rem", opacity: 0.8, marginBottom: "1.25rem" },
+    done: {
+      borderRadius: "0.5rem",
+      border: "1px solid rgba(37,99,235,0.4)",
+      padding: "1.25rem",
+      fontSize: "0.9rem",
+    },
   };
+
+  if (sent) {
+    return (
+      <div style={S.done} className="not-prose" role="status">
+        <strong>Request sent.</strong>
+        <p style={{ marginTop: "0.5rem", marginBottom: 0 }}>
+          It is on its way to <code>{TO}</code>. A Brickken engineer will reply to{" "}
+          <strong>{values.email.trim()}</strong>. No need to email us separately.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={onSubmit} noValidate style={{ marginTop: "1.5rem", marginBottom: "1.5rem" }} className="not-prose">
       <p style={S.intro}>
-        This form sends nothing to Brickken by itself. It opens a prefilled draft in your own email
-        client, addressed to <code>{TO}</code>, which you send yourself.
+        Submitting sends your request straight to the Brickken team — you do not need to send an
+        email yourself.
       </p>
 
       <div style={S.grid}>
@@ -328,11 +412,8 @@ export const ApiKeyRequestForm = () => {
         {errors.useCase ? <p style={S.err} id="bkn-useCase-error" role="alert">{errors.useCase}</p> : null}
       </div>
 
-      <button
-        type="submit"
-        style={S.submit}
-      >
-        Open prefilled email to {TO}
+      <button type="submit" style={S.submit} disabled={sending}>
+        {sending ? "Sending…" : "Send request"}
       </button>
 
       <p aria-live="polite" style={S.status}>{status}</p>
@@ -341,16 +422,20 @@ export const ApiKeyRequestForm = () => {
         <div style={S.fallback}>
           <div style={S.fallbackHead}>
             <strong style={{ fontSize: "0.875rem" }}>Didn't your mail app open? Copy this instead.</strong>
-            <button
-              type="button"
-              onClick={onCopy}
-              style={S.copyBtn}
-            >
+            <button type="button" onClick={onCopy} style={S.copyBtn}>
               {copied ? "Copied" : "Copy"}
             </button>
           </div>
           <pre style={S.pre}>{plaintext}</pre>
         </div>
+      ) : null}
+
+      {recaptchaReady ? (
+        <p style={{ ...S.hint, marginTop: "1rem" }}>
+          Protected by reCAPTCHA. Google's{" "}
+          <a href="https://policies.google.com/privacy">Privacy Policy</a> and{" "}
+          <a href="https://policies.google.com/terms">Terms of Service</a> apply.
+        </p>
       ) : null}
     </form>
   );
