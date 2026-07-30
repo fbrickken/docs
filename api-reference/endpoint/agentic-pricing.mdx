@@ -5,7 +5,15 @@ description: 'x402 pricing for Agentic API operations: free prepare, paid send.'
 
 import RamsSepoliaNote from '/snippets/rams-sepolia-note.mdx';
 
-For `brickken-relayed` operations, preparing the unsigned calldata is **free** and the x402 USDC charge is collected entirely at `POST /send-transactions`, when Brickken broadcasts the operation. Client-signed RAMS writes split the same total across both steps — see [How RAMS is priced](#how-rams-is-priced).
+**Where the charge falls depends on `executionMode`, not on the method.**
+
+| `executionMode` | Prepare | Send |
+| --- | --- | --- |
+| `brickken-relayed` | free | the full price below |
+| `client-signed` *(default)* | half the price | half the price |
+| `client-broadcast` | half the price | half the price |
+
+Only relaying gives you a free prepare, because there Brickken carries the signing and the gas. In the two client-controlled modes the same total is split evenly across the two calls — so calling `POST /prepare-transactions` directly, which defaults to `client-signed`, **is a paid call**.
 
 Prices are in USDC on **Base mainnet**.
 
@@ -41,7 +49,7 @@ Prices are in USDC on **Base mainnet**.
 
 <RamsSepoliaNote />
 
-The table above shows the `brickken-relayed` price, where the whole fee is collected at send. **RAMS defaults to `client-signed`**, and on that path the same total is split evenly across prepare and send — for example `ramsGrantMandate` becomes `0.49` + `0.49` rather than `0.00` + `0.98`. Only `grant-mandate`, `revoke-mandate`, `extend-mandate`, and `set-operator` can be relayed at all; the other six RAMS writes are always client-signed.
+RAMS is where the split above bites hardest, because **only four of the ten writes can be relayed at all** — `grant-mandate`, `revoke-mandate`, `extend-mandate`, and `set-operator`, and only with a principal EIP-712 signature. The other six check `msg.sender` against an on-chain role, so they are always client-controlled and therefore always split. `ramsGrantMandate` costs `0.49` + `0.49` rather than `0.00` + `0.98`.
 
 The nine RAMS read and typed-data endpoints (`GET /rams/*`) are priced at the cheaper `GETTER` tier, not the transaction tier. They are also callable with an `x-api-key` instead of paying.
 

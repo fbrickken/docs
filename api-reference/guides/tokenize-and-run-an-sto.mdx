@@ -58,6 +58,10 @@ curl 'https://api.sandbox.brickken.com/get-transaction-status?txId=0xPreparedTra
 
 `pending` means broadcast but not yet mined. Do not resubmit — you would pay gas twice.
 
+<Tip>
+**Already run your own broadcasting?** Add `"executionMode": "client-broadcast"` to any prepare below, submit the signed transaction to the chain yourself, then confirm with `{ txId, txHash }` instead of `{ txId, signedTransactions }`. Brickken reconciles your hash so the transaction still appears in `get-transaction-status` and in the dApp. See [Send Transactions](/api-reference/endpoint/send).
+</Tip>
+
 ## 1. Create the tokenized asset
 
 ```bash

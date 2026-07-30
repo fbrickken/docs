@@ -3,25 +3,33 @@ title: 'Send Transactions'
 openapi: 'POST /send-transactions'
 ---
 
-Broadcasts a prepared transaction. This endpoint works uniformly for all transaction types prepared using the `/prepare-transactions` endpoint. For agentic (x402) methods, **this is the paid step** — preparing is free and the x402 USDC charge is collected here.
+Confirms or broadcasts a prepared transaction. It works uniformly for every transaction type produced by `/prepare-transactions`.
 
-For x402-eligible agentic methods, this endpoint can be authenticated with either `x-api-key` or x402 payment. To use x402, omit `x-api-key`, read the `PAYMENT-REQUIRED` header from the `402` response, then retry with `X-PAYMENT`.
+For x402-eligible agentic methods, authenticate with either `x-api-key` or an x402 payment. To pay, omit `x-api-key`, read the `PAYMENT-REQUIRED` header from the `402` response, then retry with `X-PAYMENT`.
 
-It accepts two mutually exclusive request shapes:
+## The three execution modes
 
-- **Client-signed** — you sign the prepared blockchain transaction yourself and submit `txId` + `signedTransactions`.
-- **Brickken-relayed** — you do not sign the blockchain transaction. You submit `txId` + `transactions` (the prepared call), pay through x402, and Brickken's relayer signs and broadcasts it. Available for x402-eligible agentic methods that were prepared with `executionMode: "brickken-relayed"`.
+Which shape you send is decided at **prepare** time by `executionMode`, and the send must match — a mismatch is rejected with `Prepared transaction was not created for … execution`.
+
+| `executionMode` | Who signs | Who broadcasts | You send | Cost split |
+| --- | --- | --- | --- | --- |
+| `client-signed` *(default)* | You | Brickken | `txId` + `signedTransactions` | half at prepare, half at send |
+| `client-broadcast` | You | **You** | `txId` + `txHash` | half at prepare, half at send |
+| `brickken-relayed` | Brickken's relayer | Brickken | `txId` + `transactions` | free prepare, full price at send |
+
+**`client-broadcast`** is for teams that already own their broadcasting: you sign *and* submit the transaction to the chain yourself, then tell Brickken the resulting hash so it can reconcile its record. It works for Dapp API methods as well as agentic ones. `brickken-relayed` is the only mode restricted to x402-eligible agentic methods.
 
 ## Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `txId` | string \| string[] | Yes | Transaction ID(s) from the prepare-transactions response. For brickken-relayed, a single string. |
-| `signedTransactions` | string \| string[] | Client-signed | Signed transaction hex string(s) starting with `0x`. A single string (legacy) or an array. Must match the format of `txId`. |
-| `transactions` | object[] | Brickken-relayed | Exactly one prepared call `{ to, data, value }` returned by prepare. Used instead of `signedTransactions` when Brickken relays the transaction. |
+| `txId` | string \| string[] | Yes | Transaction ID(s) from the prepare response. An array only in client-signed mode; a single string otherwise. |
+| `signedTransactions` | string \| string[] | client-signed | Signed transaction hex string(s) starting with `0x`. A single string (legacy) or an array matching the format of `txId`. |
+| `txHash` | string | client-broadcast | Hash of the transaction you already broadcast. Exactly one, paired with exactly one `txId`. |
+| `transactions` | object[] | brickken-relayed | Exactly one prepared call `{ to, data, value }` returned by prepare. |
 
 > [!IMPORTANT]
-> Provide **either** `signedTransactions` (client-signed) **or** `transactions` (brickken-relayed), not both. `signedTransactions` must be a hex string starting with `0x`; `txId` and `signedTransactions` must use the same format (both strings or both arrays). A brickken-relayed send requires x402 payment — API keys are not accepted on that path.
+> Send exactly one of `signedTransactions`, `txHash`, or `transactions` — never two. A `brickken-relayed` send requires x402 payment; API keys are not accepted on that path.
 
 ## Request Body
 
@@ -59,6 +67,19 @@ Pay with the `X-PAYMENT` header. Brickken verifies the payment, signs with its r
   ]
 }
 ```
+
+### Client-broadcast (you already sent it)
+
+Prepare with `executionMode: "client-broadcast"`, sign and broadcast the transaction with your own infrastructure, then report the hash:
+
+```json
+{
+  "txId": "0x11769b5c2028a8ed0a3bdc7599e244aee68e2cae80261d8954e44c3b5cb621a4",
+  "txHash": "0x9f2c1f4b6e8a3d5c7b0e1a2d4f6c8b0a3e5d7c9f1b3a5c7e9d1f3b5a7c9e1d3f"
+}
+```
+
+Exactly one `txId` and one `txHash` — arrays are rejected. Brickken reconciles the hash against the prepared record and updates its own state, so the transaction shows up in `get-transaction-status` and in the dApp like any other. Resubmitting the same pair is idempotent.
 
 ## Response
 

@@ -7,7 +7,9 @@ Preparing does not touch the chain. The response gives you `txId` and an array o
     Sign each entry locally with the wallet matching `signerAddress`. It must be whitelisted by Brickken, and it needs native gas on the target chain.
   </Step>
   <Step title="Submit the signed payloads">
-    `POST` them to [`/send-transactions`](/api-reference/endpoint/send) as `{ txId, signedTransactions }`.
+    `POST` them to [`/send-transactions`](/api-reference/endpoint/send) as `{ txId, signedTransactions }` and Brickken broadcasts for you.
+
+    If you would rather broadcast yourself, prepare with `executionMode: "client-broadcast"` and confirm afterwards with `{ txId, txHash }` instead.
   </Step>
   <Step title="Poll until it confirms">
     Call [`GET /get-transaction-status`](/api-reference/endpoint/get-transaction-status) with the `txId`. A `pending` status means it is broadcast but not yet mined — do not resubmit.

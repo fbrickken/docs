@@ -28,6 +28,125 @@
         "name": "X-Payment",
         "description": "Base64-encoded x402 payment payload. Supported for x402-eligible agentic methods on /x402/... facades, /prepare-transactions, and eligible /send-transactions retries."
       }
+    },
+    "schemas": {
+      "UnsignedTransaction": {
+        "type": "object",
+        "description": "An unsigned transaction to sign. In client-signed and client-broadcast execution this is a fully populated EIP-1559 transaction; in brickken-relayed execution it is the bare call (to, data, value) that Brickken's relayer signs and broadcasts. BigNumber fields are serialised as { type, hex }.",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Target contract address.",
+            "example": "0x23B04b6410D72Fa66A77a9e0146DF6634Ad4C462"
+          },
+          "data": {
+            "type": "string",
+            "description": "ABI-encoded calldata.",
+            "example": "0xa9059cbb0000000000000000000000001111111111111111111111111111111111111111"
+          },
+          "from": {
+            "type": "string",
+            "description": "Signer address. Present in client-signed and client-broadcast execution.",
+            "example": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b"
+          },
+          "value": {
+            "type": "object",
+            "description": "Native value sent with the call.",
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "BigNumber"
+              },
+              "hex": {
+                "type": "string",
+                "example": "0x00"
+              }
+            }
+          },
+          "nonce": {
+            "type": "integer",
+            "description": "Signer nonce at prepare time.",
+            "example": 1
+          },
+          "chainId": {
+            "type": "integer",
+            "description": "Operation chain, decimal.",
+            "example": 11155111
+          },
+          "type": {
+            "type": "integer",
+            "description": "Transaction type. 2 is EIP-1559.",
+            "example": 2
+          },
+          "gasLimit": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "BigNumber"
+              },
+              "hex": {
+                "type": "string",
+                "example": "0x01e848"
+              }
+            }
+          },
+          "maxFeePerGas": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "BigNumber"
+              },
+              "hex": {
+                "type": "string",
+                "example": "0x0ba43b7400"
+              }
+            }
+          },
+          "maxPriorityFeePerGas": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "BigNumber"
+              },
+              "hex": {
+                "type": "string",
+                "example": "0x3b9aca00"
+              }
+            }
+          }
+        },
+        "required": [
+          "to",
+          "data"
+        ],
+        "example": {
+          "from": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
+          "to": "0x23B04b6410D72Fa66A77a9e0146DF6634Ad4C462",
+          "value": {
+            "type": "BigNumber",
+            "hex": "0x00"
+          },
+          "nonce": 1,
+          "chainId": 11155111,
+          "data": "0xa9059cbb0000000000000000000000001111111111111111111111111111111111111111",
+          "type": 2,
+          "gasLimit": {
+            "type": "BigNumber",
+            "hex": "0x01e848"
+          },
+          "maxFeePerGas": {
+            "type": "BigNumber",
+            "hex": "0x0ba43b7400"
+          },
+          "maxPriorityFeePerGas": {
+            "type": "BigNumber",
+            "hex": "0x3b9aca00"
+          }
+        }
+      }
     }
   },
   "security": [
@@ -929,8 +1048,9 @@
                     "transactions": {
                       "type": "array",
                       "items": {
-                        "type": "object"
-                      }
+                        "$ref": "#/components/schemas/UnsignedTransaction"
+                      },
+                      "description": "Unsigned transactions to sign, in order. Sign and submit every entry."
                     },
                     "txId": {
                       "type": "string"
@@ -1090,8 +1210,9 @@
                     "transactions": {
                       "type": "array",
                       "items": {
-                        "type": "object"
-                      }
+                        "$ref": "#/components/schemas/UnsignedTransaction"
+                      },
+                      "description": "Unsigned transactions to sign, in order. Sign and submit every entry."
                     },
                     "txId": {
                       "type": "string"
@@ -1264,8 +1385,9 @@
                     "transactions": {
                       "type": "array",
                       "items": {
-                        "type": "object"
-                      }
+                        "$ref": "#/components/schemas/UnsignedTransaction"
+                      },
+                      "description": "Unsigned transactions to sign, in order. Sign and submit every entry."
                     },
                     "txId": {
                       "type": "string"
@@ -1383,8 +1505,9 @@
                     "transactions": {
                       "type": "array",
                       "items": {
-                        "type": "object"
-                      }
+                        "$ref": "#/components/schemas/UnsignedTransaction"
+                      },
+                      "description": "Unsigned transactions to sign, in order. Sign and submit every entry."
                     },
                     "txId": {
                       "type": "string"
@@ -1510,8 +1633,9 @@
                     "transactions": {
                       "type": "array",
                       "items": {
-                        "type": "object"
-                      }
+                        "$ref": "#/components/schemas/UnsignedTransaction"
+                      },
+                      "description": "Unsigned transactions to sign, in order. Sign and submit every entry."
                     },
                     "txId": {
                       "type": "string"
@@ -1629,8 +1753,9 @@
                     "transactions": {
                       "type": "array",
                       "items": {
-                        "type": "object"
-                      }
+                        "$ref": "#/components/schemas/UnsignedTransaction"
+                      },
+                      "description": "Unsigned transactions to sign, in order. Sign and submit every entry."
                     },
                     "txId": {
                       "type": "string"
@@ -1769,8 +1894,9 @@
                     "transactions": {
                       "type": "array",
                       "items": {
-                        "type": "object"
-                      }
+                        "$ref": "#/components/schemas/UnsignedTransaction"
+                      },
+                      "description": "Unsigned transactions to sign, in order. Sign and submit every entry."
                     },
                     "txId": {
                       "type": "string"
@@ -1880,8 +2006,9 @@
                     "transactions": {
                       "type": "array",
                       "items": {
-                        "type": "object"
-                      }
+                        "$ref": "#/components/schemas/UnsignedTransaction"
+                      },
+                      "description": "Unsigned transactions to sign, in order. Sign and submit every entry."
                     },
                     "txId": {
                       "type": "string"
@@ -2057,8 +2184,9 @@
                     "transactions": {
                       "type": "array",
                       "items": {
-                        "type": "object"
-                      }
+                        "$ref": "#/components/schemas/UnsignedTransaction"
+                      },
+                      "description": "Unsigned transactions to sign, in order. Sign and submit every entry."
                     },
                     "txId": {
                       "type": "string"
@@ -2187,8 +2315,9 @@
                     "transactions": {
                       "type": "array",
                       "items": {
-                        "type": "object"
-                      }
+                        "$ref": "#/components/schemas/UnsignedTransaction"
+                      },
+                      "description": "Unsigned transactions to sign, in order. Sign and submit every entry."
                     },
                     "txId": {
                       "type": "string"
@@ -2304,8 +2433,9 @@
                     "transactions": {
                       "type": "array",
                       "items": {
-                        "type": "object"
-                      }
+                        "$ref": "#/components/schemas/UnsignedTransaction"
+                      },
+                      "description": "Unsigned transactions to sign, in order. Sign and submit every entry."
                     },
                     "txId": {
                       "type": "string"
@@ -2416,8 +2546,9 @@
                     "transactions": {
                       "type": "array",
                       "items": {
-                        "type": "object"
-                      }
+                        "$ref": "#/components/schemas/UnsignedTransaction"
+                      },
+                      "description": "Unsigned transactions to sign, in order. Sign and submit every entry."
                     },
                     "txId": {
                       "type": "string"
@@ -2454,53 +2585,100 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "description": "Both txId and signedTransactions must use the same format (both strings or both arrays). signedTransactions must be hex strings starting with 0x, not objects.",
-                "properties": {
-                  "signedTransactions": {
-                    "oneOf": [
-                      {
-                        "type": "string",
-                        "description": "Legacy format: Single signed transaction hex string starting with 0x.",
-                        "example": "0x02f8b1018203e8843b9aca00850ba43b740082520894742d35cc6634c0532925a3b8d4c9db96c4b4d8b80b844a9059cbb000000000000000000000000456789abcdef..."
-                      },
-                      {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        },
-                        "description": "Array format: Array of signed transaction hex strings starting with 0x.",
-                        "example": [
-                          "0x02f8b1018203e8843b9aca00850ba43b740082520894742d35cc6634c0532925a3b8d4c9db96c4b4d8b80b844a9059cbb000000000000000000000000456789abcdef..."
-                        ]
-                      }
+                "description": "Three mutually exclusive shapes, one per executionMode. Send exactly one of them.",
+                "oneOf": [
+                  {
+                    "title": "client-signed — you sign, Brickken broadcasts",
+                    "type": "object",
+                    "required": [
+                      "txId",
+                      "signedTransactions"
                     ],
-                    "description": "Signed transaction hex string(s) starting with 0x. Can be a single string (legacy) or an array of strings. Must NOT be an object or array of objects."
+                    "properties": {
+                      "txId": {
+                        "oneOf": [
+                          {
+                            "type": "string",
+                            "description": "Transaction ID from the prepare-transactions response.",
+                            "example": "0x11769b5c2028a8ed0a3bdc7599e244aee68e2cae80261d8954e44c3b5cb621a4"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "One ID per signed transaction, same order."
+                          }
+                        ],
+                        "description": "Must match the format of signedTransactions: both strings, or both arrays of equal length."
+                      },
+                      "signedTransactions": {
+                        "oneOf": [
+                          {
+                            "type": "string",
+                            "description": "Legacy single-value form.",
+                            "example": "0x02f8b1018203e8843b9aca00850ba43b7400825208..."
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "example": [
+                              "0x02f8b1018203e8843b9aca00850ba43b7400825208..."
+                            ]
+                          }
+                        ],
+                        "description": "Signed transaction hex string(s) starting with 0x. Never objects."
+                      }
+                    }
                   },
-                  "txId": {
-                    "oneOf": [
-                      {
+                  {
+                    "title": "client-broadcast — you sign and broadcast, then confirm",
+                    "type": "object",
+                    "required": [
+                      "txId",
+                      "txHash"
+                    ],
+                    "properties": {
+                      "txId": {
                         "type": "string",
-                        "description": "Legacy format: Single transaction ID.",
+                        "description": "Transaction ID from the prepare-transactions response.",
                         "example": "0x11769b5c2028a8ed0a3bdc7599e244aee68e2cae80261d8954e44c3b5cb621a4"
                       },
-                      {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        },
-                        "description": "Array format: Array of transaction IDs.",
-                        "example": [
-                          "0x11769b5c2028a8ed0a3bdc7599e244aee68e2cae80261d8954e44c3b5cb621a4"
-                        ]
+                      "txHash": {
+                        "type": "string",
+                        "description": "Hash of the transaction you already broadcast yourself. Brickken reconciles it against the prepared record.",
+                        "example": "0x9f2c1f4b6e8a3d5c7b0e1a2d4f6c8b0a3e5d7c9f1b3a5c7e9d1f3b5a7c9e1d3f"
                       }
+                    },
+                    "description": "Requires exactly one txId and one txHash, and the prepare must have used executionMode: client-broadcast. Available for Dapp API methods as well as agentic ones."
+                  },
+                  {
+                    "title": "brickken-relayed — Brickken signs and broadcasts",
+                    "type": "object",
+                    "required": [
+                      "txId",
+                      "transactions"
                     ],
-                    "description": "Transaction ID(s) from prepare-transactions response. Must match the format of signedTransactions (both strings or both arrays)."
+                    "properties": {
+                      "txId": {
+                        "type": "string",
+                        "description": "Transaction ID from the prepare-transactions response.",
+                        "example": "0x11769b5c2028a8ed0a3bdc7599e244aee68e2cae80261d8954e44c3b5cb621a4"
+                      },
+                      "transactions": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 1,
+                        "items": {
+                          "$ref": "#/components/schemas/UnsignedTransaction"
+                        },
+                        "description": "Exactly one prepared call, as returned by prepare."
+                      }
+                    },
+                    "description": "Requires x402 payment; API keys are not accepted on this path."
                   }
-                },
-                "required": [
-                  "signedTransactions",
-                  "txId"
                 ]
               }
             }
