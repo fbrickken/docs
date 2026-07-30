@@ -4,6 +4,8 @@ openapi: 'POST /x402/rams/grant-mandate'
 description: 'Prepare a compliance-gated ERC-8226 mandate, directly or with a principal EIP-712 signature.'
 ---
 
+import NextPayAndSend from '/snippets/next-pay-and-send.mdx';
+
 Maps to `ramsGrantMandate`. The principal must already be eligible with the selected ComplianceProvider.
 
 ## Authorization modes
@@ -21,3 +23,5 @@ Maps to `ramsGrantMandate`. The principal must already be eligible with the sele
 ## Response
 
 Returns `txId`, unsigned `transactions`, and `info` with the contract, authorization `mode`, and EIP-712 nonce when applicable. Preparing is free; x402 is charged at send.
+
+<NextPayAndSend />

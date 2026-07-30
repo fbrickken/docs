@@ -4,6 +4,10 @@ openapi: 'POST /x402/rams/freeze-agent'
 description: 'Prepare an enforcement freeze for an ERC-8226 agent.'
 ---
 
+import NextPayAndSend from '/snippets/next-pay-and-send.mdx';
+
 Maps to `ramsFreezeAgent`. `signerAddress` must hold `ENFORCER_ROLE` on AgentMandate. It is always client-signed and freezes the agent across all mandates in that registry.
 
 The AgentMandate admin cannot also be its enforcer (`AdminEnforcerOverlap`). Use a distinct operational wallet.
+
+<NextPayAndSend />

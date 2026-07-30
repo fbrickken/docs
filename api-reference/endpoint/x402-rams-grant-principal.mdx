@@ -4,6 +4,10 @@ openapi: 'POST /x402/rams/grant-principal'
 description: 'Prepare a compliance eligibility record for a principal.'
 ---
 
+import NextPayAndSend from '/snippets/next-pay-and-send.mdx';
+
 Maps to `ramsGrantPrincipal`. `signerAddress` must be the ComplianceProvider owner; this admin operation is always client-signed.
 
 Provide the `principal`, a non-zero bytes32 `identityRef`, and optional `expiresAt` (`0` means no expiry). This must be completed before granting a mandate that references the same provider and identity.
+
+<NextPayAndSend />

@@ -3,4 +3,8 @@ title: 'burnToken'
 openapi: 'POST /prepare-transactions/burnToken'
 ---
 
+import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
+
 Prepares unsigned transactions for burning tokens from the signer's balance. This endpoint is equivalent to calling `/prepare-transactions` with `method=burnToken`.
+
+<NextSignAndSend />

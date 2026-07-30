@@ -3,6 +3,8 @@ title: 'claimTokens'
 openapi: 'POST /prepare-transactions/claimTokens'
 ---
 
+import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
+
 Prepares unsigned transactions for claiming tokens from a completed Security Token Offering (STO) investment. This endpoint is equivalent to calling `/prepare-transactions` with `method=claimTokens`.
 
 ## Notes
@@ -11,3 +13,5 @@ Prepares unsigned transactions for claiming tokens from a completed Security Tok
 - The investor must have participated in the STO
 - Each investor can only claim their allocated tokens once
 - The claiming process transfers the purchased tokens to the investor's address
+
+<NextSignAndSend />

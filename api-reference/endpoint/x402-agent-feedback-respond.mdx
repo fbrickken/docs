@@ -6,6 +6,8 @@ description: 'Prepare an ERC-8004 feedback response through x402.'
 
 import X402AuthNote from '/snippets/x402-auth-note.mdx';
 
+import NextPayAndSend from '/snippets/next-pay-and-send.mdx';
+
 Prepares unsigned transactions for appending a response to an ERC-8004 feedback thread. This facade maps to `agentAppendFeedbackResponse`.
 
 ## Authentication
@@ -28,3 +30,5 @@ Prepares unsigned transactions for appending a response to an ERC-8004 feedback 
 ## Response
 
 Returns prepared unsigned transactions and `txId`. Submit it to `POST /send-transactions`: in `brickken-relayed` mode send `{ txId, transactions }` and pay via x402 (Brickken signs and broadcasts); in `client-signed` mode sign the transaction locally and send `{ txId, signedTransactions }`.
+
+<NextPayAndSend />

@@ -6,6 +6,8 @@ description: 'Prepare an ERC-8004 identity ownership transfer through x402.'
 
 import X402AuthNote from '/snippets/x402-auth-note.mdx';
 
+import NextPayAndSend from '/snippets/next-pay-and-send.mdx';
+
 Prepares an unsigned ERC-721 `safeTransferFrom` that moves an ERC-8004 agent identity from Brickken custody to a wallet you control. This facade maps to `agentTransferOwnership`.
 
 By default Brickken is the on-chain owner of the agent identity in `brickken-relayed` mode. Call this method only when you explicitly want to take custody of the identity NFT yourself.
@@ -34,3 +36,5 @@ Returns a prepared unsigned transaction and `txId`. Submit it to `POST /send-tra
 <Warning>
 Ownership transfer is **irreversible** and is different from [`agentSetWallet`](/api-reference/endpoint/x402-agent-set-wallet), which only changes the operational wallet. After the identity leaves Brickken custody, Brickken's relayer can no longer perform owner-only operations for that agent unless ownership is transferred back.
 </Warning>
+
+<NextPayAndSend />

@@ -4,6 +4,8 @@ openapi: 'POST /x402/rams/execute'
 description: 'Prepare an agent action through the principal-bound AgentExecutor.'
 ---
 
+import NextPayAndSend from '/snippets/next-pay-and-send.mdx';
+
 Maps to `ramsExecute`. `signerAddress` must be the mandate's **agent**.
 
 <Warning>
@@ -18,3 +20,5 @@ This operation is always client-signed. `brickken-relayed` is rejected because t
 | ERC-20 helper | `asset`, `from`, `to`, and raw base-unit `amount`; the API encodes `transferFrom` |
 
 Exactly one mode is accepted. The API reads the selector registration, derives any cap-gated amount, and simulates mandate authorization before returning the unsigned executor transaction.
+
+<NextPayAndSend />

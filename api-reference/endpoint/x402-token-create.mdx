@@ -6,6 +6,8 @@ description: 'Prepare an agent-owned ERC-20 token deployment through x402.'
 
 import X402AuthNote from '/snippets/x402-auth-note.mdx';
 
+import NextPayAndSend from '/snippets/next-pay-and-send.mdx';
+
 Prepares unsigned transactions for deploying an agent-owned ERC-20 token. This facade maps to `agentCreateToken`.
 
 ## Authentication
@@ -28,3 +30,5 @@ Prepares unsigned transactions for deploying an agent-owned ERC-20 token. This f
 ## Response
 
 Returns prepared unsigned transactions and `txId`. Submit it to `POST /send-transactions`: in `brickken-relayed` mode send `{ txId, transactions }` and pay via x402 (Brickken signs and broadcasts); in `client-signed` mode sign the transaction locally and send `{ txId, signedTransactions }`. If executed, use the deployment receipt to recover the deployed `tokenAddress`. In `brickken-relayed` mode, omit `agentWallet` — Brickken's relayer becomes the token owner.
+
+<NextPayAndSend />

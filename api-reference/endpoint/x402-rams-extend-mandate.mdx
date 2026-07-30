@@ -4,6 +4,8 @@ openapi: 'POST /x402/rams/extend-mandate'
 description: 'Prepare a later expiry for an active ERC-8226 mandate.'
 ---
 
+import NextPayAndSend from '/snippets/next-pay-and-send.mdx';
+
 Maps to `ramsExtendMandate`. `newValidUntil` must exceed the current expiry; extending does not reset `cumulativeUsed`.
 
 ## Authorization modes
@@ -15,3 +17,5 @@ Maps to `ramsExtendMandate`. `newValidUntil` must exceed the current expiry; ext
 | Brickken relayed | Principal signature plus `executionMode: "brickken-relayed"` |
 
 Preparing is free. The full x402 fee is collected when the prepared transaction is sent.
+
+<NextPayAndSend />

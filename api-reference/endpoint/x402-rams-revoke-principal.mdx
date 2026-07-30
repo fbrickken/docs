@@ -4,6 +4,10 @@ openapi: 'POST /x402/rams/revoke-principal'
 description: 'Prepare revocation of a principal compliance record.'
 ---
 
+import NextPayAndSend from '/snippets/next-pay-and-send.mdx';
+
 Maps to `ramsRevokePrincipal`. `signerAddress` must be the ComplianceProvider owner; this admin operation is always client-signed.
 
 `reason` accepts a numeric code `0–8` or a name such as `KYC_EXPIRED`, `AML_FLAG`, `JURISDICTION_BLOCKED`, or `OTHER`. Revocation makes mandate execution fail its compliance check; it does not rewrite the mandate record.
+
+<NextPayAndSend />

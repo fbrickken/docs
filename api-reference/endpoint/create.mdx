@@ -3,6 +3,8 @@ title: 'Prepare Transactions'
 openapi: 'POST /prepare-transactions'
 ---
 
+import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
+
 Prepares unsigned transactions for various blockchain operations. This endpoint supports multiple transaction methods for tokenization, STO management, token operations, and more.
 
 ## Common Parameters
@@ -47,3 +49,5 @@ The response includes the transaction details, metadata, and a unique transactio
 **Next Steps:**
 1. Sign each transaction in the `transactions` array
 2. Submit the signed transactions along with the `txId` to `/send-transactions`
+
+<NextSignAndSend />

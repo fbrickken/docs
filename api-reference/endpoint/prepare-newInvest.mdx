@@ -3,6 +3,8 @@ title: 'newInvest'
 openapi: 'POST /prepare-transactions/newInvest'
 ---
 
+import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
+
 Prepares unsigned transactions for making an investment in a Security Token Offering (STO). This endpoint is equivalent to calling `/prepare-transactions` with `method=newInvest`.
 
 ## Notes
@@ -11,3 +13,5 @@ Prepares unsigned transactions for making an investment in a Security Token Offe
 - Investment amount must be within the STO's min/max investment limits
 - The STO must be active and within the investment period
 - The investor address will be automatically whitelisted if required
+
+<NextSignAndSend />

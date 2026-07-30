@@ -4,6 +4,8 @@ openapi: 'POST /x402/rams/set-operator'
 description: 'Approve or remove an operator for an ERC-8226 principal.'
 ---
 
+import NextPayAndSend from '/snippets/next-pay-and-send.mdx';
+
 Maps to `ramsSetOperator`. Set `approved` to `true` or `false`.
 
 ## Authorization modes
@@ -15,3 +17,5 @@ Maps to `ramsSetOperator`. Set `approved` to `true` or `false`.
 | Brickken relayed | Principal signature plus `executionMode: "brickken-relayed"` |
 
 An operator may directly revoke or extend mandates, but EIP-712 lifecycle signatures always recover to the principal.
+
+<NextPayAndSend />

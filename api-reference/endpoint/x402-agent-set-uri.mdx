@@ -6,6 +6,8 @@ description: 'Prepare an ERC-8004 agent URI/profile update through x402.'
 
 import X402AuthNote from '/snippets/x402-auth-note.mdx';
 
+import NextPayAndSend from '/snippets/next-pay-and-send.mdx';
+
 Prepares unsigned transactions for updating an ERC-8004 agent profile URI. This facade maps to `agentSetURI`.
 
 ## Authentication
@@ -27,3 +29,5 @@ Prepares unsigned transactions for updating an ERC-8004 agent profile URI. This 
 ## Response
 
 Returns prepared unsigned transactions and `txId`. Submit it to `POST /send-transactions`: in `brickken-relayed` mode send `{ txId, transactions }` and pay via x402 (Brickken signs and broadcasts); in `client-signed` mode sign the transaction locally and send `{ txId, signedTransactions }`.
+
+<NextPayAndSend />

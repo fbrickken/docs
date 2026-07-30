@@ -4,6 +4,10 @@ openapi: 'POST /x402/rams/unfreeze-agent'
 description: 'Prepare removal of an enforcement freeze from an ERC-8226 agent.'
 ---
 
+import NextPayAndSend from '/snippets/next-pay-and-send.mdx';
+
 Maps to `ramsUnfreezeAgent`. `signerAddress` must hold `ENFORCER_ROLE`; the operation is always client-signed and cannot use Brickken's relayer.
 
 Unfreezing removes the global overlay but does not reactivate revoked or expired mandates.
+
+<NextPayAndSend />

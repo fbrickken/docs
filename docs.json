@@ -61,6 +61,12 @@
             ]
           },
           {
+            "group": "Guides",
+            "pages": [
+              "api-reference/guides/tokenize-and-run-an-sto"
+            ]
+          },
+          {
             "group": "Prepare Transactions",
             "pages": [
               "api-reference/endpoint/create",

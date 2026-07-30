@@ -3,4 +3,8 @@ title: 'transferFrom'
 openapi: 'POST /prepare-transactions/transferFrom'
 ---
 
+import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
+
 Prepares unsigned transactions for transferring tokens from one address to another (requires prior approval). This endpoint is equivalent to calling `/prepare-transactions` with `method=transferFrom`.
+
+<NextSignAndSend />
