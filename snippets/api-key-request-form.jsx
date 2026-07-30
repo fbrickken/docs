@@ -10,11 +10,13 @@ export const ApiKeyRequestForm = () => {
   // the forge base URL used by the CLI and MCP docs — each microservice deploys its own.
   const ENDPOINT = "https://3rfhw2uk53.execute-api.eu-west-1.amazonaws.com/forge/request-api-key";
 
-  // Public reCAPTCHA v3 site key. Safe to commit — it is the public half of the
-  // pair whose secret lives in the backend vault. While this is the placeholder,
-  // the form skips the endpoint and falls back to the prefilled-email flow.
-  const RECAPTCHA_SITE_KEY = "RECAPTCHA_SITE_KEY_TO_FILL";
-  const recaptchaReady = RECAPTCHA_SITE_KEY.indexOf("TO_FILL") === -1;
+  // Public reCAPTCHA v3 site key, taken from the sandbox dApp — it is the public half
+  // of the pair whose secret lives in the backend vault, so it is safe to commit.
+  // `docs.brickken.com` must be listed as an allowed domain on this reCAPTCHA site,
+  // and the target environment's RECAPTCHA_SECRET must be its pair. If either is
+  // wrong the form falls back to the prefilled-email flow instead of breaking.
+  const RECAPTCHA_SITE_KEY = "6LfjjpwjAAAAAFB4vVljJvgWiTHbuB3m5TL0RDJG";
+  const recaptchaReady = /^6L\S{20,}$/.test(RECAPTCHA_SITE_KEY);
 
   const NETWORKS = [
     "Ethereum mainnet (1)",
@@ -292,8 +294,9 @@ export const ApiKeyRequestForm = () => {
   return (
     <form onSubmit={onSubmit} noValidate style={{ marginTop: "1.5rem", marginBottom: "1.5rem" }} className="not-prose">
       <p style={S.intro}>
-        Submitting sends your request straight to the Brickken team — you do not need to send an
-        email yourself.
+        {recaptchaReady
+          ? "Submitting sends your request straight to the Brickken team — you do not need to send an email yourself."
+          : "Submitting opens a prefilled email to " + TO + " for you to send. Direct submission is being finalised."}
       </p>
 
       <div style={S.grid}>
@@ -421,7 +424,7 @@ export const ApiKeyRequestForm = () => {
       </div>
 
       <button type="submit" style={S.submit} disabled={sending}>
-        {sending ? "Sending…" : "Send request"}
+        {sending ? "Sending…" : recaptchaReady ? "Send request" : "Open prefilled email"}
       </button>
 
       <p aria-live="polite" style={S.status}>{status}</p>
