@@ -12,7 +12,7 @@ export const ApiKeyRequestForm = () => {
   ];
 
   // Order matters: focus jumps to the first invalid field in this order.
-  const FIELD_ORDER = ["name", "email", "company", "accountEmail", "signers", "networks", "useCase"];
+  const FIELD_ORDER = ["name", "email", "company", "accountEmail", "networks", "useCase"];
 
   const [values, setValues] = useState({
     name: "",
@@ -21,7 +21,6 @@ export const ApiKeyRequestForm = () => {
     accountEmail: "",
     environment: "Sandbox",
     plan: "Not sure",
-    signers: "",
     symbols: "",
     useCase: "",
   });
@@ -46,8 +45,6 @@ export const ApiKeyRequestForm = () => {
   );
 
   const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v).trim());
-  const isAddress = (v) => /^0x[a-fA-F0-9]{40}$/.test(String(v).trim());
-  const signerList = () => values.signers.split(",").map((s) => s.trim()).filter(Boolean);
 
   const validate = useCallback(() => {
     const next = {};
@@ -56,10 +53,6 @@ export const ApiKeyRequestForm = () => {
     if (!values.company.trim()) next.company = "Enter your company or project name.";
     if (!isEmail(values.accountEmail))
       next.accountEmail = "Enter the email registered on your Brickken account.";
-    const signers = values.signers.split(",").map((s) => s.trim()).filter(Boolean);
-    if (signers.length === 0) next.signers = "Enter at least one signer address to whitelist.";
-    else if (!signers.every(isAddress))
-      next.signers = "Each address must be a 42-character 0x address.";
     if (networks.length === 0) next.networks = "Select at least one network.";
     if (values.useCase.trim().length < 20)
       next.useCase = "Describe your use case in at least 20 characters.";
@@ -68,7 +61,6 @@ export const ApiKeyRequestForm = () => {
   }, [values, networks]);
 
   const body = useMemo(() => {
-    const signers = values.signers.split(",").map((s) => s.trim()).filter(Boolean);
     return [
       "Brickken API key request",
       "",
@@ -80,10 +72,7 @@ export const ApiKeyRequestForm = () => {
       "Plan of interest:       " + values.plan,
       "Networks:               " + (networks.join(", ") || "-"),
       "Token symbols to issue: " + (values.symbols.trim() || "-"),
-      "",
-      "Signer addresses to whitelist:",
     ]
-      .concat(signers.length ? signers.map((s) => "  - " + s) : ["  - (none provided)"])
       .concat([
         "",
         "Use case:",
@@ -295,23 +284,6 @@ export const ApiKeyRequestForm = () => {
             <option>Enterprise</option>
           </select>
         </div>
-      </div>
-
-      <div style={S.field}>
-        <label style={S.label} htmlFor="bkn-signers">Signer address(es) to whitelist *</label>
-        <input
-          id="bkn-signers"
-          style={S.input}
-          value={values.signers}
-          onChange={set("signers")}
-          placeholder="0xabc…, 0xdef…"
-          aria-invalid={!!errors.signers}
-          aria-describedby={errors.signers ? "bkn-signers-error" : undefined}
-        />
-        <p style={S.hint}>
-          Comma-separated. Each address must be whitelisted before <code>prepare-transactions</code> will accept it as a signer.
-        </p>
-        {errors.signers ? <p style={S.err} id="bkn-signers-error" role="alert">{errors.signers}</p> : null}
       </div>
 
       <div style={S.field}>
