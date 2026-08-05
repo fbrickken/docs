@@ -1,10 +1,10 @@
 ---
 title: 'newTokenization'
-openapi: 'POST /prepare-transactions/newTokenization'
+openapi: 'POST /prepare-transactions'
 ---
 
 import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
 
-Prepares unsigned transactions for creating a new tokenized asset. This endpoint is equivalent to calling `/prepare-transactions` with `method=newTokenization`.
+Prepares unsigned transactions for creating a new tokenized asset. Use `POST /prepare-transactions` with `method=newTokenization`.
 
 <NextSignAndSend />

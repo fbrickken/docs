@@ -1,11 +1,11 @@
 ---
 title: 'dividendDistribution'
-openapi: 'POST /prepare-transactions/dividendDistribution'
+openapi: 'POST /prepare-transactions'
 ---
 
 import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
 
-Prepares unsigned transactions for distributing payment token dividends to holders of a specific token. This endpoint is equivalent to calling `/prepare-transactions` with `method=dividendDistribution`.
+Prepares unsigned transactions for distributing payment token dividends to holders of a specific token. Use `POST /prepare-transactions` with `method=dividendDistribution`.
 
 ## Notes
 

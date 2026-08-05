@@ -1,10 +1,10 @@
 ---
 title: 'mintToken'
-openapi: 'POST /prepare-transactions/mintToken'
+openapi: 'POST /prepare-transactions'
 ---
 
 import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
 
-Prepares unsigned transactions for minting tokens to specified users. This endpoint is equivalent to calling `/prepare-transactions` with `method=mintToken`.
+Prepares unsigned transactions for minting tokens to specified users. Use `POST /prepare-transactions` with `method=mintToken`.
 
 <NextSignAndSend />

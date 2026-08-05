@@ -65,7 +65,7 @@ curl 'https://api.sandbox.brickken.com/get-transaction-status?txId=0xPreparedTra
 ## 1. Create the tokenized asset
 
 ```bash
-curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions/newTokenization' \
+curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
   --header 'Content-Type: application/json' \
   --header 'x-api-key: YOUR_BRICKKEN_API_KEY' \
   --data '{
@@ -97,7 +97,7 @@ Every field, with the request and response schema, is on the [`newTokenization` 
 A security token only moves between whitelisted wallets. Whitelist before you mint or accept investment.
 
 ```bash
-curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions/whitelist' \
+curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
   --header 'Content-Type: application/json' \
   --header 'x-api-key: YOUR_BRICKKEN_API_KEY' \
   --data '{
@@ -120,7 +120,7 @@ curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions/white
 ## 3. Mint tokens
 
 ```bash
-curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions/mintToken' \
+curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
   --header 'Content-Type: application/json' \
   --header 'x-api-key: YOUR_BRICKKEN_API_KEY' \
   --data '{
@@ -144,7 +144,7 @@ curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions/mintT
 ## 4. Launch the offering
 
 ```bash
-curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions/newSto' \
+curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
   --header 'Content-Type: application/json' \
   --header 'x-api-key: YOUR_BRICKKEN_API_KEY' \
   --data '{
@@ -179,7 +179,7 @@ curl 'https://api.sandbox.brickken.com/get-stos?chainId=aa36a7&tokenSymbol=EXMPL
 Note there is no `signerAddress` in the required set — the **investor** signs this one, not the tokenizer.
 
 ```bash
-curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions/newInvest' \
+curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
   --header 'Content-Type: application/json' \
   --header 'x-api-key: YOUR_BRICKKEN_API_KEY' \
   --data '{
@@ -200,7 +200,7 @@ Track progress with [`GET /get-investments-by-sto-id`](/api-reference/endpoint/g
 ## 6. Let investors claim their tokens
 
 ```bash
-curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions/claimTokens' \
+curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
   --header 'Content-Type: application/json' \
   --header 'x-api-key: YOUR_BRICKKEN_API_KEY' \
   --data '{
@@ -217,7 +217,7 @@ The investor signs this too.
 ## 7. Close the offering
 
 ```bash
-curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions/closeOffer' \
+curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
   --header 'Content-Type: application/json' \
   --header 'x-api-key: YOUR_BRICKKEN_API_KEY' \
   --data '{
@@ -232,7 +232,7 @@ curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions/close
 ## 8. Distribute dividends
 
 ```bash
-curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions/dividendDistribution' \
+curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
   --header 'Content-Type: application/json' \
   --header 'x-api-key: YOUR_BRICKKEN_API_KEY' \
   --data '{

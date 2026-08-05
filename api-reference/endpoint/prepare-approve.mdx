@@ -1,10 +1,10 @@
 ---
 title: 'approve'
-openapi: 'POST /prepare-transactions/approve'
+openapi: 'POST /prepare-transactions'
 ---
 
 import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
 
-Prepares unsigned transactions for approving a spender to use tokens on behalf of the signer. This endpoint is equivalent to calling `/prepare-transactions` with `method=approve`.
+Prepares unsigned transactions for approving a spender to use tokens on behalf of the signer. Use `POST /prepare-transactions` with `method=approve`.
 
 <NextSignAndSend />

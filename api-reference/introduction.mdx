@@ -93,18 +93,6 @@ curl --request POST 'https://api.sandbox.brickken.com/send-transactions' \
 | Endpoint | Purpose |
 | --- | --- |
 | `POST /prepare-transactions` | Prepare any supported transaction method by passing `method` in the JSON body. |
-| `POST /prepare-transactions/newTokenization` | Prepare a new tokenized asset. |
-| `POST /prepare-transactions/mintToken` | Prepare token minting. |
-| `POST /prepare-transactions/whitelist` | Prepare whitelist updates. |
-| `POST /prepare-transactions/burnToken` | Prepare token burning. |
-| `POST /prepare-transactions/transferFrom` | Prepare allowance-based token transfer. |
-| `POST /prepare-transactions/transferTo` | Prepare direct token transfer. |
-| `POST /prepare-transactions/approve` | Prepare allowance approval. |
-| `POST /prepare-transactions/dividendDistribution` | Prepare dividend distribution. |
-| `POST /prepare-transactions/newSto` | Prepare a Security Token Offering. |
-| `POST /prepare-transactions/newInvest` | Prepare an STO investment. |
-| `POST /prepare-transactions/claimTokens` | Prepare token claims from an STO. |
-| `POST /prepare-transactions/closeOffer` | Prepare an STO close operation. |
 | `POST /send-transactions` | Submit signed transactions returned by prepare. |
 | `PATCH /patch-token-docs` | Update token documentation and branding files. |
 

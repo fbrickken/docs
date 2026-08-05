@@ -1,10 +1,10 @@
 ---
 title: 'transferTo'
-openapi: 'POST /prepare-transactions/transferTo'
+openapi: 'POST /prepare-transactions'
 ---
 
 import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
 
-Prepares unsigned transactions for transferring tokens from the signer's address to another address. This endpoint is equivalent to calling `/prepare-transactions` with `method=transferTo`.
+Prepares unsigned transactions for transferring tokens from the signer's address to another address. Use `POST /prepare-transactions` with `method=transferTo`.
 
 <NextSignAndSend />
