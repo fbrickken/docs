@@ -19,13 +19,13 @@ export const ApiKeyRequestForm = () => {
   const recaptchaReady = /^6L\S{20,}$/.test(RECAPTCHA_SITE_KEY);
 
   const NETWORKS = [
-    "Ethereum mainnet (1)",
-    "Base mainnet (8453)",
-    "BNB Smart Chain (56)",
-    "Polygon mainnet (137)",
-    "Sepolia testnet (11155111)",
-    "Base Sepolia (84532)",
-    "Polygon Amoy (80002)",
+    { label: "Sepolia testnet (11155111)", available: true },
+    { label: "Polygon Amoy (80002)", available: true },
+    { label: "Base Sepolia (84532)", available: true },
+    { label: "Ethereum mainnet (1)", available: false },
+    { label: "Base mainnet (8453)", available: false },
+    { label: "BNB Smart Chain (56)", available: false },
+    { label: "Polygon mainnet (137)", available: false },
   ];
 
   // Order matters: focus jumps to the first invalid field in this order.
@@ -354,7 +354,10 @@ export const ApiKeyRequestForm = () => {
             aria-invalid={!!errors.accountEmail}
             aria-describedby={errors.accountEmail ? "bkn-accountEmail-error" : undefined}
           />
-          <p style={S.hint}>The email registered on your Brickken dApp account. Keys are issued against it.</p>
+          <p style={S.hint}>
+            The email registered on your Brickken dApp account. It can be the same as or different
+            from your contact email; keys are issued against this account.
+          </p>
           {errors.accountEmail ? (
             <p style={S.err} id="bkn-accountEmail-error" role="alert">{errors.accountEmail}</p>
           ) : null}
@@ -362,12 +365,10 @@ export const ApiKeyRequestForm = () => {
 
         <div style={S.field}>
           <label style={S.label} htmlFor="bkn-environment">Environment *</label>
-          <select id="bkn-environment" style={S.input} value={values.environment} onChange={set("environment")}>
+          <select id="bkn-environment" style={S.input} value={values.environment} disabled>
             <option>Sandbox</option>
-            <option>Production</option>
-            <option>Both</option>
           </select>
-          <p style={S.hint}>Keys are per-deployment — a sandbox key does not work in production.</p>
+          <p style={S.hint}>API key requests are currently available for Sandbox only.</p>
         </div>
 
         <div style={S.field}>
@@ -385,10 +386,15 @@ export const ApiKeyRequestForm = () => {
         <fieldset aria-describedby={errors.networks ? "bkn-networks-error" : undefined}>
           <legend style={S.label} id="bkn-networks" tabIndex={-1}>Target networks *</legend>
           <div style={S.netGrid}>
-            {NETWORKS.map((n) => (
-              <label key={n} style={S.check}>
-                <input type="checkbox" checked={networks.includes(n)} onChange={toggleNetwork(n)} />
-                <span>{n}</span>
+            {NETWORKS.map(({ label, available }) => (
+              <label key={label} style={{ ...S.check, opacity: available ? 1 : 0.55 }}>
+                <input
+                  type="checkbox"
+                  checked={networks.includes(label)}
+                  onChange={toggleNetwork(label)}
+                  disabled={!available}
+                />
+                <span>{label}{available ? "" : " — Unavailable in sandbox"}</span>
               </label>
             ))}
           </div>
