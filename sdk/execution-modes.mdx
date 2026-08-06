@@ -1,0 +1,128 @@
+---
+title: 'Execution modes'
+description: 'Who signs the transaction, who broadcasts it, and what each mode costs.'
+---
+
+`executionMode` decides two things: who produces the signature, and who puts the transaction on chain. Every write accepts it, and every write has a sensible default — most callers never set it.
+
+| Mode | Signs | Broadcasts | Needs |
+| --- | --- | --- | --- |
+| `client-signed` | You | Brickken | A signer with `signTransaction`, and `signerAddress` |
+| `client-broadcast` | You | You, over `rpcUrl` | A signer with `signTransaction`, `signerAddress`, and `rpcUrl` |
+| `brickken-relayed` | Brickken's relayer | Brickken | An x402 payment, so **no** `apiKey` |
+
+## Defaults per namespace
+
+The API's own default depends on which entry point you hit, which is exactly the asymmetry the SDK removes: it always sends the mode explicitly, and reports it back on `result.executionMode`.
+
+| Namespace | Default | Relaying |
+| --- | --- | --- |
+| `tokenization.*`, `sto.*` (Dapp) | `client-signed` | Not available |
+| `agent.*`, `agentToken.*` (ERC-8004) | `brickken-relayed` | Available |
+| `rams.grantMandate`, `revokeMandate`, `extendMandate`, `setOperator` | `client-signed` | Available, with a principal signature |
+| Every other `rams.*` write | `client-signed` | Rejected locally |
+
+The six RAMS operations that cannot be relayed — `execute`, `setExecutorAction`, `freezeAgent`, `unfreezeAgent`, `grantPrincipal`, `revokePrincipal` — require `msg.sender` to hold an on-chain role, so no relayer can send them on your behalf. The SDK throws `ValidationError` rather than letting the server answer `400`.
+
+## What each mode costs
+
+Only relaying gives you a free prepare, because there Brickken carries the signing and the gas. In the two client-controlled modes the same total is split evenly across prepare and send.
+
+| Mode | Prepare | Send |
+| --- | --- | --- |
+| `brickken-relayed` | Free | The full price |
+| `client-signed` | Half the price | Half the price |
+| `client-broadcast` | Half the price | Half the price |
+
+Dapp writes made with an API key are not x402-priced at all — they draw on the per-method credit balance attached to your key. See [Pricing](/api-reference/endpoint/agentic-pricing) for the agentic per-operation table.
+
+## `client-signed`
+
+The default for Dapp writes. You sign locally and hand the signed transaction to Brickken to broadcast.
+
+```ts
+const done = await bkn.tokenization.mint(
+  { chainId: '11155111', tokenSymbol: 'EXMPL', userToMint: [{ email: 'investor@example.com', amount: '100' }] },
+  { execute: true, signerAddress: await signer.address() },
+)
+
+done.sent?.transactionHashes
+```
+
+`signerAddress` is required: prepare builds the transaction against that account's nonce. The SDK checks the configured signer's address against it and refuses a mismatch locally.
+
+## `brickken-relayed`
+
+The recommended mode for agentic work. Omit `signerAddress` — Brickken supplies its relayer as the signer, pays the native gas, and broadcasts. Your signer only authorizes the x402 payment.
+
+```ts
+const done = await bkn.agent.register(
+  { chainId: '84532', name: 'Research Agent', image: 'https://example.com/agent.png' },
+  { execute: true },     // brickken-relayed is already the default here
+)
+```
+
+Prepare returns a single `txId`, exactly one transaction, and an `x402Requirements` quote.
+
+<Note>
+A relayed send **rejects an API key**. Brickken pays the gas, so the payment is mandatory. Configuring both `apiKey` and `signer` and then asking for relayed execution raises `RelayedRequiresPaymentError` with no network round trip.
+</Note>
+
+For `agentToken.create` in relayed mode, omit `agentWallet` as well as `signerAddress`.
+
+## `client-broadcast`
+
+Submit the signed transaction yourself through your own JSON-RPC endpoint, then confirm `{ txId, txHash }` back to Brickken. Use it when you need to own the mempool path — your own node, a private relay, or your own gas and nonce policy.
+
+```ts
+const bkn = new Brickken({ apiKey: 'key', signer, rpcUrl: 'https://your-node.example' })
+
+const done = await bkn.tokenization.create(input, {
+  execute: true,
+  executionMode: 'client-broadcast',
+  signerAddress: await signer.address(),
+})
+
+done.sent?.transactionHashes[0]        // the hash your node assigned
+```
+
+It takes **exactly one** prepared transaction. The SDK rejects an empty response or a batch locally rather than reporting a partial execution.
+
+### When your node refuses
+
+If the RPC endpoint rejects the transaction — `nonce too low`, `insufficient funds`, anything else — you get an `RpcRejectedError` carrying the node's own code and message. An `already known` response is not an error: the SDK recovers the hash deterministically from the signed transaction and carries on.
+
+### When confirmation fails
+
+After broadcasting, the SDK retries the Brickken confirmation while the backend RPC catches up with transaction propagation. If confirmation still fails, the transaction is already on chain, so re-signing and re-broadcasting would be wrong. `BroadcastConfirmationError` preserves both `.txId` and `.txHash` so you can resume only the confirmation step:
+
+```ts
+import { BroadcastConfirmationError } from 'brickken-sdk'
+
+try {
+  await bkn.tokenization.create(input, options)
+} catch (error) {
+  if (error instanceof BroadcastConfirmationError) {
+    await bkn.tx.send({ txId: error.txId, txHash: error.txHash })
+  }
+}
+```
+
+## Waiting for a receipt
+
+`waitForReceipt: true` polls the chain after the send and fills in `result.receipt`. For a deployment it also recovers `result.deployedAddress` from the receipt.
+
+```ts
+const done = await bkn.agentToken.create(
+  { chainId: '84532', name: 'Agent Token', symbol: 'AGT' },
+  { execute: true, waitForReceipt: true },
+)
+
+done.deployedAddress
+```
+
+This needs an `rpcUrl` on the client. Without one the SDK throws rather than silently returning a result with no receipt.
+
+<Card title="Payments and spending controls" icon="shield-halved" href="/sdk/payments">
+  Cap what an autonomous agent can spend before it spends it.
+</Card>

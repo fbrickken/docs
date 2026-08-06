@@ -1,0 +1,78 @@
+---
+title: 'Installation'
+description: 'Install brickken-sdk, and pick the signer adapter that matches your stack.'
+---
+
+## Install
+
+```bash
+npm install brickken-sdk
+```
+
+```bash
+pnpm add brickken-sdk
+```
+
+```bash
+yarn add brickken-sdk
+```
+
+## Requirements
+
+| | |
+| --- | --- |
+| Node.js | 20 or newer |
+| Browsers | Any runtime with global `fetch` and `WebCrypto` |
+| Edge runtimes | Supported — the package is side-effect free and ships ESM |
+| Runtime dependencies | One: `micro-eth-signer` |
+
+The package publishes both ESM and CommonJS entry points with matching type declarations, so `import` and `require` both work.
+
+```ts
+import { Brickken } from 'brickken-sdk'
+```
+
+```js
+const { Brickken } = require('brickken-sdk')
+```
+
+## Signer adapters
+
+Signing is optional. You only need a signer for x402 payments, `client-signed` and `client-broadcast` writes, and RAMS EIP-712 authorization — a read-only or Dapp-with-API-key integration needs none.
+
+Three adapters ship with the package, each on its own subpath:
+
+```ts
+import { fromPrivateKey } from 'brickken-sdk/adapters/private-key'   // raw hex key
+import { fromEthers } from 'brickken-sdk/adapters/ethers'            // ethers v6
+import { fromViem } from 'brickken-sdk/adapters/viem'                // viem Account or WalletClient
+```
+
+`ethers` and `viem` are **optional peer dependencies**, imported only from their own subpath. A consumer using neither installs neither, and nothing pulls them into your bundle.
+
+```bash
+npm install ethers        # only if you use brickken-sdk/adapters/ethers
+npm install viem          # only if you use brickken-sdk/adapters/viem
+```
+
+`fromPrivateKey` needs no peer dependency at all — it signs with the bundled `micro-eth-signer`.
+
+See [Signers](/sdk/signers) for the `Signer` interface and how to bring your own KMS or MPC wallet.
+
+## Verify the install
+
+```ts
+import { Brickken, VERSION } from 'brickken-sdk'
+
+console.log(VERSION)
+
+const bkn = new Brickken({ env: 'sandbox' })
+const network = await bkn.network.info({ chainId: '11155111' })
+console.log(network)
+```
+
+`GET /get-network-info` needs no credential, so this confirms the package resolves and can reach the API before you configure anything.
+
+<Card title="Quickstart" icon="rocket" href="/sdk/quickstart">
+  Your first authenticated call.
+</Card>

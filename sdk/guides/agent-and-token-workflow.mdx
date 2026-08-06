@@ -1,0 +1,204 @@
+---
+title: 'Agent and token workflow'
+description: 'Register an ERC-8004 agent with the SDK, then deploy and operate its own ERC-20.'
+icon: 'robot'
+---
+
+The agentic path needs no Brickken account and no API key — a funded wallet is the whole credential. Everything below runs on **Base Sepolia** (`84532`), where the x402 asset is Circle USDC.
+
+## Set up the client
+
+```ts
+import { Brickken } from 'brickken-sdk'
+import { fromPrivateKey } from 'brickken-sdk/adapters/private-key'
+
+const bkn = new Brickken({
+  env: 'sandbox',
+  signer: fromPrivateKey(process.env.BRICKKEN_PRIVATE_KEY!),
+  rpcUrl: 'https://sepolia.base.org',          // needed for waitForReceipt
+  payment: {
+    maxAmountBaseUnits: '50000',               // hard ceiling, in the asset's base units
+    onPaymentRequired: async quote => {
+      console.log(`about to pay ${quote.displayPrice}`)
+      return true
+    },
+    onPayment: record => console.log('settled', record.settlement),
+  },
+})
+
+const chainId = '84532'
+```
+
+Do **not** pass an `apiKey` here. A relayed send rejects one, and configuring both would take `brickken-relayed` off the table — the SDK would raise `RelayedRequiresPaymentError` before any request left the process.
+
+<Note>
+`brickken-relayed` is already the default for `agent.*` and `agentToken.*`. Brickken's relayer signs, broadcasts, and pays the native gas; your signer only authorizes the x402 payment. Omit `signerAddress` — passing one in relayed mode raises `ValidationError`.
+</Note>
+
+## 1. Preview the cost
+
+Preparing is free in relayed mode. Do it first and read the quote before committing to anything.
+
+```ts
+const prepared = await bkn.agent.register({
+  chainId,
+  name: 'Research Agent',
+  description: 'On-chain AI research agent',
+  image: 'https://example.com/agent.png',
+  serviceName: 'A2A',
+  serviceEndpoint: 'https://agent.example/.well-known/agent-card.json',
+  aiModelProvider: 'OpenAI',
+  aiModelName: 'Research Model',
+  x402Support: true,
+  active: true,
+})
+
+prepared.x402Requirements     // what sending will cost
+prepared.sent                 // undefined: nothing was sent
+```
+
+`image` is required and must be a publicly reachable HTTPS URL. `serviceName` / `serviceEndpoint` are the flat form of a single service — pass `services: [{ name, endpoint, version }]` instead when you have more than one.
+
+## 2. Register the agent
+
+Same call, with `execute: true`. This prepares, pays the x402 charge, and sends.
+
+```ts
+const agent = await bkn.agent.register(
+  {
+    chainId,
+    name: 'Research Agent',
+    description: 'On-chain AI research agent',
+    image: 'https://example.com/agent.png',
+    serviceName: 'A2A',
+    serviceEndpoint: 'https://agent.example/.well-known/agent-card.json',
+    aiModelProvider: 'OpenAI',
+    aiModelName: 'Research Model',
+    x402Support: true,
+    active: true,
+  },
+  { execute: true },
+)
+
+const agentUuid = agent.info?.agentUuid
+console.log(agent.payment?.settlement)
+```
+
+<Warning>
+**Save `agentUuid`.** `setUri`, `setMetadata`, `setWallet`, `transferOwnership`, and every feedback call identify the agent by it. There is no lookup-by-name.
+</Warning>
+
+## 3. Update the agent's profile
+
+```ts
+await bkn.agent.setMetadata(
+  { chainId, agentUuid, metadataKey: 'specialty', metadataValue: 'on-chain research' },
+  { execute: true },
+)
+
+await bkn.agent.setUri(
+  { chainId, agentUuid, documentation: 'https://agent.example/docs' },
+  { execute: true },
+)
+```
+
+Rotating the operational wallet is its own call, so the identity survives a key rotation:
+
+```ts
+await bkn.agent.setWallet({ chainId, agentUuid, newWallet: '0xNewOperationalWallet' }, { execute: true })
+```
+
+## 4. Deploy the agent's token
+
+`waitForReceipt: true` polls the chain after the send and recovers the deployed contract address. It needs the `rpcUrl` configured in step 0.
+
+```ts
+const token = await bkn.agentToken.create(
+  { chainId, name: 'Research Agent Token', symbol: 'RAGT', decimals: 18, premint: '1000' },
+  { execute: true, waitForReceipt: true },
+)
+
+const tokenAddress = token.deployedAddress
+```
+
+In relayed mode omit `agentWallet` as well as `signerAddress` — Brickken supplies both.
+
+## 5. Operate the token
+
+Amounts here are **human-readable** and scaled by `decimals`.
+
+```ts
+await bkn.agentToken.mint(
+  { chainId, tokenAddress, to: '0xRecipient', amount: '250' },
+  { execute: true },
+)
+
+await bkn.agentToken.approve(
+  { chainId, tokenAddress, spenderAddress: '0xSpender', amount: '100' },
+  { execute: true },
+)
+
+await bkn.agentToken.transfer(
+  { chainId, tokenAddress, to: '0xRecipient', amount: '25' },
+  { execute: true },
+)
+
+await bkn.agentToken.burn(
+  { chainId, tokenAddress, from: '0xHolder', amount: '10' },
+  { execute: true },
+)
+```
+
+<Note>
+Agent-token amounts are `HumanAmount`. [RAMS](/sdk/guides/rams-mandate-workflow) caps are `RawBaseUnits` and are **not** scaled. The types keep the two apart so the distinction cannot be crossed by accident.
+</Note>
+
+## 6. Reputation
+
+```ts
+await bkn.agent.feedback.give(
+  { chainId, agentUuid, value: '5', tag1: 'accuracy', feedbackURI: 'https://example.com/review/1' },
+  { execute: true },
+)
+
+await bkn.agent.feedback.respond(
+  { chainId, agentUuid, feedbackIndex: 0, responseURI: 'https://agent.example/replies/1' },
+  { execute: true },
+)
+
+await bkn.agent.feedback.revoke({ chainId, agentUuid, feedbackIndex: 0 }, { execute: true })
+```
+
+## Signing it yourself instead
+
+Pass `executionMode: 'client-signed'` and a `signerAddress` to sign the prepared transaction locally. You then need native gas on Base Sepolia as well as USDC for the payment, and the price is split evenly across prepare and send rather than being free at prepare.
+
+```ts
+const signerAddress = await signer.address()
+
+await bkn.agentToken.create(input, {
+  execute: true,
+  executionMode: 'client-signed',
+  signerAddress,
+})
+```
+
+## Funding and failure
+
+Fund the wallet behind your signer with the exact asset quoted in `x402Requirements` — on Base Sepolia that is Circle USDC, six decimals. Read the amount from the live quote rather than a table.
+
+| Error | What to do |
+| --- | --- |
+| `PaymentDeclinedError` | Your ceiling or `onPaymentRequired` refused the quote; raise the cap or accept it |
+| `PaymentRequiredError` | A payment was needed and none could be authorized — usually no signer, or an unfunded wallet |
+| `RelayedRequiresPaymentError` | An `apiKey` is configured; drop it for relayed execution |
+| `RateLimitError` | Too many outstanding prepared transactions for the wallet; send some before preparing more |
+
+<CardGroup cols={2}>
+  <Card title="Payments" icon="shield-halved" href="/sdk/payments">
+    Cap what an autonomous agent can spend.
+  </Card>
+  <Card title="RAMS mandates" icon="file-signature" href="/sdk/guides/rams-mandate-workflow">
+    Give the agent delegated, capped spending authority.
+  </Card>
+</CardGroup>

@@ -1,0 +1,99 @@
+---
+title: 'SDK'
+description: 'Typed TypeScript client for the Dapp API, the Agentic API, and RAMS mandates.'
+---
+
+The **Brickken SDK** is the official TypeScript client for the whole platform: the [Dapp API](/api-reference/introduction) (tokenization, STOs, security-token operations), the [Agentic API](/api-reference/endpoint/agentic-methods-x402) (x402 payments, ERC-8004 identity and reputation, agent-owned tokens), and [RAMS mandates](/api-reference/endpoint/rams-overview) (ERC-8226).
+
+It runs on Node 20+, in browsers, and on edge runtimes. The core has one runtime dependency.
+
+```bash
+npm install brickken-sdk
+```
+
+<CardGroup cols={2}>
+  <Card title="npm package" icon="box" href="https://www.npmjs.com/package/brickken-sdk">
+    Install `brickken-sdk` from npm.
+  </Card>
+  <Card title="GitHub repository" icon="github" href="https://github.com/Brickken/brickken-sdk">
+    View the public source repository.
+  </Card>
+</CardGroup>
+
+## Why this surface
+
+The SDK is the client to reach for when **your own code** is driving. Unlike the [CLI](/cli/introduction), it reaches the full Dapp API; unlike the [MCP server](/mcp/introduction), it runs in your process rather than behind a hosted agent endpoint.
+
+- **One client, three APIs.** Dapp, agentic, and RAMS live behind the same `Brickken` instance.
+- **Illegal combinations fail locally.** The SDK derives the credential mode from what you pass and refuses combinations the API rejects, before a request leaves your process.
+- **Typed results, typed errors.** Every write returns the same `WriteResult` shape, and every failure is one of fourteen error classes you can branch on.
+- **Your private key stays put.** It signs x402 payments, `client-signed` transactions, and RAMS typed data in your process, and is never sent anywhere.
+
+## Two credentials, and they are alternatives
+
+Brickken accepts an API key **or** an x402 payment, never both on one request. When `x-api-key` is present the API skips the payment path entirely, which means no payment is taken and `brickken-relayed` execution becomes unavailable.
+
+| | `apiKey` | `signer`, no key |
+| --- | :---: | :---: |
+| Dapp API (tokenization, STOs, reads) | Yes | No |
+| Agentic API, `client-signed` | Yes | Yes |
+| Agentic API, `client-broadcast` | Yes | Yes |
+| Agentic API, `brickken-relayed` | **Rejected** | Yes |
+| RAMS reads and typed data | Yes | Yes |
+
+The SDK enforces this locally:
+
+```ts
+const bkn = new Brickken({ apiKey: 'key', signer })
+await bkn.agent.register(input, { executionMode: 'brickken-relayed' })
+// throws RelayedRequiresPaymentError, naming both fixes, with no network round trip
+```
+
+See [Authentication](/sdk/authentication) for the full matrix.
+
+## Every write is prepare → sign → send
+
+Preparing builds unsigned transactions; sending puts them on chain. The SDK defaults to **prepare-only**, so `execute: true` is an explicit opt-in.
+
+```ts
+const prepared = await bkn.agentToken.create({ chainId: '84532', name: 'Agent Token', symbol: 'AGT' })
+prepared.txId                  // the prepared transaction id
+prepared.transactions          // unsigned transactions
+prepared.x402Requirements      // what sending will cost
+prepared.sent                  // undefined: nothing was sent
+
+const done = await bkn.agentToken.create(
+  { chainId: '84532', name: 'Agent Token', symbol: 'AGT' },
+  { execute: true, waitForReceipt: true },        // waitForReceipt needs rpcUrl
+)
+done.payment?.requirement.amount
+done.deployedAddress                              // recovered from the receipt
+```
+
+Payment metadata is always a sibling field on the result. It is never mixed into the response body.
+
+## Where to go next
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/sdk/installation">
+    Runtimes, module formats, and optional peer dependencies.
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/sdk/quickstart">
+    A first Dapp read and a first agentic write, on sandbox.
+  </Card>
+  <Card title="Execution modes" icon="route" href="/sdk/execution-modes">
+    Who signs, who broadcasts, and what each mode costs.
+  </Card>
+  <Card title="Namespaces" icon="sitemap" href="/sdk/namespaces">
+    Every method, mapped to its backend endpoint.
+  </Card>
+</CardGroup>
+
+## Prerequisites the API does not expose
+
+Two things fail at request time and are invisible beforehand:
+
+1. The wallet you pass as `signerAddress` must be **whitelisted by Brickken** before any prepare accepts it. Request it together with your [API key](/get-started/request-api-key).
+2. An API key may only act on token symbols whose tokenizer email matches a `newTokenization` performed under that same key. Anything else raises `UnauthorizedTokenSymbolError`.
+
+Each Dapp write method also carries its own credit balance, so one method can run out while others still work — that one surfaces as `CreditsExhaustedError`, carrying `.method`.

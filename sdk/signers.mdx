@@ -1,0 +1,98 @@
+---
+title: 'Signers'
+description: 'The Signer contract, the three bundled adapters, and how to bring your own KMS or MPC wallet.'
+---
+
+The SDK does not own a wallet. It defines a minimal contract and signs through whatever you hand it.
+
+```ts
+interface Signer {
+  address(): Promise<Address>
+  signTypedData(data: TypedDataDefinition): Promise<Hex>
+  signTransaction?(transaction: TransactionRequest): Promise<Hex>     // optional
+}
+```
+
+Three methods, one of them optional. Nothing derived from a signer is ever sent to the API except a signature.
+
+## The bundled adapters
+
+```ts
+import { fromPrivateKey } from 'brickken-sdk/adapters/private-key'   // raw hex key
+import { fromEthers } from 'brickken-sdk/adapters/ethers'            // ethers v6
+import { fromViem } from 'brickken-sdk/adapters/viem'                // viem Account or WalletClient
+```
+
+| Adapter | Accepts | Peer dependency |
+| --- | --- | --- |
+| `fromPrivateKey` | A `0x`-prefixed hex private key | None — signs with the bundled `micro-eth-signer` |
+| `fromEthers` | Any ethers v6 signer | `ethers ^6` |
+| `fromViem` | A viem `Account` or `WalletClient` | `viem ^2` |
+
+`ethers` and `viem` are optional peers, imported only from their own subpath. A consumer using neither installs neither.
+
+```ts
+import { Brickken } from 'brickken-sdk'
+import { fromEthers } from 'brickken-sdk/adapters/ethers'
+import { Wallet } from 'ethers'
+
+const bkn = new Brickken({
+  env: 'sandbox',
+  signer: fromEthers(new Wallet(process.env.BRICKKEN_PRIVATE_KEY!)),
+})
+```
+
+## Why `signTransaction` is optional
+
+A KMS, MPC, or browser-wallet signer can sign typed data but not a raw transaction. That is deliberately enough for:
+
+- the entire **`brickken-relayed`** path — your key signs only the x402 payment authorization, which is EIP-712 typed data;
+- every **RAMS EIP-712 flow**, including the four signature-authorized lifecycle operations.
+
+Requiring `signTransaction` would exclude exactly the custody setups an institutional integrator uses. What it does exclude is `client-signed` and `client-broadcast`: those need a raw transaction signature, and the SDK throws `ValidationError` locally if the configured signer cannot produce one.
+
+```ts
+import { canSignTransactions } from 'brickken-sdk'
+
+canSignTransactions(signer)   // false for a typed-data-only signer
+```
+
+## Bring your own
+
+Implement the three methods against your provider. Nothing else is required.
+
+```ts
+import type { Signer, TypedDataDefinition, TransactionRequest } from 'brickken-sdk'
+
+const kmsSigner: Signer = {
+  async address() {
+    return await kms.getAddress()
+  },
+  async signTypedData(data: TypedDataDefinition) {
+    return await kms.signTypedData(data)
+  },
+  // omit signTransaction entirely if the provider cannot sign raw transactions
+}
+
+const bkn = new Brickken({ env: 'production', signer: kmsSigner })
+```
+
+<Warning>
+Adapters must forward the `TransactionRequest` to the underlying library **as-is**, rather than rebuilding it field by field. Prepare may include fee or type fields the SDK does not model, and dropping them changes what gets signed.
+</Warning>
+
+## Address checking
+
+For `client-signed` and `client-broadcast` writes, the SDK compares the configured signer's address against the `signerAddress` you passed and refuses a mismatch locally, case-insensitively — before any transaction is signed.
+
+```ts
+const signerAddress = await signer.address()
+
+await bkn.tokenization.mint(input, { execute: true, signerAddress })
+```
+
+In `brickken-relayed` mode `signerAddress` must be **omitted**: Brickken supplies its relayer as the signer, and passing one raises `ValidationError`.
+
+<Card title="Authentication" icon="key" href="/sdk/authentication">
+  Which credential the SDK derives from what you pass.
+</Card>

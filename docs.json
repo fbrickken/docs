@@ -226,6 +226,44 @@
         ]
       },
       {
+        "tab": "SDK",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "sdk/introduction",
+              "sdk/installation",
+              "sdk/quickstart",
+              "sdk/authentication"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "sdk/execution-modes",
+              "sdk/payments",
+              "sdk/signers",
+              "sdk/errors"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "sdk/namespaces",
+              "sdk/configuration"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "sdk/guides/tokenize-and-run-an-sto",
+              "sdk/guides/agent-and-token-workflow",
+              "sdk/guides/rams-mandate-workflow"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "Skill",
         "groups": [
           {
@@ -287,6 +325,11 @@
     {
       "source": "/mcp",
       "destination": "/mcp/introduction",
+      "permanent": false
+    },
+    {
+      "source": "/sdk",
+      "destination": "/sdk/introduction",
       "permanent": false
     },
     {

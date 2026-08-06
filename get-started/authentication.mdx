@@ -166,6 +166,7 @@ Polling a relayed operation with `GET /get-transaction-status` needs no credenti
 | Surface | API key | x402 | How you configure it |
 | --- | --- | --- | --- |
 | REST | Yes | Yes | `x-api-key` / `X-PAYMENT` headers |
+| SDK | Yes | Yes | `new Brickken({ apiKey, signer })`, or `Brickken.fromEnv(process.env)` |
 | MCP | Yes | Yes | `configure` tool, or `BRICKKEN_API_KEY` / `BRICKKEN_PRIVATE_KEY` |
 | CLI | RAMS reads only | Yes | `BRICKKEN_API_KEY` / `BRICKKEN_PRIVATE_KEY`, or `--api-key` / `--private-key` |
 | Skill | Yes | Yes | Environment variables, per the agent client |
@@ -178,9 +179,26 @@ Polling a relayed operation with `GET /get-transaction-status` needs no credenti
 | `BRICKKEN_BASE_URL` | `BKN_BASE_URL` | Override the API base URL |
 | `BRICKKEN_RPC_URL` | `BKN_RPC_URL` | RPC used to wait for deployment receipts |
 
-## Using the Dapp API from the CLI and MCP
+`Brickken.fromEnv(process.env)` reads the same variables and the same aliases, with one deliberate exception: it does **not** read `BRICKKEN_PRIVATE_KEY`. Turning a key into a signer is an explicit choice in the SDK — see [SDK authentication](/sdk/authentication).
+
+## Using the Dapp API from the SDK, the CLI, and MCP
 
 The Dapp API is not only reachable over plain HTTP. This is what each client can actually do with an API key today.
+
+### SDK — full Dapp API access with an API key
+
+The SDK is the client to use when your own code holds the credential. An API key alone reaches every Dapp read and write, typed, with the credential rules enforced locally before a request leaves your process.
+
+```ts
+import { Brickken } from 'brickken-sdk'
+
+const bkn = new Brickken({ env: 'production', apiKey: process.env.BRICKKEN_API_KEY })
+
+await bkn.tokenization.info({ tokenSymbol: 'EXMPL' })
+await bkn.sto.list({ tokenSymbol: 'EXMPL' })
+```
+
+Dapp writes default to `client-signed`, so they also need a signer and a whitelisted `signerAddress`. See [SDK](/sdk/introduction) for the full surface.
 
 ### MCP — full Dapp API access with an API key
 

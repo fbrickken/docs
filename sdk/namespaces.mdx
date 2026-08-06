@@ -1,0 +1,177 @@
+---
+title: 'Namespaces'
+description: 'Every SDK method, mapped to the backend method or endpoint it reaches.'
+---
+
+One client exposes eight namespaces. Writes take `(input, options?)` and return a [`WriteResult`](/sdk/quickstart#reading-the-result); reads take a query object and return the API's payload.
+
+```ts
+const bkn = new Brickken({ env: 'sandbox', apiKey })
+
+bkn.tokenization   bkn.sto      bkn.agent     bkn.agentToken
+bkn.rams           bkn.tx       bkn.network   bkn.discovery
+```
+
+## `tokenization`
+
+Tokenization and security-token operations, plus the reads scoped to a token. **API key required**, default mode `client-signed`.
+
+| Method | Backend |
+| --- | --- |
+| `create(input, options?)` | `newTokenization` |
+| `mint(input, options?)` | `mintToken` |
+| `whitelist(input, options?)` | `whitelist` |
+| `burn(input, options?)` | `burnToken` |
+| `transfer(input, options?)` | `transferTo` |
+| `transferFrom(input, options?)` | `transferFrom` |
+| `approve(input, options?)` | `approve` |
+| `distributeDividend(input, options?)` | `dividendDistribution` |
+| `patchDocs(form)` | `PATCH /patch-token-docs` |
+| `info(query)` | `GET /get-token-info` |
+| `tokenizer(query)` | `GET /get-tokenizer-info` |
+| `allowance(query)` | `GET /get-allowance` |
+| `whitelistStatus(query)` | `GET /get-whitelist-status` |
+| `balanceAndWhitelist(query)` | `GET /get-balance-whitelist` |
+| `dividend(query)` | `GET /get-dividend-distribution` |
+
+## `sto`
+
+Security Token Offerings: the lifecycle, plus the reads scoped to an offering. **API key required**, default mode `client-signed`.
+
+| Method | Backend |
+| --- | --- |
+| `create(input, options?)` | `newSto` |
+| `invest(input, options?)` | `newInvest` |
+| `claim(input, options?)` | `claimTokens` |
+| `close(input, options?)` | `closeOffer` |
+| `list(query)` | `GET /get-stos` |
+| `get(query)` | `GET /get-sto-by-id` |
+| `balance(query)` | `GET /get-sto-balance` |
+| `investments(query)` | `GET /get-investments-by-sto-id` |
+| `investor(query)` | `GET /get-investor-info` |
+
+## `agent`
+
+ERC-8004 identity and reputation on Base. API key **or** x402; default mode `brickken-relayed`.
+
+| Method | Backend |
+| --- | --- |
+| `register(input, options?)` | `POST /x402/agent/register` |
+| `setUri(input, options?)` | `POST /x402/agent/set-uri` |
+| `setMetadata(input, options?)` | `POST /x402/agent/set-metadata` |
+| `setWallet(input, options?)` | `POST /x402/agent/set-wallet` |
+| `transferOwnership(input, options?)` | `POST /x402/agent/transfer-ownership` |
+| `feedback.give(input, options?)` | `POST /x402/agent/feedback/give` |
+| `feedback.revoke(input, options?)` | `POST /x402/agent/feedback/revoke` |
+| `feedback.respond(input, options?)` | `POST /x402/agent/feedback/respond` |
+
+`register` returns `info.agentUuid` — save it, because `setUri`, `setMetadata`, and `transferOwnership` all need it.
+
+## `agentToken`
+
+Agent-owned ERC-20 tokens. API key **or** x402; default mode `brickken-relayed`.
+
+| Method | Backend |
+| --- | --- |
+| `create(input, options?)` | `POST /x402/token/create` |
+| `mint(input, options?)` | `POST /x402/token/mint` |
+| `burn(input, options?)` | `POST /x402/token/burn` |
+| `transfer(input, options?)` | `POST /x402/token/transfer` |
+| `transferFrom(input, options?)` | `POST /x402/token/transfer-from` |
+| `approve(input, options?)` | `POST /x402/token/approve` |
+
+<Note>
+Amounts here are `HumanAmount` and are scaled by `decimals`. RAMS caps are `RawBaseUnits` and are not. The types make the asymmetry visible so it cannot be crossed by accident.
+</Note>
+
+## `rams`
+
+ERC-8226 mandates. Every call defaults to `chainId: '11155111'` (Ethereum Sepolia). API key **or** x402; default mode `client-signed`.
+
+### Lifecycle — relayable with a principal signature
+
+| Method | Backend |
+| --- | --- |
+| `grantMandate(input, options?)` | `POST /x402/rams/grant-mandate` |
+| `revokeMandate(input, options?)` | `POST /x402/rams/revoke-mandate` |
+| `extendMandate(input, options?)` | `POST /x402/rams/extend-mandate` |
+| `setOperator(input, options?)` | `POST /x402/rams/set-operator` |
+
+These four accept `authorize: 'direct' | 'signature'`. With `'signature'` the SDK fetches the typed data, signs it, and resubmits the same parameters and **the same deadline**.
+
+### Role-bound writes — never relayable
+
+| Method | Backend |
+| --- | --- |
+| `execute(input, options?)` | `POST /x402/rams/execute` |
+| `setExecutorAction(input, options?)` | `POST /x402/rams/set-executor-action` |
+| `freezeAgent(input, options?)` | `POST /x402/rams/freeze-agent` |
+| `unfreezeAgent(input, options?)` | `POST /x402/rams/unfreeze-agent` |
+| `grantPrincipal(input, options?)` | `POST /x402/rams/grant-principal` |
+| `revokePrincipal(input, options?)` | `POST /x402/rams/revoke-principal` |
+
+Their on-chain call requires `msg.sender` to hold a role, so `brickken-relayed` is rejected locally.
+
+### Reads and typed data
+
+| Method | Backend |
+| --- | --- |
+| `mandate(query)` | `GET /rams/mandate` |
+| `status(query)` | `GET /rams/status` |
+| `canExecute(query)` | `GET /rams/can-execute` |
+| `complianceStatus(query)` | `GET /rams/compliance-status` |
+| `executorAction(query)` | `GET /rams/executor-action` |
+| `typedData.grantMandate(query)` | `GET /rams/typed-data/grant-mandate` |
+| `typedData.revokeMandate(query)` | `GET /rams/typed-data/revoke-mandate` |
+| `typedData.extendMandate(query)` | `GET /rams/typed-data/extend-mandate` |
+| `typedData.setOperator(query)` | `GET /rams/typed-data/set-operator` |
+
+The `typedData.*` calls return a `TypedDataEnvelope` carrying `domain`, `types`, `primaryType`, `message`, and — critically — `deadline` and `nonce`, which must be resubmitted verbatim alongside the signature.
+
+## `tx` — the escape hatch
+
+Any backend method is reachable the day it ships, without waiting for a typed namespace.
+
+| Method | Backend |
+| --- | --- |
+| `prepare(input, options?)` | `POST /prepare-transactions`, or the method's facade when one exists |
+| `sign(transactions)` | Local only |
+| `send(body)` | `POST /send-transactions` |
+| `status(query)` | `GET /get-transaction-status` |
+| `waitForReceipt(input)` | Local only, over `rpcUrl` |
+
+```ts
+await bkn.tx.prepare({ method: 'someNewMethod', chainId: '8453', custom: 'value' })
+await bkn.tx.sign(transactions)
+await bkn.tx.send({ txId, signedTransactions })
+await bkn.tx.status({ txId })
+await bkn.tx.waitForReceipt({ txHash, chainId: '8453' })
+```
+
+An unknown method name passes through with only `chainId` normalized. A known one is mapped exactly as its typed namespace would map it. Three aliases from the CLI core are still accepted: `createToken`, `agentApprove`, and `newTokenizedAgent`.
+
+## `network` and `discovery`
+
+| Method | Backend | Credential |
+| --- | --- | --- |
+| `network.info(query)` | `GET /get-network-info` | None required |
+| `discovery.x402()` | `GET /.well-known/x402` | Public |
+| `discovery.openapi()` | `GET /openapi.json` | Public |
+
+## Chain identifiers
+
+`CHAINS` is exported for the common values, and any `chainId` accepts decimal or hex — both are normalized to a canonical decimal string before the request.
+
+```ts
+import { CHAINS, normalizeChainId } from 'brickken-sdk'
+
+CHAINS.base          // '8453'
+CHAINS.baseSepolia   // '84532'
+CHAINS.sepolia       // '11155111'
+CHAINS.ethereum      // '1'
+CHAINS.bnb           // '56'
+CHAINS.polygon       // '137'
+CHAINS.polygonAmoy   // '80002'
+
+normalizeChainId('0x14a34')   // '84532'
+```

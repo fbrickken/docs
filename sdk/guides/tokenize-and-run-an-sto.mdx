@@ -1,0 +1,260 @@
+---
+title: 'Tokenize an asset and run an STO'
+description: 'The full Dapp API lifecycle with the SDK, from creating a token to distributing dividends.'
+icon: 'route'
+---
+
+The Dapp API is where the SDK earns its place: it is the typed client for the surface the [CLI](/cli/introduction) cannot reach at all. Everything below targets **sandbox** on Sepolia (`11155111`), so nothing here moves real value.
+
+## Before you start
+
+<Steps>
+  <Step title="Get an API key">
+    [Request one](/get-started/request-api-key). Every call below needs it.
+  </Step>
+  <Step title="Get your signer whitelisted">
+    Brickken must whitelist the wallet you pass as `signerAddress` before any prepare accepts it. Ask for it in the same request as the key.
+  </Step>
+  <Step title="Fund that wallet with native gas">
+    Dapp writes default to `client-signed`: you sign, Brickken broadcasts, and your wallet pays the gas — Sepolia ETH here.
+  </Step>
+</Steps>
+
+<Note>
+The wallet that performs the first `newTokenization` becomes the **tokenizer** for that token. Only the tokenizer can mint it, whitelist its investors, or distribute its dividends. Your API key is also scoped to the symbols it tokenized — anything else raises `UnauthorizedTokenSymbolError`.
+</Note>
+
+## Set up the client once
+
+```ts
+import { Brickken } from 'brickken-sdk'
+import { fromPrivateKey } from 'brickken-sdk/adapters/private-key'
+
+const signer = fromPrivateKey(process.env.BRICKKEN_PRIVATE_KEY!)
+const signerAddress = await signer.address()
+
+const bkn = new Brickken({
+  env: 'sandbox',
+  apiKey: process.env.BRICKKEN_API_KEY,
+  signer,
+})
+
+const chainId = '11155111'
+const write = { execute: true, signerAddress } as const
+```
+
+`write` is the option object every step below reuses: `execute: true` prepares, signs, and sends in one call, and `signerAddress` is required in `client-signed` mode because prepare builds the transaction against that account's nonce.
+
+<Tip>
+Drop `execute: true` from any step to prepare only and inspect `result.transactions` before committing. Chain ids accept decimal or `0x`-prefixed hex — a bare `aa36a7` is rejected.
+</Tip>
+
+## 1. Create the tokenized asset
+
+```ts
+const token = await bkn.tokenization.create(
+  {
+    chainId,
+    tokenizerEmail: 'issuer@example.com',
+    name: 'Example Asset',
+    tokenSymbol: 'EXMPL',
+    tokenType: 'EQUITY',
+    supplyCap: '1000000',
+    url: 'https://example.com/token-docs',
+  },
+  write,
+)
+
+token.sent?.transactionHashes
+```
+
+The field is `name`, not `tokenName`. `tokenType` accepts `EQUITY`, `DEBT`, `BILL_FACTORING`, `ICO`, `STABLECOIN`, `REVENUE_SHARE`, `RWA_TOKEN`, or `PROFIT_SHARING`, and defaults to `EQUITY`. `supplyCap` defaults to `0`, which means uncapped — set it deliberately.
+
+Confirm it exists:
+
+```ts
+await bkn.tokenization.info({ tokenSymbol: 'EXMPL' })
+```
+
+## 2. Whitelist your investors
+
+A security token only moves between whitelisted wallets. Whitelist before you mint or accept investment.
+
+```ts
+await bkn.tokenization.whitelist(
+  {
+    chainId,
+    tokenSymbol: 'EXMPL',
+    userToWhitelist: [
+      {
+        investorAddress: '0x1111111111111111111111111111111111111111',
+        investorEmail: 'investor@example.com',
+        whitelistStatus: true,
+      },
+    ],
+  },
+  write,
+)
+```
+
+`whitelistStatus: false` removes an investor. Verify with:
+
+```ts
+await bkn.tokenization.whitelistStatus({
+  tokenSymbol: 'EXMPL',
+  investorAddress: '0x1111111111111111111111111111111111111111',
+})
+```
+
+## 3. Mint tokens
+
+```ts
+await bkn.tokenization.mint(
+  {
+    chainId,
+    tokenSymbol: 'EXMPL',
+    userToMint: [
+      {
+        investorEmail: 'investor@example.com',
+        investorAddress: '0x1111111111111111111111111111111111111111',
+        amount: '100',
+        needWhitelist: true,
+      },
+    ],
+  },
+  write,
+)
+```
+
+`needWhitelist: true` whitelists the recipient as part of the same mint, which collapses step 2 into step 3 when you are onboarding a new investor.
+
+## 4. Launch the offering
+
+```ts
+await bkn.sto.create(
+  {
+    chainId,
+    tokenizerEmail: 'issuer@example.com',
+    tokenSymbol: 'EXMPL',
+    tokenAmount: '1000',
+    offeringName: 'Series A',
+    startDate: '2026-09-01T00:00:00.000Z',
+    endDate: '2026-12-31T23:59:59.000Z',
+    acceptedCoin: 'USDT',
+    minRaiseUSD: '10000',
+    maxRaiseUSD: '100000',
+    minInvestment: '100',
+    maxInvestment: '10000',
+  },
+  write,
+)
+```
+
+Every one of those fields is required — the type will tell you if one is missing. Dates are ISO 8601, and `acceptedCoin` is a payment token symbol: `USDT`, `USDC`, or `BKN`.
+
+Once it is live, list your offerings and keep the `uuid`:
+
+```ts
+const offerings = await bkn.sto.list({ tokenSymbol: 'EXMPL' })
+```
+
+## 5. Take an investment
+
+The **investor** signs this one, not the tokenizer — so build a second client with the investor's signer, or pass their address as `signerAddress`.
+
+```ts
+const investment = await bkn.sto.invest(
+  {
+    chainId,
+    tokenSymbol: 'EXMPL',
+    investorEmail: 'investor@example.com',
+    investorAddress: '0x1111111111111111111111111111111111111111',
+    investmentAmount: '1000',
+    paymentTokenSymbol: 'USDT',
+  },
+  { execute: true, signerAddress: '0x1111111111111111111111111111111111111111' },
+)
+
+investment.transactions.length    // may be 2: an ERC-20 approve, then the investment
+```
+
+The investor needs the payment token in their wallet, and prepare may return **two** transactions — an ERC-20 `approve` followed by the investment. The SDK signs and sends both, in order.
+
+Track progress:
+
+```ts
+await bkn.sto.investments({ tokenSymbol: 'EXMPL', id: offeringUuid })
+await bkn.sto.balance({ tokenSymbol: 'EXMPL', id: offeringUuid })
+```
+
+## 6. Let investors claim their tokens
+
+The investor signs this too.
+
+```ts
+await bkn.sto.claim(
+  {
+    chainId,
+    tokenSymbol: 'EXMPL',
+    investorEmail: 'investor@example.com',
+    investorAddress: '0x1111111111111111111111111111111111111111',
+  },
+  { execute: true, signerAddress: '0x1111111111111111111111111111111111111111' },
+)
+```
+
+## 7. Close the offering
+
+```ts
+await bkn.sto.close(
+  { chainId, tokenSymbol: 'EXMPL', tokenizerEmail: 'issuer@example.com' },
+  write,
+)
+```
+
+## 8. Distribute dividends
+
+Only the tokenizer can do this.
+
+```ts
+await bkn.tokenization.distributeDividend(
+  { chainId, tokenSymbol: 'EXMPL', amount: '1000' },
+  write,
+)
+
+await bkn.tokenization.dividend({ tokenSymbol: 'EXMPL' })
+```
+
+## Broadcasting it yourself
+
+Add `rpcUrl` to the client and `executionMode: 'client-broadcast'` to any step. You sign and submit through your own node, and the SDK confirms `{ txId, txHash }` back to Brickken so the transaction still appears in `get-transaction-status` and in the dApp.
+
+```ts
+const bkn = new Brickken({ env: 'sandbox', apiKey, signer, rpcUrl: 'https://your-node.example' })
+
+await bkn.tokenization.create(input, { ...write, executionMode: 'client-broadcast' })
+```
+
+If the confirmation fails after a successful broadcast, catch `BroadcastConfirmationError` and resume only that step — see [Execution modes](/sdk/execution-modes#when-confirmation-fails).
+
+## When something fails
+
+| Error | What it means |
+| --- | --- |
+| `ValidationError` | Refused locally — usually a missing `signerAddress`, or a Dapp method with no API key |
+| `AuthError` | The key is missing, wrong, or not accepted on that endpoint |
+| `UnauthorizedTokenSymbolError` | Your key did not tokenize that symbol |
+| `CreditsExhaustedError` | That specific method's credit balance is spent; `.method` names it |
+| `RateLimitError` | Rate limited on prepare; `.retryAfterSeconds` says for how long |
+| `ApiError` | Anything else non-2xx; `.status` and `.body` carry the API's own answer |
+
+Each write method has its own credit balance, so exhausting mint credits does not block `newSto`. See [Errors](/sdk/errors) for the full list.
+
+<CardGroup cols={2}>
+  <Card title="Namespaces" icon="sitemap" href="/sdk/namespaces">
+    Every method above, mapped to its backend endpoint.
+  </Card>
+  <Card title="The same lifecycle over HTTP" icon="code" href="/api-reference/guides/tokenize-and-run-an-sto">
+    The raw request bodies, if you would rather not use the SDK.
+  </Card>
+</CardGroup>

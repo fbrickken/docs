@@ -1,0 +1,154 @@
+---
+title: 'Quickstart'
+description: 'A first Dapp read and a first agentic write with the SDK, on sandbox.'
+---
+
+Everything here runs against **sandbox** — nothing moves real value.
+
+<Tabs>
+  <Tab title="Dapp API — with an API key">
+    ```ts
+    import { Brickken } from 'brickken-sdk'
+
+    const bkn = new Brickken({ env: 'sandbox', apiKey: process.env.BRICKKEN_API_KEY })
+
+    const token = await bkn.tokenization.info({ tokenSymbol: 'EXMPL' })
+    const offerings = await bkn.sto.list({ tokenSymbol: 'EXMPL' })
+    ```
+
+    Now prepare a write. Nothing is on chain yet — this returns unsigned transactions and a `txId`:
+
+    ```ts
+    const prepared = await bkn.tokenization.create(
+      {
+        chainId: '11155111',
+        tokenizerEmail: 'issuer@example.com',
+        name: 'Example Asset',
+        tokenSymbol: 'EXMPL',
+        tokenType: 'RWA_TOKEN',
+        supplyCap: '1000000',
+        url: 'https://example.com/token-docs',
+      },
+      { signerAddress: '0xYourWhitelistedWallet' },
+    )
+
+    prepared.txId
+    prepared.transactions
+    ```
+
+    Add a signer and `execute: true` to sign locally and let Brickken broadcast:
+
+    ```ts
+    import { fromPrivateKey } from 'brickken-sdk/adapters/private-key'
+
+    const signer = fromPrivateKey(process.env.BRICKKEN_PRIVATE_KEY!)
+    const bkn = new Brickken({ env: 'sandbox', apiKey: process.env.BRICKKEN_API_KEY, signer })
+
+    const done = await bkn.tokenization.create(input, {
+      execute: true,
+      signerAddress: await signer.address(),
+    })
+
+    done.sent?.transactionHashes
+    ```
+
+    <Note>
+    `signerAddress` must be whitelisted by Brickken first. Ask for it when you [request your key](/get-started/request-api-key).
+    </Note>
+  </Tab>
+
+  <Tab title="Agentic API — with a wallet">
+    No API key. The signer pays with x402 and Brickken's relayer does the rest:
+
+    ```ts
+    import { Brickken } from 'brickken-sdk'
+    import { fromPrivateKey } from 'brickken-sdk/adapters/private-key'
+
+    const bkn = new Brickken({
+      env: 'sandbox',
+      signer: fromPrivateKey(process.env.BRICKKEN_PRIVATE_KEY!),
+      payment: {
+        maxAmountBaseUnits: '50000',                  // ceiling in the asset's base units
+        onPaymentRequired: async quote => {
+          console.log(`about to pay ${quote.displayPrice}`)
+          return true
+        },
+      },
+    })
+
+    const agent = await bkn.agent.register(
+      {
+        chainId: '84532',
+        name: 'Research Agent',
+        image: 'https://example.com/agent.png',       // required, must be publicly reachable
+        serviceName: 'A2A',
+        serviceEndpoint: 'https://agent.example/.well-known/agent-card.json',
+      },
+      { execute: true },                               // prepare is free here; this also pays and sends
+    )
+
+    console.log(agent.info?.agentUuid)                 // save it: set-uri and set-metadata need it
+    console.log(agent.payment?.settlement)             // what the payment settled to
+    ```
+
+    Drop `execute: true` to prepare only and inspect the quote before committing:
+
+    ```ts
+    const prepared = await bkn.agent.register(input)
+    prepared.x402Requirements    // what sending will cost
+    prepared.sent                // undefined: nothing was sent
+    ```
+
+    Fund the wallet with Base Sepolia USDC first — the exact asset and amount come from the live quote.
+  </Tab>
+
+  <Tab title="No credential at all">
+    Two things work with nothing configured: the public reads, and preparing an x402-eligible agentic method.
+
+    ```ts
+    import { Brickken } from 'brickken-sdk'
+
+    const bkn = new Brickken({ env: 'sandbox' })
+
+    const network = await bkn.network.info({ chainId: '11155111' })
+    ```
+
+    Sending always needs a credential. Attempting it without one raises `ValidationError` before any request leaves your process.
+  </Tab>
+</Tabs>
+
+## Reading the result
+
+Every write returns the same shape, whatever the API or the execution mode:
+
+```ts
+interface WriteResult<TInfo> {
+  txId: string
+  transactions: UnsignedTransactionLike[]
+  executionMode: ExecutionMode      // the effective mode, stated rather than implied
+  info?: TInfo                      // method-specific data, e.g. agentUuid
+  x402Requirements?: X402Requirement[]
+  sent?: SendResult                 // present only when you passed execute: true
+  payment?: PaymentRecord           // present only when a payment was made
+  receipt?: ReceiptSummary          // present only with waitForReceipt
+  deployedAddress?: Address         // recovered from the receipt, for deployments
+  raw: unknown
+}
+```
+
+## Where to go next
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/sdk/authentication">
+    Which credential reaches which method.
+  </Card>
+  <Card title="Execution modes" icon="route" href="/sdk/execution-modes">
+    Who signs, who broadcasts, and what it costs.
+  </Card>
+  <Card title="Tokenize and run an STO" icon="building-columns" href="/sdk/guides/tokenize-and-run-an-sto">
+    The Dapp lifecycle end to end.
+  </Card>
+  <Card title="Agent and token workflow" icon="robot" href="/sdk/guides/agent-and-token-workflow">
+    Register an agent, then deploy its token.
+  </Card>
+</CardGroup>

@@ -1,0 +1,115 @@
+---
+title: 'Authentication'
+description: 'API key or x402 signer — which credential the SDK uses, and which combinations it refuses.'
+---
+
+The SDK does not ask you to pick a credential mode. It derives one from what you pass to the constructor:
+
+| You pass | Mode | What it can do |
+| --- | --- | --- |
+| `apiKey` | `api-key` | The full Dapp API, plus agentic and RAMS in the two client-controlled modes |
+| `signer`, no `apiKey` | `x402` | Agentic and RAMS, paying per call; every execution mode including relayed |
+| Neither | `anonymous` | Public reads, and free prepares of x402-eligible agentic methods |
+
+Passing both is legal — the SDK uses the key for authentication and the signer for transaction signing — but it takes `brickken-relayed` off the table, because a relayed send must be paid with x402.
+
+```ts
+import { Brickken } from 'brickken-sdk'
+import { fromPrivateKey } from 'brickken-sdk/adapters/private-key'
+
+// api-key mode
+const dapp = new Brickken({ env: 'sandbox', apiKey: process.env.BRICKKEN_API_KEY })
+
+// x402 mode
+const agentic = new Brickken({
+  env: 'sandbox',
+  signer: fromPrivateKey(process.env.BRICKKEN_PRIVATE_KEY!),
+})
+
+dapp.credentialMode      // 'api-key'
+agentic.credentialMode   // 'x402'
+```
+
+## What each credential reaches
+
+| | `apiKey` | `signer`, no key |
+| --- | :---: | :---: |
+| Dapp API writes (`tokenization.*`, `sto.*`) | Yes | No |
+| Dapp API reads | Yes | No |
+| Agentic API, `client-signed` | Yes | Yes |
+| Agentic API, `client-broadcast` | Yes | Yes |
+| Agentic API, `brickken-relayed` | **Rejected** | Yes |
+| RAMS writes | Yes | Yes |
+| RAMS reads and typed data | Yes | Yes |
+| `GET /get-network-info`, `GET /get-transaction-status` | Yes | Yes, and anonymously |
+
+Brickken treats the two credentials as alternatives, not layers: when `x-api-key` is present the API skips the x402 path entirely, so no payment is taken.
+
+## Combinations the SDK refuses locally
+
+These throw before any request leaves your process, with the fix named in the message.
+
+| Attempt | Error |
+| --- | --- |
+| `brickken-relayed` while an `apiKey` is configured | `RelayedRequiresPaymentError` |
+| `brickken-relayed` on a method whose on-chain call checks `msg.sender` | `ValidationError` |
+| `brickken-relayed` with a `signerAddress` passed | `ValidationError` — Brickken supplies its relayer as the signer |
+| `client-signed` or `client-broadcast` without a `signerAddress` | `ValidationError` — prepare builds against that account's nonce |
+| A Dapp method with no credential at all, even to prepare | `ValidationError` |
+| `execute: true` with no credential | `ValidationError` |
+| `client-signed` or `client-broadcast` with a signer that has no `signTransaction` | `ValidationError` |
+
+```ts
+const bkn = new Brickken({ apiKey: 'key', signer })
+await bkn.agent.register(input, { executionMode: 'brickken-relayed' })
+// RelayedRequiresPaymentError — no network round trip
+```
+
+<Note>
+Credential rules that only bind at **send** time are checked only when you pass `execute: true`. A free prepare is never rejected for a credential it does not yet need.
+</Note>
+
+## Prepare without a credential
+
+An x402-eligible agentic method — everything under `/x402/*` — prepares with no credential at all. A Dapp method does not: the backend requires a key for any non-x402 method at prepare as well as at send, so the SDK refuses the call rather than spending a round trip on it.
+
+```ts
+const anon = new Brickken({ env: 'sandbox' })
+
+await anon.agent.register(input)          // fine: prepares, returns a quote
+await anon.tokenization.info({ tokenSymbol: 'EXMPL' })   // reaches the API, which requires the key
+await anon.tokenization.create(input)     // ValidationError: this method requires an apiKey
+```
+
+## Environment variables
+
+`Brickken.fromEnv` reads the same variables the CLI and MCP server already use, including the `BKN_*` aliases:
+
+```ts
+const bkn = Brickken.fromEnv(process.env)
+```
+
+| Variable | Alias | Purpose |
+| --- | --- | --- |
+| `BRICKKEN_API_KEY` | `BKN_API_KEY` | Brickken API key |
+| `BRICKKEN_ENV` | `BKN_ENV` | `sandbox` or `production` |
+| `BRICKKEN_BASE_URL` | `BKN_BASE_URL` | Override the API base URL |
+| `BRICKKEN_RPC_URL` | `BKN_RPC_URL` | JSON-RPC used for `client-broadcast`, receipts, and token metadata |
+
+`BRICKKEN_PRIVATE_KEY` is deliberately **not** read. Turning a key into a signer is an explicit choice, never an implicit one:
+
+```ts
+const bkn = Brickken.fromEnv(process.env, {
+  signer: fromPrivateKey(process.env.BRICKKEN_PRIVATE_KEY!),
+})
+```
+
+## Key handling
+
+Your private key never leaves your process. It signs the x402 payment authorization, `client-signed` and `client-broadcast` transactions, and RAMS typed data, all locally. The SDK never puts it in a request body or a header.
+
+<Warning>
+Never paste production API keys or private keys into shared terminals, tickets, chat logs, or committed `.env` files. Use your platform's secret store or process environment.
+</Warning>
+
+For institutional custody, implement the [`Signer` interface](/sdk/signers) against your KMS or MPC provider instead of holding a raw key.

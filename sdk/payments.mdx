@@ -1,0 +1,104 @@
+---
+title: 'Payments'
+description: 'How the SDK handles the x402 handshake, and the three controls that bound what it can spend.'
+---
+
+import X402BaseSepoliaAsset from '/snippets/x402-base-sepolia-asset.mdx';
+
+The SDK performs the whole x402 handshake for you. A send that answers `402 Payment Required` is decoded, quoted against your policy, signed locally, and retried with an `X-PAYMENT` header — all inside the call you already made.
+
+You never construct a payment yourself. You decide whether one is allowed.
+
+## Spending controls
+
+x402 payments are non-refundable, and an autonomous agent with no policy is an unbounded spender. Three controls, all optional and all strongly recommended:
+
+```ts
+new Brickken({
+  signer,
+  payment: {
+    maxAmountBaseUnits: '50000',                   // hard ceiling; throws before signing
+    onPaymentRequired: async quote => BigInt(quote.amountBaseUnits) <= 20_000n,
+    onPayment: record => audit.log(record),        // called after settlement
+  },
+})
+```
+
+| Control | When it runs | Effect |
+| --- | --- | --- |
+| `maxAmountBaseUnits` | Before anything is signed | Refuses any quote above the ceiling, with `PaymentDeclinedError` |
+| `onPaymentRequired(quote)` | Before anything is signed | Return `false` to refuse this specific payment |
+| `onPayment(record)` | After the payment settles | Observe-only, for audit logging and accounting |
+
+The ceiling is expressed in the advertised asset's **base units**, as an integer string. Base units are the only unambiguous unit available at that point: the quote does not always carry the asset's decimals.
+
+## The quote
+
+`onPaymentRequired` receives everything the server advertised, so a policy can branch on the asset and the network, not only the number:
+
+```ts
+interface PaymentQuote {
+  requirement: X402Requirement
+  amountBaseUnits: string
+  displayPrice?: string        // e.g. "0.010000000000000000 USDC"
+  tokenSymbol?: string
+  network: string              // CAIP-2, e.g. "eip155:84532"
+  asset: string
+  payTo: string
+  routeKey?: string
+  transferMethodAssumed: boolean   // true when the server did not advertise one and eip3009 was assumed
+}
+```
+
+```ts
+payment: {
+  onPaymentRequired: async quote => {
+    if (quote.transferMethodAssumed) return false          // refuse anything under-specified
+    if (quote.network !== 'eip155:84532') return false      // testnet only
+    return BigInt(quote.amountBaseUnits) <= 20_000n
+  },
+}
+```
+
+## What the SDK guarantees
+
+- **Every signed value comes from the live header.** Chain, asset, transfer rail, amount, recipient, and the authorization window are read from the `PAYMENT-REQUIRED` response, never hardcoded.
+- **No `txId` is ever paid twice.** The client remembers what it has paid for. The API reserves a payment and settles it only after the operation confirms, so a `pending` status must not be paid again — paying twice for one `txId` is money gone.
+- **A paid send is never retried.** `429`, `5xx`, and transport failures retry with jittered backoff, but not a send for which a payment was already authorized. If that one fails, the error carries `.payment` so you can reconcile the charge.
+- **Payment metadata stays a sibling.** `result.payment` is never spliced into the response body.
+
+```ts
+const done = await bkn.agent.register(input, { execute: true })
+
+done.payment?.payer
+done.payment?.requirement.amount
+done.payment?.settlement        // decoded PAYMENT-RESPONSE header, when the server sent one
+```
+
+## What is free and what is not
+
+Preparing is free in `brickken-relayed` mode only. The two client-controlled modes split the same total evenly across prepare and send — so a prepare-only call in `client-signed` mode is a paid call.
+
+| Mode | Prepare | Send |
+| --- | --- | --- |
+| `brickken-relayed` | Free | The full price |
+| `client-signed` | Half the price | Half the price |
+| `client-broadcast` | Half the price | Half the price |
+
+Dapp writes authenticated with an API key are not x402-priced at all; they draw on the per-method credit balance attached to your key, and exhausting one raises `CreditsExhaustedError` carrying `.method`.
+
+See [Pricing](/api-reference/endpoint/agentic-pricing) for the per-operation table.
+
+## Payment asset
+
+<X402BaseSepoliaAsset />
+
+## Rate limits on prepare
+
+Preparing is free in relayed mode, but not unlimited. The API caps how many prepared transactions a wallet may have outstanding and answers `429` with `Too many outstanding prepared transactions for this wallet`.
+
+The SDK honours the `Retry-After` it comes with, but only for the configured number of attempts — three by default. After that it throws `RateLimitError`, carrying `.retryAfterSeconds`. A loop that prepares without sending will therefore slow down and then fail: treat the quota as a limit to respect, not a delay to wait out.
+
+<Card title="Errors" icon="triangle-exclamation" href="/sdk/errors">
+  Every failure class, and which ones carry payment state.
+</Card>

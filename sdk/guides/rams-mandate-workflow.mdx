@@ -1,0 +1,220 @@
+---
+title: 'RAMS mandate workflow'
+description: 'Grant, use, and revoke an ERC-8226 mandate with the SDK, including the signature-authorized path.'
+icon: 'file-signature'
+---
+
+import RamsSepoliaNote from '/snippets/rams-sepolia-note.mdx';
+
+RAMS (ERC-8226) lets a **principal** grant an **agent** a compliance-gated, value-capped mandate to move a specific asset. Caps are enforced on chain, usage is recorded, and an enforcer can freeze an agent across every mandate at once.
+
+<RamsSepoliaNote />
+
+Every `rams.*` call defaults to `chainId: '11155111'`, so you can omit it entirely.
+
+## The actors
+
+| Role | Does |
+| --- | --- |
+| **Principal** | Owns the asset and grants the mandate |
+| **Agent** | Spends under the mandate, within its caps |
+| **Operator** | Optionally acts on the principal's behalf |
+| **Executor** | The contract that performs the transfer; its selectors must be registered |
+| **Compliance provider** | Decides which principals are eligible |
+
+## Set up the client
+
+```ts
+import { Brickken } from 'brickken-sdk'
+import { fromPrivateKey } from 'brickken-sdk/adapters/private-key'
+
+const bkn = new Brickken({
+  env: 'sandbox',
+  signer: fromPrivateKey(process.env.BRICKKEN_PRIVATE_KEY!),
+  payment: { maxAmountBaseUnits: '50000' },
+})
+```
+
+An `apiKey` also works for RAMS — reads, typed data, and the two client-controlled execution modes all accept one. Only `brickken-relayed` requires x402.
+
+## 1. Check the principal is eligible
+
+A mandate cannot be granted to an ineligible principal, so check before you spend anything.
+
+```ts
+await bkn.rams.complianceStatus({
+  principal: '0xPrincipal',
+  identityRef: 'urn:example:principal:1',
+})
+```
+
+If the principal is not yet registered, whoever holds the compliance role grants it:
+
+```ts
+await bkn.rams.grantPrincipal(
+  { principal: '0xPrincipal', identityRef: 'urn:example:principal:1', expiresAt: '1893456000' },
+  { execute: true, signerAddress: complianceAddress },
+)
+```
+
+`grantPrincipal` is role-bound: it requires `msg.sender` to hold the role, so it is always `client-signed`.
+
+## 2. Grant the mandate
+
+The four lifecycle operations — `grantMandate`, `revokeMandate`, `extendMandate`, `setOperator` — accept either authorization flow.
+
+### Direct authorization
+
+The transaction sender authorizes on chain. This is the default.
+
+```ts
+await bkn.rams.grantMandate(
+  {
+    agent: '0xAgent',
+    principal: '0xPrincipal',
+    asset: '0xAsset',
+    identityRef: 'urn:example:principal:1',
+    validUntil: '1893456000',
+    maxTransactionValue: 'max',                  // alias for 2^256-1
+    maxCumulativeValue: '1000000',               // raw base units, no decimal scaling
+    actions: ['0x23b872dd'],                     // bytes32 or a bare 4-byte selector
+  },
+  { execute: true, signerAddress: principalAddress },
+)
+```
+
+### Signature authorization
+
+The principal signs EIP-712 off chain, so any relayer can send the transaction. Doing this by hand means fetching the typed data, signing it, and resubmitting the same parameters **with the same deadline** — the constraint most easily broken. `authorize: 'signature'` does all three steps for you.
+
+```ts
+await bkn.rams.grantMandate(
+  {
+    agent: '0xAgent',
+    principal: '0xPrincipal',
+    asset: '0xAsset',
+    identityRef: 'urn:example:principal:1',
+    validUntil: '1893456000',
+    maxTransactionValue: 'max',
+    maxCumulativeValue: '1000000',
+    actions: ['0x23b872dd'],
+  },
+  { authorize: 'signature', executionMode: 'brickken-relayed', execute: true },
+)
+```
+
+Before signing, the SDK checks the fetched domain against the expected RAMS domain (`{ name: "RAMS", version: "1" }`) and refuses to sign anything else.
+
+<Warning>
+`maxTransactionValue` and `maxCumulativeValue` are **raw base units** — no decimal scaling, because the backend cannot know an arbitrary asset's decimals. `1000000` on a 6-decimal USDC mandate is 1 USDC, not one million. Agent-token amounts, by contrast, are human-readable and scaled.
+</Warning>
+
+## 3. Register the executor's selectors
+
+An executor can only perform actions whose selectors are registered. This is role-bound and always `client-signed`.
+
+```ts
+await bkn.rams.setExecutorAction(
+  {
+    selector: '0x23b872dd',      // transferFrom
+    supported: true,
+    hasAmount: true,             // the selector carries a value the caps apply to
+    amountIndex: 2,
+    executorAddress: '0xExecutor',
+  },
+  { execute: true, signerAddress: executorAdminAddress },
+)
+```
+
+<Warning>
+Registering a value-bearing selector with `hasAmount: false` makes its transfers **bypass the mandate caps entirely**. Set it deliberately.
+</Warning>
+
+## 4. Dry-run before spending
+
+`canExecute` answers whether a specific spend would pass right now, without touching the chain.
+
+```ts
+await bkn.rams.canExecute({
+  agent: '0xAgent',
+  principal: '0xPrincipal',
+  asset: '0xAsset',
+  amount: '250000',
+  selector: '0x23b872dd',
+})
+```
+
+## 5. Execute under the mandate
+
+Two paths: the `transferFrom` helper, or raw calldata.
+
+```ts
+// helper path
+await bkn.rams.execute(
+  { asset: '0xAsset', from: '0xPrincipal', to: '0xRecipient', amount: '250000' },
+  { execute: true, signerAddress: agentAddress },
+)
+
+// raw calldata path
+await bkn.rams.execute(
+  { target: '0xTarget', data: '0x23b872dd...' },
+  { execute: true, signerAddress: agentAddress },
+)
+```
+
+`execute` is role-bound — `msg.sender` must be the agent — so it cannot be relayed.
+
+## 6. Extend, revoke, freeze
+
+```ts
+await bkn.rams.extendMandate(
+  { agent: '0xAgent', principal: '0xPrincipal', newValidUntil: '1924992000' },
+  { authorize: 'signature', executionMode: 'brickken-relayed', execute: true },
+)
+
+await bkn.rams.revokeMandate(
+  { agent: '0xAgent', principal: '0xPrincipal' },
+  { authorize: 'signature', executionMode: 'brickken-relayed', execute: true },
+)
+
+// enforcer-only, and it applies across every mandate the agent holds
+await bkn.rams.freezeAgent({ agent: '0xAgent' }, { execute: true, signerAddress: enforcerAddress })
+```
+
+## Reads
+
+```ts
+await bkn.rams.mandate({ agent: '0xAgent', principal: '0xPrincipal' })
+await bkn.rams.status({ agent: '0xAgent', principal: '0xPrincipal' })
+await bkn.rams.executorAction({ selector: '0x23b872dd', executorAddress: '0xExecutor' })
+```
+
+Need the raw envelope rather than the automatic flow — to sign in a different process, or with hardware?
+
+```ts
+const envelope = await bkn.rams.typedData.grantMandate({ agent, principal, asset, validUntil, /* ... */ })
+
+envelope.primaryType
+envelope.deadline     // resubmit this verbatim with the signature
+envelope.nonce        // per-principal, shared across all four lifecycle operations
+```
+
+Pass the resulting `signature` and that exact `deadline` back into the lifecycle call. A fresh deadline will not verify.
+
+## What can and cannot be relayed
+
+| Operation | Relayable |
+| --- | :---: |
+| `grantMandate`, `revokeMandate`, `extendMandate`, `setOperator` | Yes, with a principal signature |
+| `execute`, `setExecutorAction`, `freezeAgent`, `unfreezeAgent`, `grantPrincipal`, `revokePrincipal` | No |
+
+The second group's on-chain call checks `msg.sender` against a role, so no relayer can stand in. Asking for `brickken-relayed` on one raises `ValidationError` locally rather than a `400` from the server.
+
+<CardGroup cols={2}>
+  <Card title="RAMS reference" icon="file-signature" href="/api-reference/endpoint/rams-overview">
+    Actors, lifecycle, caps, and the executor setup checklist.
+  </Card>
+  <Card title="Namespaces" icon="sitemap" href="/sdk/namespaces">
+    Every `rams.*` method and its endpoint.
+  </Card>
+</CardGroup>

@@ -1,0 +1,107 @@
+---
+title: 'Configuration'
+description: 'Every constructor option, the environment table, and how to build a client from the environment.'
+---
+
+import Environments from '/snippets/environments.mdx';
+
+```ts
+import { Brickken } from 'brickken-sdk'
+
+new Brickken({
+  env: 'sandbox',            // 'sandbox' | 'production'
+  baseUrl,                   // overrides env
+  apiKey,
+  signer,
+  rpcUrl,                    // client-broadcast writes, receipt polling, and on-chain token metadata
+  timeoutMs: 30_000,
+  retry: { attempts: 3, baseDelayMs: 500, jitter: true },
+  payment: { maxAmountBaseUnits: '50000' },
+  fetch,                     // inject your own
+})
+```
+
+Every option is optional. `new Brickken()` with no arguments is a valid anonymous sandbox client.
+
+| Option | Type | Default | Purpose |
+| --- | --- | --- | --- |
+| `env` | `'sandbox' \| 'production'` | `'sandbox'` | Selects the base URL |
+| `baseUrl` | `string` | — | Overrides `env`. Use for any non-public deployment |
+| `apiKey` | `string` | — | Selects API-key mode; sent as `x-api-key` |
+| `signer` | `Signer` | — | Selects x402 mode when no key is set. See [Signers](/sdk/signers) |
+| `rpcUrl` | `string` | — | JSON-RPC endpoint for `client-broadcast`, `waitForReceipt`, and token metadata |
+| `timeoutMs` | `number` | `30000` | Per-request timeout |
+| `retry` | `RetryPolicy` | `{ attempts: 3, baseDelayMs: 500, jitter: true }` | See [Errors](/sdk/errors#retries) |
+| `payment` | `PaymentPolicy` | `{}` | Spending controls. See [Payments](/sdk/payments) |
+| `fetch` | `typeof fetch` | `globalThis.fetch` | Injectable for tests, proxies, or a runtime whose global you do not want |
+
+The constructor throws a `TypeError` if no `fetch` implementation is available — use Node 20 or newer, or pass one explicitly.
+
+## Environments
+
+<Environments />
+
+| `env` | Base URL |
+| --- | --- |
+| `sandbox` | `https://api.sandbox.brickken.com` |
+| `production` | `https://api.brickken.com` |
+
+An internal `forge` environment exists for Brickken pre-release QA — contact `tech@brickken.com` for its base URL and pass it as `baseUrl`.
+
+Read back what the client resolved:
+
+```ts
+bkn.baseUrl          // 'https://api.sandbox.brickken.com'
+bkn.credentialMode   // 'api-key' | 'x402' | 'anonymous'
+```
+
+## From the environment
+
+`Brickken.fromEnv` reads the same variables the CLI and MCP server already document, including the `BKN_*` aliases.
+
+```ts
+const bkn = Brickken.fromEnv(process.env)
+```
+
+| Variable | Alias | Purpose |
+| --- | --- | --- |
+| `BRICKKEN_API_KEY` | `BKN_API_KEY` | Brickken API key |
+| `BRICKKEN_ENV` | `BKN_ENV` | `sandbox` or `production` |
+| `BRICKKEN_BASE_URL` | `BKN_BASE_URL` | Override the API base URL |
+| `BRICKKEN_RPC_URL` | `BKN_RPC_URL` | JSON-RPC used for `client-broadcast`, receipts, and token metadata |
+
+An empty string is treated as unset, and an unrecognised `BRICKKEN_ENV` is ignored rather than guessed at.
+
+`BRICKKEN_PRIVATE_KEY` is deliberately **not** read. Turning a key into a signer is an explicit choice, never an implicit one — pass it as an override:
+
+```ts
+import { fromPrivateKey } from 'brickken-sdk/adapters/private-key'
+
+const bkn = Brickken.fromEnv(process.env, {
+  signer: fromPrivateKey(process.env.BRICKKEN_PRIVATE_KEY!),
+  payment: { maxAmountBaseUnits: '50000' },
+})
+```
+
+Overrides win over the environment, so this composes cleanly with a `.env` file.
+
+## Injecting `fetch`
+
+Useful for a proxy, for request logging, or for a test that must not touch the network:
+
+```ts
+const bkn = new Brickken({
+  env: 'sandbox',
+  apiKey,
+  fetch: async (input, init) => {
+    console.log('→', input)
+    return await undici.fetch(input, init)
+  },
+})
+```
+
+The injected implementation is used for API requests, for JSON-RPC broadcasting, and for receipt polling.
+
+<Card title="Namespaces" icon="sitemap" href="/sdk/namespaces">
+  Every method the configured client exposes.
+</Card>

@@ -4,7 +4,7 @@ description: 'Make your first Brickken call on whichever surface you picked.'
 icon: 'rocket'
 ---
 
-Four first calls, one per surface. All of them run against **sandbox** — nothing here moves real value.
+Five first calls, one per surface. All of them run against **sandbox** — nothing here moves real value.
 
 <Tabs>
   <Tab title="REST — with an API key">
@@ -98,6 +98,53 @@ Four first calls, one per surface. All of them run against **sandbox** — nothi
     You get `402 Payment Required` with a `PAYMENT-REQUIRED` header. Sign that payment locally with your funded wallet and retry with `X-PAYMENT`. Brickken's relayer then signs, pays the gas, and broadcasts.
 
     Fund the wallet with Base Sepolia USDC first — the exact asset and amount are in the header.
+  </Tab>
+
+  <Tab title="SDK">
+    ```bash
+    npm install brickken-sdk
+    ```
+
+    A Dapp read with an API key:
+
+    ```ts
+    import { Brickken } from 'brickken-sdk'
+
+    const bkn = new Brickken({ env: 'sandbox', apiKey: process.env.BRICKKEN_API_KEY })
+
+    const token = await bkn.tokenization.info({ tokenSymbol: 'EXMPL' })
+    const offerings = await bkn.sto.list({ tokenSymbol: 'EXMPL' })
+    ```
+
+    Or an agentic write with a wallet and no API key. Preparing is free in relayed mode; `execute: true` also pays and sends:
+
+    ```ts
+    import { Brickken } from 'brickken-sdk'
+    import { fromPrivateKey } from 'brickken-sdk/adapters/private-key'
+
+    const bkn = new Brickken({
+      env: 'sandbox',
+      signer: fromPrivateKey(process.env.BRICKKEN_PRIVATE_KEY!),
+      payment: { maxAmountBaseUnits: '50000' },
+    })
+
+    const agent = await bkn.agent.register(
+      {
+        chainId: '84532',
+        name: 'Research Agent',
+        image: 'https://example.com/agent.png',
+        serviceName: 'A2A',
+        serviceEndpoint: 'https://agent.example/.well-known/agent-card.json',
+      },
+      { execute: true },
+    )
+
+    console.log(agent.info?.agentUuid)
+    ```
+
+    <Note>
+    The SDK is the only typed client that reaches the Dapp API from your own code. See the [SDK quickstart](/sdk/quickstart).
+    </Note>
   </Tab>
 
   <Tab title="CLI">

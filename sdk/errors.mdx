@@ -1,0 +1,102 @@
+---
+title: 'Errors'
+description: 'Fourteen typed error classes, what each one means, and which ones carry recoverable state.'
+---
+
+Branch on the **class**, never on the status code. The API reports the same missing-key cause as `401` on one endpoint and `400` on another, so a status-based branch is wrong somewhere by construction.
+
+```ts
+import { CreditsExhaustedError, RateLimitError, ValidationError } from 'brickken-sdk'
+
+try {
+  await bkn.tokenization.create(input, { execute: true, signerAddress })
+} catch (error) {
+  if (error instanceof ValidationError) throw error            // your bug; will fail identically next time
+  if (error instanceof CreditsExhaustedError) return topUp(error.method)
+  if (error instanceof RateLimitError) return retryAfter(error.retryAfterSeconds)
+  throw error
+}
+```
+
+## The classes
+
+Every one extends `BrickkenError`, which carries `.code`, and — where the API supplied them — `.status` and `.body`.
+
+| Class | Meaning |
+| --- | --- |
+| `ValidationError` | Refused locally; no request was made |
+| `AuthError` | Credential missing, wrong, or not accepted here |
+| `RelayedRequiresPaymentError` | Relayed execution attempted with an API key configured |
+| `CreditsExhaustedError` | Plan balance for that write method is spent; carries `.method` |
+| `UnauthorizedTokenSymbolError` | Your key did not tokenize that symbol |
+| `PaymentRequiredError` | An x402 payment is needed and none could be authorized; carries `.requirement` |
+| `PaymentDeclinedError` | Your ceiling or your `onPaymentRequired` hook refused to pay; carries `.requirement` |
+| `RateLimitError` | `429`; carries `.retryAfterSeconds` |
+| `ApiError` | Any other non-2xx; carries `.status` and `.body` |
+| `NetworkError` | Transport failure or timeout |
+| `RpcRejectedError` | The configured JSON-RPC node rejected a call |
+| `BroadcastConfirmationError` | Broadcast succeeded but backend confirmation failed; carries `.txId` and `.txHash` |
+| `TxRevertedError` | The transaction was mined and reverted |
+| `BrickkenError` | The base class — catch this to catch everything the SDK raises |
+
+## Errors that carry recoverable state
+
+Three of them exist so a failure does not cost you the work already done.
+
+### `BroadcastConfirmationError`
+
+The transaction is already on chain. Re-signing and re-broadcasting would be wrong. Resume only the confirmation step:
+
+```ts
+import { BroadcastConfirmationError } from 'brickken-sdk'
+
+try {
+  await bkn.tokenization.create(input, { execute: true, executionMode: 'client-broadcast', signerAddress })
+} catch (error) {
+  if (error instanceof BroadcastConfirmationError) {
+    await bkn.tx.send({ txId: error.txId, txHash: error.txHash })
+  }
+}
+```
+
+### `CreditsExhaustedError`
+
+Each Dapp write method carries its own credit balance, so one method can run out while others still work. `.method` names the one that did.
+
+### Any error with `.payment`
+
+A failure that happened **after** an x402 payment was authorized sets `.payment` on the error, so the charge can be reconciled against what actually ran.
+
+```ts
+catch (error) {
+  if (error instanceof BrickkenError && error.payment !== undefined) {
+    await reconcile(error.payment)
+  }
+}
+```
+
+## Retries
+
+| Condition | Retried |
+| --- | :---: |
+| `429` (`RateLimitError`) | Yes, honouring `Retry-After` |
+| `5xx` | Yes |
+| Transport failure or timeout (`NetworkError`) | Yes |
+| Any other `4xx` | No |
+| Anything raised locally (`ValidationError`) | No |
+| **A send for which a payment was already authorized** | **Never** |
+
+Retries use jittered exponential backoff. The defaults are three attempts with a 500 ms base delay, and are configurable:
+
+```ts
+new Brickken({
+  apiKey,
+  retry: { attempts: 5, baseDelayMs: 250, jitter: true },
+})
+```
+
+The paid-send rule is the important one: a send whose payment was authorized is never retried automatically, because a retry could be a second charge. If it fails, the error carries `.payment` and the decision is yours.
+
+<Card title="Payments" icon="shield-halved" href="/sdk/payments">
+  The controls that stop a payment before it happens.
+</Card>
