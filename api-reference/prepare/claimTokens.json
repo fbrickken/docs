@@ -84,21 +84,6 @@
                     "type": "string",
                     "description": "Optional and ignored for this method. The prepared transaction is always signed and sent by `investorAddress`.",
                     "example": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
-                  },
-                  "gasLimit": {
-                    "type": "string",
-                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically.",
-                    "example": "2000000"
-                  },
-                  "nonce": {
-                    "type": "integer",
-                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC.",
-                    "example": 12
-                  },
-                  "privateRpcUrl": {
-                    "type": "string",
-                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId.",
-                    "example": "https://rpc.example.com"
                   }
                 },
                 "example": {

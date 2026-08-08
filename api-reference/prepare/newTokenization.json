@@ -169,21 +169,6 @@
                         "walletAddress": "0x1111111111111111111111111111111111111111"
                       }
                     ]
-                  },
-                  "gasLimit": {
-                    "type": "string",
-                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically.",
-                    "example": "2000000"
-                  },
-                  "nonce": {
-                    "type": "integer",
-                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC.",
-                    "example": 12
-                  },
-                  "privateRpcUrl": {
-                    "type": "string",
-                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId.",
-                    "example": "https://rpc.example.com"
                   }
                 },
                 "example": {

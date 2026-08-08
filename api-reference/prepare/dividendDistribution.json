@@ -83,21 +83,6 @@
                     "description": "Optional. Payment token contract address. When provided, it must match the payment token configured for the token.",
                     "example": "0x5555555555555555555555555555555555555555",
                     "pattern": "^0x[a-fA-F0-9]{40}$"
-                  },
-                  "gasLimit": {
-                    "type": "string",
-                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically.",
-                    "example": "2000000"
-                  },
-                  "nonce": {
-                    "type": "integer",
-                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC.",
-                    "example": 12
-                  },
-                  "privateRpcUrl": {
-                    "type": "string",
-                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId.",
-                    "example": "https://rpc.example.com"
                   }
                 },
                 "example": {

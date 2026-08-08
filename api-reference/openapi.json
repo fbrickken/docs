@@ -161,7 +161,7 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** This endpoint prepares unsigned transactions for the method selected in the `method` field. For the exact required and optional body fields of a single method, open the matching page under Prepare Transactions.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY` for API-key auth, or `X-Payment` for x402 retries on eligible agentic methods\n- `Content-Type`: `application/json`\n\n**Common Request Body Parameters:**\n- `method` (string, required): Operation to prepare.\n- `chainId` (string, required): Blockchain network identifier. Hex format is recommended, for example `aa36a7` for Sepolia.\n- `signerAddress` (string, conditionally required): Wallet address that signs the prepared transaction. Most methods require it; `newInvest` and `claimTokens` can use `investorAddress` as the signer.\n- `gasLimit` (string, optional): Gas limit override. If omitted, the API estimates gas automatically.\n- `privateRpcUrl` (string, optional): Private RPC URL override.\n- `nonce` (integer, optional): Nonce override. If omitted, the API reads the pending nonce from the RPC.",
+        "description": "**Description:** This endpoint prepares unsigned transactions for the method selected in the `method` field. For the exact required and optional body fields of a single method, open the matching page under Prepare Transactions.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY` for API-key auth, or `X-Payment` for x402 retries on eligible agentic methods\n- `Content-Type`: `application/json`\n\n**Common Request Body Parameters:**\n- `method` (string, required): Operation to prepare.\n- `chainId` (string, required): Blockchain network identifier. Hex format is recommended, for example `aa36a7` for Sepolia.\n- `signerAddress` (string, conditionally required): Wallet address that signs the prepared transaction. Most methods require it; `newInvest` and `claimTokens` can use `investorAddress` as the signer.",
         "security": [
           {
             "apiKeyAuth": []
@@ -268,11 +268,6 @@
                     "description": "Optional. Source address required by transferFrom.",
                     "example": "0x1111111111111111111111111111111111111111",
                     "pattern": "^0x[a-fA-F0-9]{40}$"
-                  },
-                  "gasLimit": {
-                    "type": "string",
-                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically.",
-                    "example": "2000000"
                   },
                   "initialHolders": {
                     "type": "array",
@@ -404,11 +399,6 @@
                         "amount": "1000"
                       }
                     ]
-                  },
-                  "privateRpcUrl": {
-                    "type": "string",
-                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId.",
-                    "example": "https://rpc.example.com"
                   },
                   "spenderAddress": {
                     "type": "string",
@@ -683,11 +673,6 @@
                   "active": {
                     "type": "boolean",
                     "description": "Whether the registered agent should appear active."
-                  },
-                  "nonce": {
-                    "type": "integer",
-                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC.",
-                    "example": 12
                   },
                   "paymentTokenAddress": {
                     "type": "string",

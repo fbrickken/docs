@@ -102,21 +102,6 @@
                     "description": "Optional. Required when `tokenSymbol` is a payment token (`HAI`, `BKN`, `USDC`, `USDT`). Tokenizer wallet the approval is scoped to.",
                     "example": "0x4444444444444444444444444444444444444444",
                     "pattern": "^0x[a-fA-F0-9]{40}$"
-                  },
-                  "gasLimit": {
-                    "type": "string",
-                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically.",
-                    "example": "2000000"
-                  },
-                  "nonce": {
-                    "type": "integer",
-                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC.",
-                    "example": 12
-                  },
-                  "privateRpcUrl": {
-                    "type": "string",
-                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId.",
-                    "example": "https://rpc.example.com"
                   }
                 },
                 "example": {
