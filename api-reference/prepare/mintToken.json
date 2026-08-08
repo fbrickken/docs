@@ -86,7 +86,7 @@
                       "properties": {
                         "investorEmail": {
                           "type": "string",
-                          "description": "Required. Recipient investor email.",
+                          "description": "Required. Recipient investor email. It must differ from the token's tokenizerEmail.",
                           "example": "investor@example.com",
                           "format": "email"
                         },

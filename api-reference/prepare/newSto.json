@@ -105,7 +105,7 @@
                   },
                   "startDate": {
                     "type": "string",
-                    "description": "Required. STO start date. Must be in the future and earlier than `endDate`.",
+                    "description": "Required. STO start date. It must be in the future when the transaction is mined and earlier than `endDate`; set it at least 10 minutes after the planned send time.",
                     "example": "2026-09-01T00:00:00.000Z",
                     "format": "date-time"
                   },

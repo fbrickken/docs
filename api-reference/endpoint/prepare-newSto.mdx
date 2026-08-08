@@ -7,4 +7,10 @@ import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
 
 Prepares unsigned transactions for creating a new Security Token Offering (STO). Use `POST /prepare-transactions` with `method=newSto`.
 
+## Timing
+
+`startDate` is validated against the timestamp of the block that mines the STO transaction. Set it at least 10 minutes after the time you expect to send the transaction, rather than from the prepare time. This buffer covers signing, broadcast, and block inclusion; an elapsed `startDate` makes the transaction revert on-chain.
+
+Wait for the tokenization to succeed before preparing the STO, and use the exact token symbol available to the API key on the selected chain.
+
 <NextSignAndSend />

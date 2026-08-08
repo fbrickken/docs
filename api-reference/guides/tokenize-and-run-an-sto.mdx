@@ -58,6 +58,10 @@ curl 'https://api.sandbox.brickken.com/get-transaction-status?txId=0xPreparedTra
 
 `pending` means broadcast but not yet mined. Do not resubmit — you would pay gas twice.
 
+<Note>
+Treat every successful transaction as a dependency boundary. Before preparing `newSto`, `mintToken`, or `whitelist`, poll the preceding `newTokenization` until it succeeds. A send response only means the transaction was broadcast; a reverted receipt does not create the token record used by later methods.
+</Note>
+
 <Tip>
 **Already run your own broadcasting?** Add `"executionMode": "client-broadcast"` to any prepare below, submit the signed transaction to the chain yourself, then confirm with `{ txId, txHash }` instead of `{ txId, signedTransactions }`. Brickken reconciles your hash so the transaction still appears in `get-transaction-status` and in the dApp. See [Send Transactions](/api-reference/endpoint/send).
 </Tip>
@@ -83,10 +87,10 @@ curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
 
 The field is `name`, not `tokenName`. `tokenType` accepts `EQUITY`, `DEBT`, `BILL_FACTORING`, `ICO`, `STABLECOIN`, `REVENUE_SHARE`, `RWA_TOKEN`, or `PROFIT_SHARING`, and defaults to `EQUITY`. `supplyCap` defaults to `0`, which means uncapped — set it deliberately.
 
-Sign and send, then confirm the token exists:
+Sign and send, then confirm the token exists. The endpoint lists all symbols available to your API key; use the exact confirmed symbol in every later request.
 
 ```bash
-curl 'https://api.sandbox.brickken.com/get-token-info?chainId=aa36a7&tokenSymbol=EXMPL' \
+curl 'https://api.sandbox.brickken.com/get-token-info' \
   --header 'x-api-key: YOUR_BRICKKEN_API_KEY'
 ```
 
@@ -141,6 +145,10 @@ curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
 
 `needWhitelist: true` whitelists the recipient as part of the same mint, which collapses step 2 into step 3 when you are onboarding a new investor.
 
+<Warning>
+`investorEmail` must identify an investor distinct from the asset's `tokenizerEmail`. Do not use the issuer/tokenizer email as the mint recipient: it can conflict with the issuer account in the investor records. The recipient may use the same wallet address as the tokenizer for sandbox testing; only the email identities must differ. `needWhitelist` controls the whitelist sub-step and does not change this identity rule.
+</Warning>
+
 ## 4. Launch the offering
 
 ```bash
@@ -166,6 +174,10 @@ curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
 ```
 
 Every one of those fields is required. Dates are ISO 8601. `acceptedCoin` is a payment token symbol — `USDT`, `USDC`, or `BKN`.
+
+<Warning>
+`startDate` is checked against the block timestamp when the STO transaction is mined, not when you prepare it. Set it at least 10 minutes after the time you expect to call `send-transactions`, then sign and broadcast promptly. A date that has elapsed while signing, sending, or waiting for inclusion causes the transaction to revert even when prepare and send succeeded.
+</Warning>
 
 Once it is live, list your offerings and keep the `uuid`:
 
@@ -255,6 +267,9 @@ Only the tokenizer can do this. Read the result with [`GET /get-dividend-distrib
 | `Out of credits for <method>` | Your plan's balance for that specific method is exhausted |
 | `429` + `Retry-After: 60` | Rate limited on `prepare-transactions` |
 | Prepare rejects your `signerAddress` | The wallet is not whitelisted yet |
+| `No company found with this token symbol` | The symbol is not a successfully confirmed asset on that chain; inspect `GET /get-token-info` and use the exact symbol it lists |
+| Mint returns a uniqueness conflict | The recipient email is already the asset's tokenizer email; use a distinct `investorEmail` |
+| `newSto` reverts after send | `startDate` became past or too close by the mined block; retry with at least a 10-minute send-time buffer |
 | Send reverts on-chain | Usually an unwhitelisted recipient, an unapproved allowance, or no gas |
 
 Each write method has its own credit balance, so exhausting `mintCredits` does not block `newSto`. See [Authentication](/get-started/authentication) for plans, scoping, and the full error reference.

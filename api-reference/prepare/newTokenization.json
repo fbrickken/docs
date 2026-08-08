@@ -77,7 +77,7 @@
                   },
                   "name": {
                     "type": "string",
-                    "description": "Required. Name of the tokenized asset.",
+                    "description": "Required. Name of the tokenized asset. Use `name`; `tokenName` is not supported.",
                     "example": "Example Token"
                   },
                   "tokenSymbol": {

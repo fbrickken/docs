@@ -7,4 +7,10 @@ import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
 
 Prepares unsigned transactions for creating a new tokenized asset. Use `POST /prepare-transactions` with `method=newTokenization`.
 
+## Prerequisites
+
+- The required asset-name field is `name`. `tokenName` is not accepted.
+- After sending, wait until the tokenization succeeds before using its symbol in `newSto`, `mintToken`, or `whitelist`.
+- Use [`GET /get-token-info`](/api-reference/endpoint/get-token-info) to inspect the exact symbols available to the API key.
+
 <NextSignAndSend />

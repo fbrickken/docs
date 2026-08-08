@@ -24,13 +24,17 @@ Prepares unsigned transactions for registering an ERC-8004 agent identity. This 
 | `name` | Yes | Human-readable agent name. |
 | `description` | Yes | Agent description. |
 | `image` | Yes | Publicly reachable HTTPS URL for the agent logo. Local paths and omitted values are rejected. |
-| `services` | Yes | Service descriptors such as A2A endpoints. |
+| `services` | Yes | Non-empty service descriptors such as A2A endpoints. Every entry needs a non-empty `name` and `endpoint`. |
 | `aiModelName`, `aiModelProvider` | No | AI model metadata published with the agent profile. |
 | `x402Support`, `active` | No | Agent capability and status flags. |
 
 <Warning>
 `image` is mandatory. Provide the final public logo URL, or an explicitly authorized test fixture; requests without it fail with `image is required`.
 </Warning>
+
+<Note>
+A `400` before the prepare response is a request-validation failure, not an x402-payment failure. Confirm the Base chain ID and all required fields (`name`, `description`, `image`, and valid `services`) before attempting payment.
+</Note>
 
 ## Response
 

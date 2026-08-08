@@ -36,7 +36,7 @@ The Agentic API runs on Base, with Base Sepolia for tests. The x402 payment rail
 | --- | --- | --- | --- |
 | Base mainnet | `8453` | `0x2105` | Production |
 | Base Sepolia | `84532` | `0x14a34` | Testing |
-| Ethereum Sepolia | `11155111` | `0xaa36a7` | Legacy testing |
+| Ethereum Sepolia | `11155111` | `0xaa36a7` | RAMS mandates only; not ERC-8004 agent routes |
 
 ## Authentication Flow
 
@@ -47,11 +47,15 @@ For x402, omit `x-api-key`.
 3. **Sign the x402 payment locally** with the payer's private key, and retry the send with `X-PAYMENT`.
 4. Brickken verifies the payment, then (in `brickken-relayed` mode) signs and broadcasts the operation. The settlement is returned in the `PAYMENT-RESPONSE` header.
 
+<Note>
+For an agent facade, a `400` before a `txId` is request validation, not an insufficient x402 balance. x402 payment begins only when `send-transactions` returns `402 Payment Required`.
+</Note>
+
 ```http
 X-PAYMENT: BASE64_ENCODED_X402_PAYMENT_PAYLOAD
 ```
 
-Always read the chain, asset, transfer method, amount, recipient, and timeout from `PAYMENT-REQUIRED`; do not hardcode them client-side. On Base Sepolia the payment rail uses **EIP-3009**; on Base mainnet it follows the advertised token's transfer method.
+Always read the chain, asset, transfer method, amount, recipient, and timeout from `PAYMENT-REQUIRED`; do not hardcode them client-side. On Base Sepolia the payment rail uses **EIP-3009**, whose signed authorization carries the transfer, so no separate ERC-20 `approve` transaction is required. On Base mainnet, follow the advertised token's transfer method.
 
 <Note>
 In `brickken-relayed` mode, x402 payment is **mandatory** — API keys are not accepted on the send step. The payment is reserved when you pay and only **settled after the operation confirms on-chain**. If the operation reverts or its authorization expires before confirmation, the reservation is released.

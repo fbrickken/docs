@@ -7,4 +7,11 @@ import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
 
 Prepares unsigned transactions for minting tokens to specified users. Use `POST /prepare-transactions` with `method=mintToken`.
 
+## Recipient Requirements
+
+- Every entry in `userToMint` needs a valid `investorEmail` and a positive whole-token `amount`.
+- `investorEmail` must be different from the token's `tokenizerEmail`. Issuer and investor are separate email identities, even when they use the same wallet for sandbox testing.
+- Use the exact symbol from a successfully confirmed `newTokenization`. A symbol that does not resolve on the supplied chain returns `No company found with this token symbol`.
+- `needWhitelist` only determines whether the recipient is whitelisted with the mint. It does not change the identity requirement.
+
 <NextSignAndSend />
