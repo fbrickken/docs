@@ -1,0 +1,241 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Brickken API V2 - prepare newInvest",
+    "description": "Method-scoped view of `POST /prepare-transactions` for `method=newInvest`. The full endpoint, with every supported method and the common request body parameters, is documented in `api-reference/openapi.json`.",
+    "version": "2.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.sandbox.brickken.com",
+      "description": "Sandbox Environment"
+    },
+    {
+      "url": "https://api.brickken.com",
+      "description": "Production Environment"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key"
+      }
+    }
+  },
+  "paths": {
+    "/prepare-transactions": {
+      "post": {
+        "operationId": "prepare_newInvest",
+        "summary": "Prepare an STO investment",
+        "description": "Prepares the unsigned transactions that invest payment tokens in an ongoing Security Token Offering.",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "method",
+                  "chainId",
+                  "investorAddress",
+                  "investorEmail",
+                  "tokenSymbol",
+                  "investmentAmount"
+                ],
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "example": "newInvest",
+                    "enum": [
+                      "newInvest"
+                    ],
+                    "description": "Required. Operation to prepare. Must be `newInvest` for this endpoint.",
+                    "default": "newInvest"
+                  },
+                  "chainId": {
+                    "type": "string",
+                    "description": "Required. Blockchain network identifier. Hex format is recommended, for example Sepolia `aa36a7`.",
+                    "example": "aa36a7"
+                  },
+                  "investorAddress": {
+                    "type": "string",
+                    "description": "Required. Investor wallet address. It is used as the signer and sender of the prepared transactions.",
+                    "example": "0x1111111111111111111111111111111111111111",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "investorEmail": {
+                    "type": "string",
+                    "description": "Required. Email of the investor. The investor must already exist in Brickken and be KYC eligible.",
+                    "example": "investor@example.com",
+                    "format": "email"
+                  },
+                  "tokenSymbol": {
+                    "type": "string",
+                    "description": "Required. Symbol of the token being offered.",
+                    "example": "EXMPL"
+                  },
+                  "investmentAmount": {
+                    "type": "string",
+                    "description": "Required. Payment-token amount to invest. It must be at least the offering minimum investment.",
+                    "example": "1000"
+                  },
+                  "signerAddress": {
+                    "type": "string",
+                    "description": "Optional and ignored for this method. The prepared transactions are always signed and sent by `investorAddress`.",
+                    "example": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
+                  },
+                  "paymentTokenSymbol": {
+                    "type": "string",
+                    "description": "Optional. Symbol of the payment token used for the investment. If omitted, the chain default payment token is used.",
+                    "example": "USDT"
+                  },
+                  "gasLimit": {
+                    "type": "string",
+                    "description": "Optional. Gas limit override. If omitted, the API estimates gas automatically.",
+                    "example": "2000000"
+                  },
+                  "nonce": {
+                    "type": "integer",
+                    "description": "Optional. Nonce override. If omitted, the API reads the pending nonce from the RPC.",
+                    "example": 12
+                  },
+                  "privateRpcUrl": {
+                    "type": "string",
+                    "description": "Optional. Private RPC URL override. If omitted, the API uses the configured RPC for chainId.",
+                    "example": "https://rpc.example.com"
+                  }
+                },
+                "example": {
+                  "method": "newInvest",
+                  "chainId": "aa36a7",
+                  "investorAddress": "0x1111111111111111111111111111111111111111",
+                  "investorEmail": "investor@example.com",
+                  "tokenSymbol": "EXMPL",
+                  "investmentAmount": "1000"
+                }
+              },
+              "example": {
+                "method": "newInvest",
+                "chainId": "aa36a7",
+                "investorAddress": "0x1111111111111111111111111111111111111111",
+                "investorEmail": "investor@example.com",
+                "tokenSymbol": "EXMPL",
+                "investmentAmount": "1000"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactions": {
+                      "type": "array",
+                      "description": "Array of unsigned transaction objects ready for signing",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "from": {
+                            "type": "string",
+                            "description": "Sender address",
+                            "example": "0x1234567890abcdef1234567890abcdef12345678"
+                          },
+                          "to": {
+                            "type": "string",
+                            "description": "Recipient address",
+                            "example": "0xabcdef1234567890abcdef1234567890abcdef12"
+                          },
+                          "value": {
+                            "type": "string",
+                            "description": "Transaction value in hex",
+                            "example": "0x00"
+                          },
+                          "nonce": {
+                            "type": "integer",
+                            "description": "Transaction nonce",
+                            "example": 3792
+                          },
+                          "chainId": {
+                            "type": "integer",
+                            "description": "Blockchain network chain ID",
+                            "example": 11155111
+                          },
+                          "data": {
+                            "type": "string",
+                            "description": "Transaction data payload",
+                            "example": "0xd362e8a70000000000000000000000000000000000000000000000000000000000000040..."
+                          },
+                          "type": {
+                            "type": "integer",
+                            "description": "Transaction type (EIP-1559)",
+                            "example": 2
+                          },
+                          "maxPriorityFeePerGas": {
+                            "type": "string",
+                            "description": "Maximum priority fee per gas",
+                            "example": "1150000"
+                          },
+                          "maxFeePerGas": {
+                            "type": "string",
+                            "description": "Maximum fee per gas",
+                            "example": "1156037"
+                          },
+                          "gasLimit": {
+                            "type": "string",
+                            "description": "Gas limit in hex",
+                            "example": "0xccef"
+                          }
+                        }
+                      }
+                    },
+                    "info": {
+                      "type": "object",
+                      "description": "Metadata about the operation",
+                      "properties": {
+                        "tokenizerEmail": {
+                          "type": "string",
+                          "description": "Email of the tokenizer",
+                          "example": "tokenizer@example.com"
+                        },
+                        "tokenSymbol": {
+                          "type": "string",
+                          "description": "Symbol of the token",
+                          "example": "EXMPL"
+                        },
+                        "investorEmail": {
+                          "type": "string",
+                          "description": "Email of the investor (when applicable)",
+                          "example": "investor@example.com"
+                        }
+                      }
+                    },
+                    "txId": {
+                      "type": "string",
+                      "description": "Unique identifier for this transaction batch (required for /send-transactions). This is NOT a blockchain transaction hash.",
+                      "example": "0x46adea7bdf49c576a760102e0d6bc9ecd650b3998588cd3d7f576a7973426aad"
+                    }
+                  },
+                  "required": [
+                    "transactions",
+                    "txId"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

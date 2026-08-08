@@ -4,7 +4,7 @@ Preparing does not touch the chain. The response gives you `txId` and an array o
 
 <Steps>
   <Step title="Sign every returned transaction">
-    Sign each entry locally with the wallet matching `signerAddress`. It must be whitelisted by Brickken, and it needs native gas on the target chain.
+    Sign each entry locally with the wallet that sends the transaction — `signerAddress`, or `investorAddress` for `newInvest` and `claimTokens`. It must be whitelisted by Brickken, and it needs native gas on the target chain.
   </Step>
   <Step title="Submit the signed payloads">
     `POST` them to [`/send-transactions`](/api-reference/endpoint/send) as `{ txId, signedTransactions }` and Brickken broadcasts for you.
