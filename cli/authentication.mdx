@@ -1,21 +1,23 @@
 ---
 title: 'Authentication & Configuration'
-description: 'x402 write authentication, RAMS API-key reads, private-key signing, environments, and CLI configuration.'
+description: 'KYC API-key authentication, API-key-or-x402 reads, private-key signing, environments, and CLI configuration.'
 ---
 
 ## What the CLI can authenticate
 
-The CLI is an x402 client. It attaches `x-api-key` to exactly one class of request — RAMS reads and typed-data fetches — and to nothing else.
+The CLI uses endpoint-specific authentication. Transaction writes use x402; KYC link creation requires an API key; agent getters and RAMS reads use an API key when configured and otherwise fall back to x402.
 
 | Request | Credential the CLI sends |
 | --- | --- |
 | Every write (`agent`, `create-token`, `mint`, `burn`, `transfer`, `rams` writes, `tx prepare`, `tx send`) | x402 payment only |
+| `kyc create-link` | `x-api-key` (required) |
+| `agent list`, `info`, `transactions` | `x-api-key` if configured, otherwise x402 |
 | `tx status` | none |
 | `rams inspect`, `status`, `can-execute`, `compliance-status`, `executor-action`, `sign` | `x-api-key` if configured, otherwise x402 |
-| Legacy Dapp API methods | **not supported — see below** |
+| Other Dapp API methods | **not supported — see below** |
 
 <Warning>
-**The CLI cannot drive the legacy Dapp API.** There are no commands or method mappers for `newTokenization`, `newSto`, `mintToken`, `whitelist`, `get-stos`, or any other Dapp method, and no API key is attached even if you set one. `brickken tx prepare --method newTokenization` forwards the method name, but the backend rejects it with `API key is required for this method`.
+**The CLI cannot drive the full legacy Dapp API.** KYC link creation is the explicit supported exception. There are no commands or method mappers for `newTokenization`, `newSto`, `mintToken`, `whitelist`, `get-stos`, or other Dapp methods, and no API key is attached to transaction writes even if you set one. `brickken tx prepare --method newTokenization` forwards the method name, but the backend rejects it with `API key is required for this method`.
 
 Use the [MCP server](/mcp/introduction) if an AI agent should drive the Dapp API, or call the [REST API](/api-reference/introduction) directly from your own code.
 </Warning>
@@ -30,12 +32,14 @@ Transaction writes are x402-paid. Preparing is free; the send is paid through x4
 
 In the recommended `brickken-relayed` mode the private key signs **only the x402 payment** — Brickken's relayer signs and broadcasts the operation. In the default `client-signed` mode the same key also **signs the blockchain transaction** locally.
 
-## RAMS read authentication
+## KYC and read authentication
 
-RAMS read and typed-data endpoints are the exception: set an API key and the CLI sends it on those authenticated GETs.
+KYC always needs an API key. Agent getters and RAMS read/typed-data endpoints send the key when configured and otherwise use the configured private key for x402.
 
 ```bash
 export BRICKKEN_API_KEY=...
+brickken kyc create-link --email investor@example.com --need-kyc true
+brickken agent list --chain 84532 --limit 20
 brickken rams status --chain 11155111 --agent "$AGENT" --principal "$PRINCIPAL"
 ```
 
@@ -99,7 +103,7 @@ Configuration is resolved in this order (highest priority first):
 | --- | --- |
 | `--env <forge\|sandbox\|production>` | Target Brickken environment |
 | `--base-url <url>` | Override the Brickken API base URL |
-| `--api-key <key>` | API key for RAMS read and typed-data endpoints |
+| `--api-key <key>` | API key for KYC, agent getters, and RAMS read/typed-data endpoints |
 | `--private-key <key>` | Private key for local signing and x402 payments |
 | `--rpc-url <url>` | RPC URL used to wait for token deployment receipts |
 | `--env-file <path>` | Env file to load before resolving config |
@@ -109,7 +113,7 @@ Configuration is resolved in this order (highest priority first):
 
 | Variable | Alias | Purpose |
 | --- | --- | --- |
-| `BRICKKEN_API_KEY` | `BKN_API_KEY` | RAMS reads and typed-data fetches |
+| `BRICKKEN_API_KEY` | `BKN_API_KEY` | KYC, agent getters, and RAMS read/typed-data fetches |
 | `BRICKKEN_PRIVATE_KEY` | `BKN_PRIVATE_KEY` | Signing and x402 payment key |
 | `BRICKKEN_BASE_URL` | `BKN_BASE_URL` | API base URL |
 | `BRICKKEN_RPC_URL` | `BKN_RPC_URL` | RPC for receipt polling |
@@ -117,4 +121,4 @@ Configuration is resolved in this order (highest priority first):
 
 ## Budget note
 
-Preparing is free; only the `send` is x402-priced. On Base Sepolia and other non-production environments the reference price is `0.01 USDC` per send. Fund the wallet behind `BRICKKEN_PRIVATE_KEY` with enough USDC on the x402 payment chain (Circle USDC `0x036CbD53842c5426634e7929541eC2318f3dCF7e` on Base Sepolia). See [Pricing](/api-reference/endpoint/agentic-pricing) for the mainnet per-operation table.
+Preparing is free; only `send` is priced for writes. Agent getters cost `0.000001 USDC` per x402 call. On Base Sepolia and other non-production environments the write reference price is commonly `0.01 USDC` per send. Fund the wallet behind `BRICKKEN_PRIVATE_KEY` with the exact asset returned by the live challenge. See [Pricing](/api-reference/endpoint/agentic-pricing) for the mainnet write table.

@@ -67,6 +67,12 @@
             ]
           },
           {
+            "group": "KYC",
+            "pages": [
+              "api-reference/endpoint/create-kyc-link"
+            ]
+          },
+          {
             "group": "Prepare Transactions",
             "pages": [
               "api-reference/endpoint/create",
@@ -134,6 +140,14 @@
               "api-reference/endpoint/x402-agent-set-metadata",
               "api-reference/endpoint/x402-agent-set-wallet",
               "api-reference/endpoint/x402-agent-transfer-ownership"
+            ]
+          },
+          {
+            "group": "Agent Reads",
+            "pages": [
+              "api-reference/endpoint/get-agents",
+              "api-reference/endpoint/get-agent-info",
+              "api-reference/endpoint/get-agent-transactions"
             ]
           },
           {
@@ -210,6 +224,7 @@
           {
             "group": "Commands",
             "pages": [
+              "cli/commands/kyc",
               "cli/commands/agent",
               "cli/commands/token-economics",
               "cli/commands/rams",

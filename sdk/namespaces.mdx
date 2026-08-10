@@ -3,12 +3,12 @@ title: 'Namespaces'
 description: 'Every SDK method, mapped to the backend method or endpoint it reaches.'
 ---
 
-One client exposes eight namespaces. Writes take `(input, options?)` and return a [`WriteResult`](/sdk/quickstart#reading-the-result); reads take a query object and return the API's payload.
+One client exposes nine namespaces. Writes take `(input, options?)` and return a [`WriteResult`](/sdk/quickstart#reading-the-result); reads take a query object and return the API's payload.
 
 ```ts
 const bkn = new Brickken({ env: 'sandbox', apiKey })
 
-bkn.tokenization   bkn.sto      bkn.agent     bkn.agentToken
+bkn.tokenization   bkn.sto      bkn.kyc       bkn.agent     bkn.agentToken
 bkn.rams           bkn.tx       bkn.network   bkn.discovery
 ```
 
@@ -50,12 +50,25 @@ Security Token Offerings: the lifecycle, plus the reads scoped to an offering. *
 | `investments(query)` | `GET /get-investments-by-sto-id` |
 | `investor(query)` | `GET /get-investor-info` |
 
+## `kyc`
+
+Investor onboarding. **API key required.**
+
+| Method | Backend |
+| --- | --- |
+| `createLink(input)` | `POST /create-kyc-link` |
+
+`createLink` can create an investor record and send an invitation email. Treat the returned Sumsub URL as sensitive.
+
 ## `agent`
 
 ERC-8004 identity and reputation on Base. API key **or** x402; default mode `brickken-relayed`.
 
 | Method | Backend |
 | --- | --- |
+| `list(query)` | `GET /get-agents` |
+| `get(reference)` | `GET /get-agent-info` |
+| `transactions(query)` | `GET /get-agent-transactions` |
 | `register(input, options?)` | `POST /x402/agent/register` |
 | `setUri(input, options?)` | `POST /x402/agent/set-uri` |
 | `setMetadata(input, options?)` | `POST /x402/agent/set-metadata` |
@@ -66,6 +79,8 @@ ERC-8004 identity and reputation on Base. API key **or** x402; default mode `bri
 | `feedback.respond(input, options?)` | `POST /x402/agent/feedback/respond` |
 
 `register` returns `info.agentUuid` — save it, because `setUri`, `setMetadata`, and `transferOwnership` all need it.
+
+The three getters accept an API key or x402. References use `agentUuid`, or `agentId` with `chainId`. In x402 mode, `list` also requires `ownerWalletAddress`, and the SDK checks that the payment signer matches it. Pagination limits are 1–100 and offsets are non-negative.
 
 ## `agentToken`
 

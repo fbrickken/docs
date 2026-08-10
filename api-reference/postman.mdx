@@ -6,7 +6,7 @@ icon: 'download'
 
 ## Overview
 
-Get started with the Brickken API in minutes using our official Postman collection. It includes ready-to-run requests for every public endpoint — transaction preparation, signed transaction submission, read endpoints, token documentation management, and the Agentic (x402) API — pre-configured with example payloads and environment variables.
+Get started with the Brickken API in minutes using our official Postman collection. It includes ready-to-run requests for every public endpoint — KYC onboarding, agent getters, transaction preparation, signed transaction submission, token documentation management, and the Agentic (x402) API — pre-configured with example payloads and environment variables.
 
 ## Downloads
 
@@ -46,7 +46,7 @@ If a file opens in the browser instead of downloading, right-click the card and 
 1. Open Postman and click **Import** (top left).
 2. Drop in the collection file and both environment files.
 3. Select the **Brickken API — Sandbox** environment from the environment picker (top right).
-4. Open the environment and set your `apiKey`. Optionally adjust `tokenSymbol` and `chainId` (defaults: `EXMPL`, `aa36a7` — Sepolia).
+4. Open the environment and set your `apiKey`. Optionally adjust `tokenSymbol`, `chainId`, `agentChainId`, `agentUuid`, and `ownerWalletAddress` for the requests you plan to run.
 5. Run any request — authentication is applied automatically via the `x-api-key` header at collection level.
 
 ## Authentication
@@ -58,6 +58,8 @@ Business endpoints are authenticated with an API key in the `x-api-key` header, 
 </Card>
 
 Agentic (x402) endpoints alternatively accept a per-call payment via the `X-Payment` header. See [Authentication](/get-started/authentication) for the full credential matrix.
+
+The **Agent Getters** folder defaults to API-key authentication and includes disabled `X-Payment` headers for manual x402 retries. The **KYC** folder always requires the API key; creating a link can create an investor and send an invitation email.
 
 ## Typical Workflow
 

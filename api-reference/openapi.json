@@ -146,6 +146,83 @@
             "hex": "0x3b9aca00"
           }
         }
+      },
+      "KycLinkResult": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["email", "needKyc", "userCreated", "invitationSent", "url"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "needKyc": { "type": "boolean" },
+          "userCreated": { "type": "boolean" },
+          "invitationSent": { "type": "boolean" },
+          "url": {
+            "type": ["string", "null"],
+            "format": "uri",
+            "description": "Sumsub verification URL. Null when KYC is not required. Treat this value as sensitive."
+          }
+        }
+      },
+      "AgentSummary": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["uuid", "chainId", "ownerWalletAddress"],
+        "properties": {
+          "uuid": { "type": "string", "format": "uuid" },
+          "agentId": { "type": ["string", "null"] },
+          "chainId": { "type": "string", "example": "84532" },
+          "standard": { "type": "string", "example": "ERC-8004" },
+          "registryAddress": { "type": ["string", "null"] },
+          "agentURI": { "type": ["string", "null"] },
+          "metadataCid": { "type": ["string", "null"] },
+          "ownerWalletAddress": { "type": "string", "pattern": "^0x[a-fA-F0-9]{40}$" },
+          "name": { "type": ["string", "null"] },
+          "description": { "type": ["string", "null"] },
+          "image": { "type": ["string", "null"] },
+          "services": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+          "supportedTrust": { "type": "array", "items": { "type": "string" } },
+          "x402Support": { "type": "boolean" },
+          "active": { "type": "boolean" },
+          "lifecycleStatus": { "type": ["string", "null"] },
+          "status": { "type": ["string", "null"] },
+          "actualTxHash": { "type": ["string", "null"] },
+          "error": { "type": ["string", "null"] },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AgentDetail": {
+        "allOf": [
+          { "$ref": "#/components/schemas/AgentSummary" },
+          {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "registrationFile": { "type": ["object", "null"], "additionalProperties": true },
+              "onchainMetadata": { "type": ["object", "null"], "additionalProperties": true },
+              "prepareTxId": { "type": ["string", "null"] }
+            }
+          }
+        ]
+      },
+      "AgentTransaction": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["txId", "type", "category", "status", "chainId", "details"],
+        "properties": {
+          "txId": { "type": "string" },
+          "actualTxHash": { "type": ["string", "null"] },
+          "type": { "type": "string", "example": "agentRegister" },
+          "category": { "type": "string", "enum": ["erc8004", "agentToken", "rams"] },
+          "status": { "type": "string" },
+          "chainId": { "type": "string", "example": "84532" },
+          "from": { "type": ["string", "null"] },
+          "to": { "type": ["string", "null"] },
+          "details": { "type": "object", "additionalProperties": true },
+          "error": { "type": ["string", "null"] },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
       }
     }
   },
@@ -155,6 +232,138 @@
     }
   ],
   "paths": {
+    "/create-kyc-link": {
+      "post": {
+        "operationId": "createKycLink",
+        "summary": "Create a KYC link",
+        "tags": ["KYC"],
+        "description": "Creates or reuses an investor scoped to the API client, sends the invitation when needed, and returns a Sumsub verification URL when KYC is required. This endpoint always requires an API key.",
+        "security": [{ "apiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "needKyc": { "type": "boolean", "default": true }
+                }
+              },
+              "example": { "email": "investor@example.com", "needKyc": true }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Investor access resolved and invitation state returned.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/KycLinkResult" } } }
+          },
+          "400": { "description": "Invalid email, invalid needKyc value, or unsupported user." },
+          "401": { "description": "Missing or invalid API key." },
+          "403": { "description": "The API key is not authorized to access an existing user." }
+        }
+      }
+    },
+    "/get-agents": {
+      "get": {
+        "operationId": "getAgents",
+        "summary": "List agents",
+        "tags": ["Agent Getters"],
+        "description": "Lists agents scoped to the API key. Without an API key, chainId and ownerWalletAddress are required, and the x402 payer must match the owner wallet.",
+        "security": [{ "apiKeyAuth": [] }, { "x402Payment": [] }],
+        "parameters": [
+          { "name": "chainId", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Optional with API-key auth; required for x402." },
+          { "name": "ownerWalletAddress", "in": "query", "required": false, "schema": { "type": "string", "pattern": "^0x[a-fA-F0-9]{40}$" }, "description": "Optional API-key filter; required for x402 and must match the payer." },
+          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 50 } },
+          { "name": "offset", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0, "default": 0 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated agent list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["agents", "total", "limit", "offset"],
+                  "properties": {
+                    "agents": { "type": "array", "items": { "$ref": "#/components/schemas/AgentSummary" } },
+                    "total": { "type": "integer" },
+                    "limit": { "type": "integer" },
+                    "offset": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid filters or pagination." },
+          "402": { "description": "x402 payment required when no API key is supplied." }
+        },
+        "x-payment-info": { "protocols": [{ "x402": {} }], "price": { "mode": "fixed", "currency": "USD", "amount": "0.000001" } }
+      }
+    },
+    "/get-agent-info": {
+      "get": {
+        "operationId": "getAgentInfo",
+        "summary": "Get agent information",
+        "tags": ["Agent Getters"],
+        "description": "Returns one complete agent profile. Provide agentUuid, or provide agentId together with chainId. API-key access is scope-checked; x402 payment must come from the agent owner wallet.",
+        "security": [{ "apiKeyAuth": [] }, { "x402Payment": [] }],
+        "parameters": [
+          { "name": "agentUuid", "in": "query", "required": false, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "agentId", "in": "query", "required": false, "schema": { "type": "string" } },
+          { "name": "chainId", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Required with agentId." }
+        ],
+        "responses": {
+          "200": { "description": "Complete agent profile.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AgentDetail" } } } },
+          "400": { "description": "Missing or invalid reference, or agent not found." },
+          "403": { "description": "The API key cannot access this agent." },
+          "402": { "description": "x402 payment required when no API key is supplied." }
+        },
+        "x-payment-info": { "protocols": [{ "x402": {} }], "price": { "mode": "fixed", "currency": "USD", "amount": "0.000001" } }
+      }
+    },
+    "/get-agent-transactions": {
+      "get": {
+        "operationId": "getAgentTransactions",
+        "summary": "Get agent transactions",
+        "tags": ["Agent Getters"],
+        "description": "Returns ERC-8004, agent-token, and RAMS transactions for an agent. Provide agentUuid, or agentId together with chainId. API-key access is scope-checked; x402 payment must come from the agent owner wallet.",
+        "security": [{ "apiKeyAuth": [] }, { "x402Payment": [] }],
+        "parameters": [
+          { "name": "agentUuid", "in": "query", "required": false, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "agentId", "in": "query", "required": false, "schema": { "type": "string" } },
+          { "name": "chainId", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Required with agentId." },
+          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 50 } },
+          { "name": "offset", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0, "default": 0 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated agent transaction history.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["agentUuid", "transactions", "total", "limit", "offset"],
+                  "properties": {
+                    "agentUuid": { "type": "string", "format": "uuid" },
+                    "transactions": { "type": "array", "items": { "$ref": "#/components/schemas/AgentTransaction" } },
+                    "total": { "type": "integer" },
+                    "limit": { "type": "integer" },
+                    "offset": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Missing or invalid reference, pagination, or agent not found." },
+          "403": { "description": "The API key cannot access this agent." },
+          "402": { "description": "x402 payment required when no API key is supplied." }
+        },
+        "x-payment-info": { "protocols": [{ "x402": {} }], "price": { "mode": "fixed", "currency": "USD", "amount": "0.000001" } }
+      }
+    },
     "/prepare-transactions": {
       "post": {
         "summary": "Prepare Transactions",
@@ -1543,7 +1752,7 @@
     },
     "/get-investor-info": {
       "get": {
-        "summary": "Get investors information",
+        "summary": "Get investor information",
         "tags": [
           "Endpoints"
         ],
@@ -1575,7 +1784,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Succesful response",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -1618,6 +1827,23 @@
                       "type": "string",
                       "description": "Type classification of the user.",
                       "example": "INVESTOR_INDIVIDUAL"
+                    },
+                    "needKyc": {
+                      "type": "boolean",
+                      "description": "Whether this user must complete KYC."
+                    },
+                    "kycStatus": {
+                      "type": ["string", "null"],
+                      "description": "Raw KYC workflow status."
+                    },
+                    "kycResult": {
+                      "type": ["string", "null"],
+                      "description": "Raw KYC decision result."
+                    },
+                    "complianceStatus": {
+                      "type": "string",
+                      "enum": ["NOT_REQUIRED", "NOT_STARTED", "PENDING", "APPROVED", "REJECTED", "ON_HOLD"],
+                      "description": "Normalized compliance state derived from the KYC requirement, status, and result."
                     },
                     "investments": {
                       "type": "array",

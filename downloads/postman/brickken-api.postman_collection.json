@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Brickken API",
-    "description": "Client collection for the Brickken API V2 (Dapp API + Agentic x402 API).\n\n**Authentication**: every business endpoint requires the `x-api-key` header. Request an API key from tech@brickken.com, or use the form at https://docs.brickken.com/get-started/request-api-key. Agentic (x402) endpoints alternatively accept a per-call `X-Payment` header.\n\n**Environments**: import the Sandbox and Production environment files shipped next to this collection, select one, then fill in `apiKey` (and optionally `tokenSymbol`/`chainId`).\n\n**Typical flow**: 1) POST /prepare-transactions → returns unsigned transactions + txId, 2) sign locally with the whitelisted signer wallet, 3) POST /send-transactions, 4) poll GET /get-transaction-status.\n\nDocs: https://docs.brickken.com",
+    "description": "Client collection for the Brickken API V2 (Dapp API + Agentic x402 API).\n\n**Authentication**: KYC and Dapp business endpoints require `x-api-key`. Agent getters and Agentic endpoints can alternatively accept a per-call `X-Payment` header. Request an API key from tech@brickken.com, or use the form at https://docs.brickken.com/get-started/request-api-key.\n\n**Environments**: import the Sandbox and Production environment files shipped next to this collection, select one, then fill in `apiKey` and the variables used by your request.\n\n**Typical flow**: 1) POST /prepare-transactions → returns unsigned transactions + txId, 2) sign locally with the whitelisted signer wallet, 3) POST /send-transactions, 4) poll GET /get-transaction-status.\n\nDocs: https://docs.brickken.com",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -77,6 +77,31 @@
     },
     {
       "key": "operatorAddress",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "investorEmail",
+      "value": "investor@example.com",
+      "type": "string"
+    },
+    {
+      "key": "agentChainId",
+      "value": "84532",
+      "type": "string"
+    },
+    {
+      "key": "agentUuid",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "agentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ownerWalletAddress",
       "value": "",
       "type": "string"
     },
@@ -946,6 +971,191 @@
         }
       ],
       "description": "Read-only endpoints. All require the x-api-key header."
+    },
+    {
+      "name": "KYC",
+      "item": [
+        {
+          "name": "Create KYC Link",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{investorEmail}}\",\n  \"needKyc\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/create-kyc-link",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "create-kyc-link"
+              ]
+            },
+            "description": "Create or reuse an investor and return a Sumsub verification link. API key required. This request can create an investor record and send an invitation email; treat the returned URL as sensitive."
+          },
+          "response": []
+        }
+      ],
+      "description": "API-key-authenticated investor KYC onboarding."
+    },
+    {
+      "name": "Agent Getters",
+      "item": [
+        {
+          "name": "List Agents",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Payment",
+                "value": "",
+                "disabled": true,
+                "description": "Alternative auth: base64-encoded x402 payment payload instead of x-api-key."
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/get-agents?chainId={{agentChainId}}&limit=50&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "get-agents"
+              ],
+              "query": [
+                {
+                  "key": "chainId",
+                  "value": "{{agentChainId}}",
+                  "description": "Optional with API-key auth; required for x402."
+                },
+                {
+                  "key": "ownerWalletAddress",
+                  "value": "{{ownerWalletAddress}}",
+                  "disabled": true,
+                  "description": "Required for x402 and must match the payer wallet."
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            },
+            "description": "List API-key-scoped agents. For x402, disable inherited API-key auth, enable X-Payment, enable ownerWalletAddress, and use a payment signer matching that wallet. Limits are 1-100 and offsets are non-negative."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Agent Information",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Payment",
+                "value": "",
+                "disabled": true,
+                "description": "Alternative auth: base64-encoded x402 payment payload instead of x-api-key."
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/get-agent-info?agentUuid={{agentUuid}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "get-agent-info"
+              ],
+              "query": [
+                {
+                  "key": "agentUuid",
+                  "value": "{{agentUuid}}",
+                  "description": "Use this reference, or disable it and enable agentId plus chainId."
+                },
+                {
+                  "key": "agentId",
+                  "value": "{{agentId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "chainId",
+                  "value": "{{agentChainId}}",
+                  "disabled": true,
+                  "description": "Required when agentId is enabled."
+                }
+              ]
+            },
+            "description": "Get a complete agent profile by UUID, or by on-chain ID with chain ID. API-key or x402 authentication; x402 payment must come from the stored owner wallet."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Agent Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Payment",
+                "value": "",
+                "disabled": true,
+                "description": "Alternative auth: base64-encoded x402 payment payload instead of x-api-key."
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/get-agent-transactions?agentUuid={{agentUuid}}&limit=50&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "get-agent-transactions"
+              ],
+              "query": [
+                {
+                  "key": "agentUuid",
+                  "value": "{{agentUuid}}",
+                  "description": "Use this reference, or disable it and enable agentId plus chainId."
+                },
+                {
+                  "key": "agentId",
+                  "value": "{{agentId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "chainId",
+                  "value": "{{agentChainId}}",
+                  "disabled": true,
+                  "description": "Required when agentId is enabled."
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            },
+            "description": "List ERC-8004, agent-token, and RAMS transactions for one agent. API-key or x402 authentication. Limits are 1-100 and offsets are non-negative."
+          },
+          "response": []
+        }
+      ],
+      "description": "API-key-or-x402 reads for agent discovery, profiles, and transaction history."
     },
     {
       "name": "Management",

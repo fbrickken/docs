@@ -1,0 +1,24 @@
+---
+title: 'kyc'
+description: 'Create API-key-authenticated investor KYC links from the Brickken CLI.'
+---
+
+`brickken kyc create-link` creates or reuses an investor and returns a Sumsub verification link. It always requires `BRICKKEN_API_KEY` or the global `--api-key` option.
+
+```bash
+brickken kyc create-link \
+  --email investor@example.com \
+  --need-kyc true \
+  --json
+```
+
+| Flag | Type | Required | Description |
+| --- | --- | --- | --- |
+| `--email <email>` | string | Yes | Investor email address |
+| `--need-kyc <true\|false>` | boolean | No | Whether verification is required; defaults to `true` |
+
+<Warning>
+The command can create an investor account and send an invitation email. Treat the returned Sumsub URL as sensitive and do not store it in shell history, logs, or source control.
+</Warning>
+
+See [Create KYC Link](/api-reference/endpoint/create-kyc-link) for the response and authorization rules.
