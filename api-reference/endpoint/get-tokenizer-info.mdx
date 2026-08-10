@@ -22,9 +22,21 @@ curl --request GET \
 ```json
 {
   "companyWalletAddress": "0x0000000000000000000000000000000000000001",
-  "paymentTokenAddress": "0x0000000000000000000000000000000000000001",
-  "escrowAddress": "0x0000000000000000000000000000000000000002",
+  "tokenAddress": "0x0000000000000000000000000000000000000002",
+  "paymentTokenAddress": "0x0000000000000000000000000000000000000003",
+  "escrowAddress": "0x0000000000000000000000000000000000000004",
   "chainId": "aa36a7",
   "email": "tokenizer@example.com"
 }
 ```
+
+## Address roles for dividend distributions
+
+When preparing the payment-token allowance required by `dividendDistribution`:
+
+- Use `tokenAddress` as the `spenderAddress` of the `approve` request. This is the STO token contract that consumes the allowance.
+- `paymentTokenAddress` is the ERC-20 payment token contract on which the approval transaction is executed.
+- `companyWalletAddress` identifies the tokenizer and can be passed as `tokenizerAddress` for a shared payment token such as USDT.
+- Do not use `escrowAddress` as the spender for the dividend allowance.
+
+See [`approve`](/api-reference/endpoint/prepare-approve) for a complete request example.

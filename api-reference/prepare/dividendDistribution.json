@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Brickken API V2 - prepare dividendDistribution",
-    "description": "Method-scoped view of `POST /prepare-transactions` for `method=dividendDistribution`. The full endpoint, with every supported method and the common request body parameters, is documented in `api-reference/openapi.json`.",
+    "description": "Method-scoped view of `POST /prepare-transactions` for `method=dividendDistribution`. Before preparing the distribution, approve the configured payment token with the STO contract (`tokenAddress` from `GET /get-tokenizer-info`) as spender. The full endpoint, with every supported method and the common request body parameters, is documented in `api-reference/openapi.json`.",
     "version": "2.0.0"
   },
   "servers": [
@@ -29,7 +29,7 @@
       "post": {
         "operationId": "prepare_dividendDistribution",
         "summary": "Prepare a dividend distribution",
-        "description": "Prepares the unsigned transaction that distributes payment-token dividends to token holders.",
+        "description": "Prepares the unsigned transaction that distributes payment-token dividends to token holders. The payment-token allowance must be granted to the STO `tokenAddress`, not to `escrowAddress`, and the approval must be confirmed on-chain first.",
         "security": [
           {
             "apiKeyAuth": []
@@ -65,7 +65,7 @@
                   },
                   "signerAddress": {
                     "type": "string",
-                    "description": "Required. Wallet that funds and signs the distribution. It must hold at least `amount` of the payment token and have approved the token contract for that amount.",
+                    "description": "Required. Wallet that funds and signs the distribution. It must hold at least `amount` of the configured payment token and have approved the STO `tokenAddress` for that amount. Retrieve that address with `GET /get-tokenizer-info`; `escrowAddress` is not the spender for this allowance.",
                     "example": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
                   },
                   "tokenSymbol": {

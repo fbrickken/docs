@@ -370,7 +370,7 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** This endpoint prepares unsigned transactions for the method selected in the `method` field. For the exact required and optional body fields of a single method, open the matching page under Prepare Transactions.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY` for API-key auth, or `X-Payment` for x402 retries on eligible agentic methods\n- `Content-Type`: `application/json`\n\n**Common Request Body Parameters:**\n- `method` (string, required): Operation to prepare.\n- `chainId` (string, required): Blockchain network identifier. Hex format is recommended, for example `aa36a7` for Sepolia.\n- `signerAddress` (string, conditionally required): Wallet address that signs the prepared transaction. Most methods require it; `newInvest` and `claimTokens` can use `investorAddress` as the signer.",
+        "description": "**Description:** This endpoint prepares unsigned transactions for the method selected in the `method` field. For the exact required and optional body fields of a single method, open the matching page under Prepare Transactions.\n\nFor a payment-token `approve` used before `dividendDistribution`, call `GET /get-tokenizer-info` for the tokenized asset and set `spenderAddress` to its returned `tokenAddress`. Do not use `escrowAddress`; the approval must be confirmed on-chain before preparing the distribution.\n\n**Headers:**\n- `x-api-key`: `YOUR_API_KEY` for API-key auth, or `X-Payment` for x402 retries on eligible agentic methods\n- `Content-Type`: `application/json`\n\n**Common Request Body Parameters:**\n- `method` (string, required): Operation to prepare.\n- `chainId` (string, required): Blockchain network identifier. Hex format is recommended, for example `aa36a7` for Sepolia.\n- `signerAddress` (string, conditionally required): Wallet address that signs the prepared transaction. Most methods require it; `newInvest` and `claimTokens` can use `investorAddress` as the signer.",
         "security": [
           {
             "apiKeyAuth": []
@@ -611,7 +611,7 @@
                   },
                   "spenderAddress": {
                     "type": "string",
-                    "description": "Optional. Spender address required by approve.",
+                    "description": "Optional. Spender address required by approve. Before `dividendDistribution`, this must be the STO `tokenAddress` returned by `GET /get-tokenizer-info`, not `escrowAddress`.",
                     "example": "0x3333333333333333333333333333333333333333",
                     "pattern": "^0x[a-fA-F0-9]{40}$"
                   },
@@ -639,7 +639,7 @@
                   },
                   "tokenizerAddress": {
                     "type": "string",
-                    "description": "Optional. Tokenizer wallet address used by tokenization setup flows when provided.",
+                    "description": "Optional. Tokenizer wallet address used by tokenization setup flows. It is required by `approve` when `tokenSymbol` is a shared payment token; use `companyWalletAddress` from `GET /get-tokenizer-info` for the related asset.",
                     "example": "0x4444444444444444444444444444444444444444",
                     "pattern": "^0x[a-fA-F0-9]{40}$"
                   },
@@ -2390,7 +2390,7 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** Retrieves information about the tokenizer of a specific token.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.",
+        "description": "**Description:** Retrieves information about the tokenizer of a specific token. For a payment-token approval before `dividendDistribution`, use the returned `tokenAddress` as `spenderAddress`. `paymentTokenAddress` identifies the ERC-20 being approved; `escrowAddress` is not the spender for this allowance.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.",
         "security": [
           {
             "apiKeyAuth": []
@@ -2419,13 +2419,17 @@
                       "type": "string",
                       "description": "The company's wallet address."
                     },
+                    "tokenAddress": {
+                      "type": "string",
+                      "description": "The STO token contract address. Use this as `spenderAddress` when approving the payment token before `dividendDistribution`."
+                    },
                     "paymentTokenAddress": {
                       "type": "string",
-                      "description": "The payment token's address."
+                      "description": "The ERC-20 payment token contract address on which the dividend approval is executed."
                     },
                     "escrowAddress": {
                       "type": "string",
-                      "description": "The escrow address."
+                      "description": "The escrow address. Do not use this as the spender for the `dividendDistribution` allowance."
                     },
                     "chainId": {
                       "type": "string",
