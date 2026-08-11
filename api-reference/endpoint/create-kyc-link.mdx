@@ -1,0 +1,57 @@
+---
+title: 'Create KYC Link'
+openapi: 'POST /create-kyc-link'
+description: 'Create or reuse an investor and return a Sumsub verification link.'
+---
+
+This endpoint always requires `x-api-key`. The email is normalized before lookup, and `needKyc` defaults to `true`.
+
+<Warning>
+This operation can create an investor account and send an invitation email. The returned Sumsub URL grants access to a verification flow; do not log it, commit it, or expose it to another user.
+</Warning>
+
+When `needKyc` is `false`, the investor is created without a KYC requirement and `url` is `null`.
+
+## Client examples
+
+<Tabs>
+  <Tab title="CLI">
+```bash
+brickken kyc create-link \
+  --email investor@example.com \
+  --need-kyc true \
+  --json
+```
+  </Tab>
+  <Tab title="MCP">
+```json
+{
+  "name": "create_kyc_link",
+  "arguments": {
+    "email": "investor@example.com",
+    "needKyc": true
+  }
+}
+```
+  </Tab>
+  <Tab title="SDK">
+```ts
+const result = await bkn.kyc.createLink({
+  email: 'investor@example.com',
+  needKyc: true,
+})
+```
+  </Tab>
+</Tabs>
+
+## Response
+
+```json
+{
+  "email": "investor@example.com",
+  "needKyc": true,
+  "userCreated": true,
+  "invitationSent": true,
+  "url": "https://in.sumsub.com/..."
+}
+```

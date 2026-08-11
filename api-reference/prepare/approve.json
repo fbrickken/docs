@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Brickken API V2 - prepare approve",
-    "description": "Method-scoped view of `POST /prepare-transactions` for `method=approve`. The full endpoint, with every supported method and the common request body parameters, is documented in `api-reference/openapi.json`.",
+    "description": "Method-scoped view of `POST /prepare-transactions` for `method=approve`. For a payment-token approval used by `dividendDistribution`, retrieve the asset with `GET /get-tokenizer-info` and use its `tokenAddress` as `spenderAddress`; do not use `escrowAddress`. The full endpoint, with every supported method and the common request body parameters, is documented in `api-reference/openapi.json`.",
     "version": "2.0.0"
   },
   "servers": [
@@ -29,7 +29,7 @@
       "post": {
         "operationId": "prepare_approve",
         "summary": "Prepare a token approval",
-        "description": "Prepares the unsigned transaction that approves a spender to move tokens on behalf of the owner.",
+        "description": "Prepares the unsigned transaction that approves a spender to move tokens on behalf of the owner. For `dividendDistribution`, the spender must be the STO contract returned as `tokenAddress` by `GET /get-tokenizer-info`, not the returned `escrowAddress`.",
         "security": [
           {
             "apiKeyAuth": []
@@ -76,8 +76,8 @@
                   },
                   "spenderAddress": {
                     "type": "string",
-                    "description": "Required. Address allowed to spend the approved amount.",
-                    "example": "0x3333333333333333333333333333333333333333",
+                    "description": "Required. Address allowed to spend the approved amount. For a payment-token approval before `dividendDistribution`, use the STO `tokenAddress` returned by `GET /get-tokenizer-info`; never use `escrowAddress` for that allowance.",
+                    "example": "0x2222222222222222222222222222222222222222",
                     "pattern": "^0x[a-fA-F0-9]{40}$"
                   },
                   "amount": {
@@ -99,27 +99,29 @@
                   },
                   "tokenizerAddress": {
                     "type": "string",
-                    "description": "Optional. Required when `tokenSymbol` is a payment token (`HAI`, `BKN`, `USDC`, `USDT`). Tokenizer wallet the approval is scoped to.",
-                    "example": "0x4444444444444444444444444444444444444444",
+                    "description": "Optional. Required when `tokenSymbol` is a payment token (`HAI`, `BKN`, `USDC`, `USDT`). Tokenizer wallet the approval is scoped to; use `companyWalletAddress` from `GET /get-tokenizer-info` for the related tokenized asset.",
+                    "example": "0x1111111111111111111111111111111111111111",
                     "pattern": "^0x[a-fA-F0-9]{40}$"
                   }
                 },
                 "example": {
                   "method": "approve",
                   "chainId": "aa36a7",
-                  "signerAddress": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-                  "tokenSymbol": "EXMPL",
-                  "spenderAddress": "0x3333333333333333333333333333333333333333",
-                  "amount": "100"
+                  "signerAddress": "0x1111111111111111111111111111111111111111",
+                  "tokenSymbol": "USDT",
+                  "spenderAddress": "0x2222222222222222222222222222222222222222",
+                  "amount": "100",
+                  "tokenizerAddress": "0x1111111111111111111111111111111111111111"
                 }
               },
               "example": {
                 "method": "approve",
                 "chainId": "aa36a7",
-                "signerAddress": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-                "tokenSymbol": "EXMPL",
-                "spenderAddress": "0x3333333333333333333333333333333333333333",
-                "amount": "100"
+                "signerAddress": "0x1111111111111111111111111111111111111111",
+                "tokenSymbol": "USDT",
+                "spenderAddress": "0x2222222222222222222222222222222222222222",
+                "amount": "100",
+                "tokenizerAddress": "0x1111111111111111111111111111111111111111"
               }
             }
           }

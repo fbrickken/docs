@@ -1,0 +1,46 @@
+---
+title: 'Get Agent Transactions'
+openapi: 'GET /get-agent-transactions'
+description: 'List ERC-8004, agent-token, and RAMS transactions for one agent.'
+---
+
+Reference the agent with `agentUuid`, or with `agentId` and `chainId`. The endpoint accepts an API key or x402 and costs `0.000001 USDC` in x402 mode. API-key access is scope-checked; the x402 payer must match the agent owner wallet.
+
+`limit` defaults to `50` and accepts `1`–`100`. `offset` defaults to `0` and cannot be negative.
+
+## Client examples
+
+<Tabs>
+  <Tab title="CLI">
+```bash
+brickken agent transactions \
+  --agent-uuid "$AGENT_UUID" \
+  --limit 20 \
+  --offset 0 \
+  --json
+```
+  </Tab>
+  <Tab title="MCP">
+```json
+{
+  "name": "get_agent_transactions",
+  "arguments": {
+    "agentUuid": "YOUR_AGENT_UUID",
+    "limit": 20,
+    "offset": 0
+  }
+}
+```
+  </Tab>
+  <Tab title="SDK">
+```ts
+const history = await bkn.agent.transactions({
+  agentUuid,
+  limit: 20,
+  offset: 0,
+})
+```
+  </Tab>
+</Tabs>
+
+Each transaction includes a `category` of `erc8004`, `agentToken`, or `rams`, plus a sanitized `details` object with operation-specific fields.

@@ -3,13 +3,27 @@ title: 'agent'
 description: 'Manage ERC-8004 agent identity and reputation from the Brickken CLI.'
 ---
 
-`brickken agent` groups the ERC-8004 identity and reputation operations on Base. Every subcommand is **prepare-only by default** (free); add `--execute` to also send and pay the x402 charge. The recommended `brickken-relayed` mode (`--execution-mode brickken-relayed`, omit `--signer-address`) lets Brickken's relayer sign and broadcast; the default `client-signed` mode signs locally with `--signer-address`.
+`brickken agent` groups ERC-8004 reads, identity writes, and reputation operations on Base. Read commands execute immediately. Write commands are **prepare-only by default** (free); add `--execute` to also send and pay the x402 charge. The recommended `brickken-relayed` mode (`--execution-mode brickken-relayed`, omit `--signer-address`) lets Brickken's relayer sign and broadcast; `client-signed` signs locally with `--signer-address`.
 
 For the field-level semantics of each underlying method, see [Agentic Methods with x402](/api-reference/endpoint/agentic-methods-x402).
 
-## Shared options
+## Read commands
 
-These options apply to every `agent` subcommand:
+Agent getters use the configured API key when present and otherwise fall back to x402. The x402 price is `0.000001 USDC` per call.
+
+```bash
+brickken agent list --chain 84532 --limit 20 --offset 0 --json
+brickken agent info --agent-uuid "$AGENT_UUID" --json
+brickken agent transactions --agent-uuid "$AGENT_UUID" --limit 20 --offset 0 --json
+```
+
+`info` and `transactions` accept `--agent-uuid`, or `--agent-id` together with `--chain`. `list` accepts `--chain`, `--owner-wallet-address`, `--limit`, and `--offset`. In x402 mode, `list` requires both owner filters and the payment signer must match the owner wallet. Limits are 1–100 and offsets are non-negative.
+
+See [List Agents](/api-reference/endpoint/get-agents), [Get Agent Information](/api-reference/endpoint/get-agent-info), and [Get Agent Transactions](/api-reference/endpoint/get-agent-transactions).
+
+## Shared write options
+
+These options apply to agent write subcommands:
 
 | Flag | Description |
 | --- | --- |

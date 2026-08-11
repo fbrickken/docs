@@ -1,0 +1,44 @@
+---
+title: 'List Agents'
+openapi: 'GET /get-agents'
+description: 'List API-key-scoped agents or x402 owner-scoped agents.'
+---
+
+With an API key, the result is scoped to agents associated with that API client; `chainId` and `ownerWalletAddress` are optional filters.
+
+Without an API key, the endpoint returns an x402 challenge priced at `0.000001 USDC`. Both `chainId` and `ownerWalletAddress` are required, and the x402 payer must match the owner wallet.
+
+`limit` defaults to `50` and accepts `1`–`100`. `offset` defaults to `0` and cannot be negative.
+
+## Client examples
+
+<Tabs>
+  <Tab title="CLI">
+```bash
+brickken agent list --chain 84532 --limit 20 --offset 0 --json
+```
+  </Tab>
+  <Tab title="MCP">
+```json
+{
+  "name": "get_agents",
+  "arguments": {
+    "chainId": "84532",
+    "limit": 20,
+    "offset": 0
+  }
+}
+```
+  </Tab>
+  <Tab title="SDK">
+```ts
+const result = await bkn.agent.list({
+  chainId: '84532',
+  limit: 20,
+  offset: 0,
+})
+```
+  </Tab>
+</Tabs>
+
+For x402, also pass `ownerWalletAddress` to the CLI, MCP tool, or SDK call. The CLI and SDK use the configured payment signer.

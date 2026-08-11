@@ -1,9 +1,9 @@
 ---
 title: 'CLI'
-description: 'Public Brickken CLI for x402-paid agentic workflows and ERC-8226 RAMS mandates.'
+description: 'Public Brickken CLI for KYC, agent getters, x402-paid writes, and ERC-8226 RAMS mandates.'
 ---
 
-The **Brickken CLI** is the public terminal client for the [Agentic API](/api-reference/endpoint/agentic-methods-x402). It supports ERC-8004 on Base and ERC-8226 RAMS mandates on Ethereum Sepolia. It prepares writes for free and pays the send through x402; RAMS reads and typed-data fetches use API-key authentication.
+The **Brickken CLI** is the public terminal client for KYC onboarding and the [Agentic API](/api-reference/endpoint/agentic-methods-x402). It supports ERC-8004 on Base and ERC-8226 RAMS mandates on Ethereum Sepolia. It prepares writes for free and pays sends through x402; agent getters and RAMS reads use API-key authentication or x402.
 
 <CardGroup cols={2}>
   <Card title="npm package" icon="box" href="https://www.npmjs.com/package/brickken-cli">
@@ -30,7 +30,7 @@ npx brickken-cli --help
 
 ## Authentication
 
-Writes use x402. RAMS reads and online EIP-712 typed-data fetches use an API key.
+Writes use x402. KYC requires an API key. Agent getters and RAMS reads/typed-data fetches use the key when configured and otherwise fall back to x402.
 
 ```bash
 export BRICKKEN_API_KEY=...
@@ -40,7 +40,7 @@ export BRICKKEN_PRIVATE_KEY=0x...
 `BKN_API_KEY` and `BKN_PRIVATE_KEY` are accepted aliases. The private key signs the x402 payment, client-signed transactions, and requested RAMS typed data locally.
 
 <Warning>
-**The CLI does not reach the legacy Dapp API.** It has no commands for tokenization, STOs, or the Dapp reads, and it only attaches `x-api-key` to RAMS reads. For those workflows use the [MCP server](/mcp/introduction) or the [REST API](/api-reference/introduction) — see [Choose your surface](/get-started/choose-your-surface).
+**The CLI does not reach the general legacy Dapp API.** KYC link creation is the supported exception. It has no commands for tokenization, STOs, or their Dapp reads. For those workflows use the [MCP server](/mcp/introduction) or the [REST API](/api-reference/introduction) — see [Choose your surface](/get-started/choose-your-surface).
 </Warning>
 
 <Warning>

@@ -11,6 +11,10 @@ Prepares unsigned transactions for distributing payment token dividends to holde
 
 - Amounts are specified in whole units (e.g., 10 for 10 USDT)
 - The signer must have sufficient balance of the payment token
+- The signer must first approve the configured payment token to the STO contract. Retrieve the STO address from `GET /get-tokenizer-info?tokenSymbol=...` and use its `tokenAddress` as `spenderAddress` in the `approve` request.
+- Do not use `escrowAddress` as the approval spender for this operation. Wait for the payment-token approval to be confirmed on-chain before preparing the distribution.
 - Only the tokenizer can distribute dividends for their tokens
+
+See [`approve`](/api-reference/endpoint/prepare-approve) for the complete allowance workflow and field mapping.
 
 <NextSignAndSend />

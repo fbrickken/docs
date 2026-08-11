@@ -7,4 +7,41 @@ import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
 
 Prepares unsigned transactions for approving a spender to use tokens on behalf of the signer. Use `POST /prepare-transactions` with `method=approve`.
 
+## Approving payment tokens for dividend distributions
+
+Before calling `dividendDistribution`, approve the tokenized asset's configured payment token and set `spenderAddress` to the **STO token contract address**. Retrieve the required addresses with:
+
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-tokenizer-info?tokenSymbol=EXMPL' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
+Use the response fields as follows:
+
+- `tokenAddress` → `spenderAddress` in the `approve` request
+- `paymentTokenAddress` → the ERC-20 contract being approved; use its configured symbol, such as `USDT`, as `tokenSymbol`
+- `companyWalletAddress` → `tokenizerAddress` when approving a shared payment token
+- `escrowAddress` → **do not use this as the spender for `dividendDistribution`**
+
+<Warning>
+  Approving the payment token to `escrowAddress` does not satisfy the dividend allowance check. The allowance must be from `signerAddress` to the STO `tokenAddress`.
+</Warning>
+
+For example, if `get-tokenizer-info` returns the STO address `0x2222222222222222222222222222222222222222` and the configured payment token is USDT:
+
+```json
+{
+  "method": "approve",
+  "signerAddress": "0x1111111111111111111111111111111111111111",
+  "chainId": "aa36a7",
+  "tokenSymbol": "USDT",
+  "spenderAddress": "0x2222222222222222222222222222222222222222",
+  "amount": "100",
+  "tokenizerAddress": "0x1111111111111111111111111111111111111111"
+}
+```
+
+Sign and submit the prepared approval, then wait for its on-chain confirmation before preparing `dividendDistribution`.
+
 <NextSignAndSend />

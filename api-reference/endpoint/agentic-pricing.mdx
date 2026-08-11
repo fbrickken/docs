@@ -45,6 +45,10 @@ Prices are in USDC on **Base mainnet**.
 | `ramsGrantPrincipal` | `0.00` | `0.98` |
 | `ramsRevokePrincipal` | `0.00` | `0.48` |
 
+## Agent getter pricing
+
+`GET /get-agents`, `GET /get-agent-info`, and `GET /get-agent-transactions` cost `0.000001 USDC` per x402 call. They are free of x402 payment when called with a valid API key.
+
 ## How RAMS is priced
 
 <RamsSepoliaNote />
@@ -57,7 +61,7 @@ The nine RAMS read and typed-data endpoints (`GET /rams/*`) are priced at the ch
 Prices are resolved from a database table at request time and environment defaults are only a fallback, so the `GETTER` amount is not fixed here. Read it from the `PAYMENT-REQUIRED` header of the `402` response.
 </Note>
 
-Sandbox, Base Sepolia, and other non-production environments use a flat reference price of `0.01` USDC per send.
+Sandbox, Base Sepolia, and other non-production environments use a flat reference price of `0.01` USDC per write send. Agent getters keep their separate `0.000001 USDC` price.
 
 <Note>
 The exact amount, asset, and chain are always quoted in the `PAYMENT-REQUIRED` header of the `402` response (and previewed in the prepare response's `x402Requirements`). Read them from there rather than hardcoding the table above.

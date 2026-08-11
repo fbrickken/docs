@@ -123,7 +123,7 @@ RAMS (ERC-8226) lets a principal grant an agent a **compliance-gated, value-capp
 
 Being explicit about the edges saves you an afternoon:
 
-- **The CLI cannot call the Dapp API.** No Dapp commands exist, and it only sends an API key on RAMS reads. The [SDK](/sdk/introduction) is the client to use for Dapp work from your own code.
+- **The CLI cannot call the general Dapp API.** It supports KYC link creation, agent getters, and RAMS reads, but not tokenization, STO, or their Dapp reads. The [SDK](/sdk/introduction) is the client to use for full Dapp work from your own code.
 - **`brickken-relayed` sends cannot be paid with an API key.** Brickken pays the gas, so the x402 payment is mandatory.
 - **RAMS runs on Ethereum Sepolia only** at launch, on both sandbox and production.
 - **The MCP packages are not published to npm.** Use the hosted server at `https://mcp.brickken.com/mcp`.

@@ -1,0 +1,40 @@
+---
+title: 'Get Agent Information'
+openapi: 'GET /get-agent-info'
+description: 'Get a complete ERC-8004 agent profile by stored UUID or on-chain ID.'
+---
+
+Provide one of these references:
+
+- `agentUuid`; or
+- `agentId` together with `chainId`.
+
+The endpoint accepts an API key or x402 and costs `0.000001 USDC` in x402 mode. API-key access is checked against the API client's agent scope. For x402, the payer must match the agent's stored owner wallet.
+
+## Client examples
+
+<Tabs>
+  <Tab title="CLI">
+```bash
+brickken agent info --agent-uuid "$AGENT_UUID" --json
+```
+  </Tab>
+  <Tab title="MCP">
+```json
+{
+  "name": "get_agent_info",
+  "arguments": { "agentUuid": "YOUR_AGENT_UUID" }
+}
+```
+  </Tab>
+  <Tab title="SDK">
+```ts
+const agent = await bkn.agent.get({ agentUuid })
+
+// Equivalent on-chain reference:
+const sameAgent = await bkn.agent.get({ agentId: '8896', chainId: '84532' })
+```
+  </Tab>
+</Tabs>
+
+The detail response extends the list summary with `registrationFile`, `onchainMetadata`, and `prepareTxId`.

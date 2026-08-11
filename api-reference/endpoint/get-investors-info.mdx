@@ -1,9 +1,9 @@
 ---
-title: 'Get Investors Information'
+title: 'Get Investor Information'
 openapi: 'GET /get-investor-info'
 ---
 
-Retrieves information about a specific investor.
+Retrieves an investor profile, KYC/compliance state, and investments for one token. The response is not a whitelist lookup; use [Get Whitelist Status](/api-reference/endpoint/get-whitelist-status) for the on-chain whitelist.
 
 ## Query Parameters
 
@@ -23,7 +23,30 @@ curl --request GET \
 ```json
 {
   "email": "investor@example.com",
-  "kycStatus": "approved",
-  "whitelistStatus": true
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "kycUrl": "https://kyc.example.com/user/123",
+  "profilePicture": null,
+  "walletAddress": "0x1111111111111111111111111111111111111111",
+  "type": "INVESTOR",
+  "needKyc": true,
+  "kycStatus": "completed",
+  "kycResult": "GREEN",
+  "complianceStatus": "APPROVED",
+  "investments": [
+    {
+      "id": "b8341970-b99d-4c75-929c-854ab746723e",
+      "date": "2026-08-10T12:00:00.000Z",
+      "txHash": "0x...",
+      "currency": "USDC",
+      "amountInUSDT": "100.0",
+      "status": "success",
+      "tokenSymbol": "EXMPL",
+      "offeringId": "a5232594-3f97-47d0-b362-491caac9388f",
+      "offeringName": "Round A"
+    }
+  ]
 }
 ```
+
+`complianceStatus` is one of `NOT_REQUIRED`, `NOT_STARTED`, `PENDING`, `APPROVED`, `REJECTED`, or `ON_HOLD` and is derived from `needKyc`, `kycStatus`, and `kycResult`.

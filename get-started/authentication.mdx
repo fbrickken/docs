@@ -31,7 +31,9 @@ Never send a private key or seed phrase to the Brickken API, and never paste one
 | What you are calling | API key | x402 |
 | --- | --- | --- |
 | Dapp API writes (`/prepare-transactions/*` for tokenization and STO methods) | Required | Not accepted |
-| Dapp API reads (`/get-*`) | Required, with exceptions below | Not accepted |
+| Dapp API reads (excluding agent getters) | Required, with exceptions below | Not accepted |
+| `POST /create-kyc-link` | Required | Not accepted |
+| Agent getters (`/get-agents`, `/get-agent-info`, `/get-agent-transactions`) | Accepted | Accepted |
 | `PATCH /patch-token-docs` | Required | Not accepted |
 | `POST /prepare-transactions` for x402-eligible agentic methods | Optional | Not needed — preparing is free |
 | Agentic writes in `client-signed` mode | Accepted | Accepted |
@@ -168,7 +170,7 @@ Polling a relayed operation with `GET /get-transaction-status` needs no credenti
 | REST | Yes | Yes | `x-api-key` / `X-PAYMENT` headers |
 | SDK | Yes | Yes | `new Brickken({ apiKey, signer })`, or `Brickken.fromEnv(process.env)` |
 | MCP | Yes | Yes | `configure` tool, or `BRICKKEN_API_KEY` / `BRICKKEN_PRIVATE_KEY` |
-| CLI | RAMS reads only | Yes | `BRICKKEN_API_KEY` / `BRICKKEN_PRIVATE_KEY`, or `--api-key` / `--private-key` |
+| CLI | KYC and supported reads | Yes | `BRICKKEN_API_KEY` / `BRICKKEN_PRIVATE_KEY`, or `--api-key` / `--private-key` |
 | Skill | Yes | Yes | Environment variables, per the agent client |
 
 | Variable | Alias | Purpose |
@@ -202,7 +204,7 @@ Dapp writes default to `client-signed`, so they also need a signer and a whiteli
 
 ### MCP — full Dapp API access with an API key
 
-The hosted MCP server is the client to use when you want an AI agent to drive the Dapp API. Configure it with an API key and nothing else, and every Dapp tool works: the 13 read tools (`get_stos`, `get_token_info`, `get_investor_info`, and the rest) and the 11 write tools that go through `prepare-transactions` (`create_tokenization`, `create_sto`, `mint_tokens`, `whitelist_investor`, `burn_tokens`, `transfer_tokens`, `approve_tokens`, `distribute_dividend`, `invest_in_sto`, `claim_sto`, `close_sto`).
+The hosted MCP server is the client to use when you want an AI agent to drive the Dapp API. Configure it with an API key and nothing else, and every Dapp tool works: the existing Dapp reads and prepare-based writes, `create_kyc_link`, and the three agent getters (`get_agents`, `get_agent_info`, `get_agent_transactions`).
 
 ```json
 {
@@ -215,18 +217,20 @@ The MCP server attaches `x-api-key` to every outbound request when one is config
 
 See [MCP](/mcp/introduction) for the connection details and the full tool list.
 
-### CLI — RAMS reads only
+### CLI — KYC and supported reads
 
 <Warning>
-**The CLI cannot drive the legacy Dapp API.** It sends `x-api-key` only on RAMS reads and typed-data fetches (`brickken rams inspect`, `status`, `can-execute`, `compliance-status`, `executor-action`, `sign`). Every other command goes out without a key, and the CLI has no commands for the Dapp methods at all — there is no `newTokenization`, `newSto`, `mintToken`, or `get-stos` mapper. `brickken tx prepare --method newTokenization` forwards the method name but the backend rejects it with `API key is required for this method`.
+**The CLI cannot drive the general legacy Dapp API.** KYC link creation is the explicit supported exception. The CLI sends `x-api-key` for KYC and, when configured, for agent getters and RAMS reads/typed-data fetches. It still has no commands for tokenization, STO, or their Dapp read methods. `brickken tx prepare --method newTokenization` forwards the method name but the backend rejects it with `API key is required for this method`.
 
 For Dapp API work from an agent or a script, use **MCP** or call the REST API directly.
 </Warning>
 
-Set the key for RAMS reads like this:
+Set the key for KYC and authenticated reads like this:
 
 ```bash
 export BRICKKEN_API_KEY=...
+brickken kyc create-link --email investor@example.com --need-kyc true
+brickken agent list --chain 84532 --limit 20
 brickken rams status --chain 11155111 --agent 0x… --principal 0x…
 ```
 
