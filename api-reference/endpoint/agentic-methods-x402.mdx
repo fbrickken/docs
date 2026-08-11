@@ -9,8 +9,8 @@ The Agentic API is the x402-paid surface for Brickken agentic methods. It covers
 
 Every agentic operation is a two-step flow:
 
-1. **Prepare** the unsigned transaction — **free**, no x402 payment required.
-2. **Send** the operation — the x402 USDC payment is charged here, and only here.
+1. **Prepare** the unsigned transaction. In `brickken-relayed` mode this is free; in `client-signed` and `client-broadcast` modes the operation charge is split between prepare and send.
+2. **Send** the operation. The remaining x402 USDC charge is collected here.
 
 There are two execution modes for the send step:
 
@@ -42,7 +42,7 @@ The Agentic API runs on Base, with Base Sepolia for tests. The x402 payment rail
 
 For x402, omit `x-api-key`.
 
-1. **Prepare (free).** Call a semantic facade such as `POST /x402/agent/register`, or `POST /prepare-transactions` with an eligible `method`. For relayed execution, pass `executionMode: "brickken-relayed"`. The response returns `txId`, `transactions`, and an `x402Requirements` quote of the upcoming send price. No payment is taken at this step.
+1. **Prepare.** Call a semantic facade such as `POST /x402/agent/register`, or `POST /prepare-transactions` with an eligible `method`. For relayed execution, pass `executionMode: "brickken-relayed"`. The response returns `txId`, `transactions`, and an `x402Requirements` quote. Relayed preparation is free; client-controlled preparation may return a payment challenge for its share of the operation price.
 2. **Send.** Call `POST /send-transactions`. The API responds `402 Payment Required` with a `PAYMENT-REQUIRED` header describing the exact chain, asset, transfer method, amount, recipient, and timeout.
 3. **Sign the x402 payment locally** with the payer's private key, and retry the send with `X-PAYMENT`.
 4. Brickken verifies the payment, then (in `brickken-relayed` mode) signs and broadcasts the operation. The settlement is returned in the `PAYMENT-RESPONSE` header.
@@ -85,7 +85,7 @@ Production (`https://api.brickken.com`) is the public x402scan target. Sandbox e
 
 ## Prepare and Send
 
-The semantic `/x402/...` routes prepare unsigned transactions for free. They do not submit transactions on-chain by themselves.
+The semantic `/x402/...` routes prepare unsigned transactions and do not submit transactions on-chain by themselves. Agent and token facades default to relayed execution, so their prepare is free; pass a client-controlled mode when you want to sign locally and expect the mode's prepare charge.
 
 ### Brickken-relayed (recommended)
 
@@ -170,7 +170,7 @@ Facade requests use the same body fields as the matching backend `method`, excep
     Delegate compliance-gated, scoped, capped authority to AI-agent wallets with ERC-8226.
   </Card>
   <Card title="Pricing" icon="badge-dollar-sign" href="/api-reference/endpoint/agentic-pricing">
-    Review free prepare and per-operation send prices.
+    Review execution-mode-aware prepare and send prices.
   </Card>
 </CardGroup>
 

@@ -35,7 +35,7 @@ command -v jq
 
 ## 4. Deploy a token end-to-end
 
-Preparing is free; the `--execute` flag also sends and pays the x402 charge in one step. With `--execution-mode brickken-relayed` you omit `--signer-address` and `--agent-wallet` — Brickken's relayer signs, pays gas, and becomes the token owner. The `--json` flag makes the output machine-readable so you can pipe it into `jq`.
+Relayed preparation is free; the `--execute` flag also sends and pays the full x402 charge in one step. Client-controlled modes charge the prepare share before execution. With `--execution-mode brickken-relayed` you omit `--signer-address` and `--agent-wallet` — Brickken's relayer signs, pays gas, and becomes the token owner. The `--json` flag makes the output machine-readable so you can pipe it into `jq`.
 
 ```bash
 brickken create-token \

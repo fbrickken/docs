@@ -60,7 +60,7 @@ Five first calls, one per surface. All of them run against **sandbox** — nothi
   </Tab>
 
   <Tab title="Agentic API — with a wallet">
-    Preparing costs nothing and needs no credential. Try it right now:
+    The x402 facade prepares a relayed operation without a credential. Try it right now:
 
     ```bash
     curl --request POST 'https://api.sandbox.brickken.com/x402/agent/register' \
@@ -157,7 +157,7 @@ Five first calls, one per surface. All of them run against **sandbox** — nothi
     export BRICKKEN_RPC_URL="https://sepolia.base.org"
     ```
 
-    Prepare only — free, nothing sent:
+    Prepare only — free in relayed mode, nothing sent:
 
     ```bash
     brickken create-token --chain 84532 --execution-mode brickken-relayed --name "Research Agent Token" --symbol RAGT
@@ -226,5 +226,11 @@ Five first calls, one per surface. All of them run against **sandbox** — nothi
   </Card>
   <Card title="Postman collection" icon="download" href="/api-reference/postman">
     Ready-to-run requests for every endpoint.
+  </Card>
+  <Card title="API Challenge Hello World" icon="code" href="/get-started/build-programme/api-hello-world">
+    Create and verify a sandbox tokenized asset with direct HTTP requests.
+  </Card>
+  <Card title="Agentic Challenge Hello World" icon="robot" href="/get-started/build-programme/agentic-hello-world">
+    Register an ERC-8004 agent and deploy its token with the CLI.
   </Card>
 </CardGroup>

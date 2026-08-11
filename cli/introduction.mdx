@@ -3,7 +3,7 @@ title: 'CLI'
 description: 'Public Brickken CLI for KYC, agent getters, x402-paid writes, and ERC-8226 RAMS mandates.'
 ---
 
-The **Brickken CLI** is the public terminal client for KYC onboarding and the [Agentic API](/api-reference/endpoint/agentic-methods-x402). It supports ERC-8004 on Base and ERC-8226 RAMS mandates on Ethereum Sepolia. It prepares writes for free and pays sends through x402; agent getters and RAMS reads use API-key authentication or x402.
+The **Brickken CLI** is the public terminal client for KYC onboarding and the [Agentic API](/api-reference/endpoint/agentic-methods-x402). It supports ERC-8004 on Base and ERC-8226 RAMS mandates on Ethereum Sepolia. In relayed mode it prepares writes for free and pays the full operation through x402 at send; client-controlled modes split the operation charge between prepare and send. Agent getters and RAMS reads use API-key authentication or x402.
 
 <CardGroup cols={2}>
   <Card title="npm package" icon="box" href="https://www.npmjs.com/package/brickken-cli">
@@ -87,12 +87,12 @@ export BRICKKEN_RPC_URL="https://sepolia.base.org"   # Base Sepolia
 
 ## Command Model
 
-High-level commands are prepare-only by default, and preparing is free. Add `--execute` to also send and pay the x402 charge in one step. Add `--json` for machine-readable output.
+High-level commands are prepare-only by default. Relayed preparation is free; client-controlled preparation charges the first half of the operation. Add `--execute` to also send and pay the remaining x402 charge in one step. Add `--json` for machine-readable output.
 
 The recommended path is `brickken-relayed` mode: pass `--execution-mode brickken-relayed` and omit `--signer-address` — Brickken's relayer signs and broadcasts. The default is `client-signed`, where you provide `--signer-address` and the CLI signs the prepared transaction locally.
 
 ```bash
-# Prepare only (free), relayed mode
+# Prepare only (free in relayed mode), relayed execution
 brickken create-token \
   --chain 84532 \
   --execution-mode brickken-relayed \
@@ -200,5 +200,5 @@ brickken tx prepare \
 ```
 
 <Note>
-Preparing is free; only the send is x402-priced. Fund the wallet behind `BRICKKEN_PRIVATE_KEY` with enough USDC on the x402 payment chain (e.g. Circle USDC on Base Sepolia). In `brickken-relayed` mode Brickken's relayer pays native gas; in `client-signed` mode you also need native gas on the operation chain.
+Relayed preparation is free and the full operation is x402-priced at send. Client-controlled modes split the operation charge between prepare and send. Fund the wallet behind `BRICKKEN_PRIVATE_KEY` with enough USDC on the x402 payment chain (e.g. Circle USDC on Base Sepolia). In `brickken-relayed` mode Brickken's relayer pays native gas; in `client-signed` mode you also need native gas on the operation chain.
 </Note>

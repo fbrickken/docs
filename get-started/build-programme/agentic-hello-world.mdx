@@ -1,0 +1,147 @@
+---
+title: 'Agentic Challenge — Hello World'
+description: 'Register an ERC-8004 agent and deploy its token with the Brickken CLI.'
+icon: 'robot'
+---
+
+This walkthrough is the first step for the **Agentic Challenge**. You will use the Brickken CLI and x402 on Base Sepolia to register an ERC-8004 agent and deploy an ERC-20 owned by your wallet.
+
+<Note>
+This path uses explicit `client-signed` execution. Your wallet signs the x402 payment and the blockchain transaction, while Brickken broadcasts the signed operation. It gives you ownership of the agent identity and token, but requires both Base Sepolia ETH for gas and Circle USDC for x402 payments.
+</Note>
+
+## Outcome
+
+At the end, your terminal will show:
+
+- a confirmed ERC-8004 agent registration and `agentUuid`;
+- the stored agent profile read back through the Agentic API;
+- a confirmed agent-owned ERC-20 deployment and `tokenAddress`;
+- x402 settlement metadata for the executed operations.
+
+The complete runnable sample is in the public [Agentic Hello World example](https://github.com/fbrickken/docs/tree/main/examples/build-programme/agentic-hello-world).
+
+## Estimated time
+
+Allow 15–20 minutes for setup, faucet funding, two x402 payments, and confirmation on Base Sepolia.
+
+## Prerequisites
+
+<Steps>
+  <Step title="Install the pinned CLI">
+    Use the version validated for this programme:
+
+    ```bash
+    npm install -g brickken-cli@0.4.11
+    brickken --version
+    ```
+  </Step>
+  <Step title="Create a dedicated Base Sepolia wallet">
+    Set `BRICKKEN_PRIVATE_KEY` and the corresponding address in `WALLET`. Use a testnet-only key and never commit the `.env` file.
+  </Step>
+  <Step title="Fund x402 payments">
+    Get Circle USDC on Base Sepolia from the [Circle faucet](https://faucet.circle.com/). The payment asset, amount, recipient, and timeout are quoted live by x402; do not hardcode them.
+  </Step>
+  <Step title="Fund transaction gas">
+    Get Base Sepolia ETH from one of the sources in the [official Base faucet list](https://docs.base.org/base-chain/network-information/network-faucets). Client-signed mode uses your wallet to pay gas.
+  </Step>
+</Steps>
+
+The sample uses the public fixtures below so the registration request is runnable without inventing an image or service URL:
+
+- Image: `https://docs.brickken.com/images/build-programme/hello-world-agent.svg`
+- Service endpoint: `https://docs.brickken.com/downloads/build-programme/agent-card.json`
+
+## Setup
+
+Clone or download the [example directory](https://github.com/fbrickken/docs/tree/main/examples/build-programme/agentic-hello-world), then run:
+
+```bash
+cp .env.example .env
+# Edit .env. WALLET must correspond to BRICKKEN_PRIVATE_KEY.
+```
+
+The environment contract is:
+
+```text
+BRICKKEN_ENV=sandbox
+BRICKKEN_PRIVATE_KEY=0x...
+BRICKKEN_RPC_URL=https://sepolia.base.org
+WALLET=0x...
+```
+
+Optional variables let you replace the example agent name, image, service endpoint, and token symbol.
+
+## Run
+
+Execute the pinned CLI workflow:
+
+```bash
+./run.sh
+```
+
+## What the script does
+
+1. `brickken agent register` prepares and executes an ERC-8004 registration on Base Sepolia with `--execution-mode client-signed`.
+2. The script captures `agentUuid` and the blockchain transaction hash, then polls the Base Sepolia RPC until the receipt succeeds.
+3. `brickken agent info` reads the stored profile. Without an API key, this getter uses x402 with the configured wallet.
+4. `brickken create-token` deploys an ERC-20 with the same wallet passed as `--signer-address` and `--agent-wallet`.
+5. The CLI waits for the deployment receipt and exposes `tokenAddress`; the script checks the x402 settlement and address format.
+
+For client-controlled modes, x402 pricing is split between prepare and send. The CLI performs both payment handshakes locally and reads the live quote, so the example does not assume a fixed amount or payment token. See [Agentic pricing](/api-reference/endpoint/agentic-pricing) for the execution-mode matrix.
+
+## Expected output
+
+The script writes JSON files under `out/` and prints a summary similar to:
+
+```text
+Hello World complete
+Agent UUID: 00000000-0000-0000-0000-000000000000
+Agent registration tx: 0x...
+Agent token: 0x...
+Agent token deployment tx: 0x...
+```
+
+## Verification
+
+Inspect the sanitized fields in `out/register-output.json`, `out/agent-info-output.json`, and `out/create-token-output.json`:
+
+- `prepared.info.agentUuid` exists;
+- the registration receipt has status `0x1`;
+- the registration send includes successful x402 settlement metadata;
+- the profile read returns the same agent reference;
+- `sent.success` is `true` for token deployment;
+- `tokenAddress` is a 40-hex-character address;
+- `tokenReceipt.status` is `0x1` and `tokenTxHash` identifies the deployment receipt;
+- `sent._x402.settlement.success` is `true`.
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| `brickken-cli is required` | Install the pinned `brickken-cli@0.4.11` package and confirm `brickken --version`. |
+| `image is required` or service validation fails | Keep the public fixture URLs or replace them with reachable HTTPS URLs. |
+| x402 payment fails | Confirm the wallet has the exact quoted Base Sepolia USDC asset and retry only after checking the quote. |
+| Client transaction fails for gas | Fund the same `WALLET` with Base Sepolia ETH and confirm it matches the private key. |
+| Agent profile read is empty | Wait for the registration receipt before calling `agent info`; do not prepare dependent operations against a pending identity. |
+| Token address is missing | Keep `BRICKKEN_RPC_URL` set so the CLI can inspect the deployment receipt. |
+
+## Security
+
+- Use a disposable Base Sepolia wallet and keep the private key in an environment variable or secret manager.
+- Review the live x402 quote before approving each payment; the CLI reads the amount, asset, recipient, and timeout from the challenge.
+- Check chain, signer, agent wallet, token symbol, and recipient before executing a write.
+- Do not commit `.env` or the generated `out/` JSON files.
+
+## Next challenge ideas
+
+Next, add [`agent set-uri`](/cli/commands/agent#agent-set-uri) and [`agent set-metadata`](/cli/commands/agent#agent-set-metadata), then exercise the token lifecycle with [`mint`](/cli/commands/token-economics#mint), [`approve`](/cli/commands/token-economics#approve), and [`transfer`](/cli/commands/token-economics#transfer). For compliance-gated delegation, continue to the [RAMS mandate workflow](/cli/guides/rams-mandate-workflow). MCP users can reach the same Agentic API through the [hosted MCP server](/mcp/introduction).
+
+<CardGroup cols={2}>
+  <Card title="Agent & token workflow" icon="route" href="/cli/guides/agent-and-token-workflow">
+    See the longer CLI lifecycle walkthrough.
+  </Card>
+  <Card title="API Hello World" icon="code" href="/get-started/build-programme/api-hello-world">
+    Build the direct API path for tokenized assets and STOs.
+  </Card>
+</CardGroup>

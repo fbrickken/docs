@@ -3,7 +3,7 @@ title: 'Token economics'
 description: 'Create, mint, burn, transfer, and approve agentic ERC-20 tokens with the Brickken CLI.'
 ---
 
-The token economics commands deploy and manage x402-capable agentic ERC-20 tokens on Base. Each is **prepare-only by default** (free); add `--execute` to also send and pay the x402 charge. The recommended `brickken-relayed` mode (`--execution-mode brickken-relayed`) lets Brickken's relayer sign and broadcast; the default `client-signed` mode signs locally with `--signer-address`.
+The token economics commands deploy and manage x402-capable agentic ERC-20 tokens on Base. Each is **prepare-only by default**; relayed preparation is free while client-controlled modes charge the prepare share. Add `--execute` to also send and pay the remaining x402 charge. The recommended `brickken-relayed` mode (`--execution-mode brickken-relayed`) lets Brickken's relayer sign and broadcast; the default `client-signed` mode signs locally with `--signer-address`.
 
 Each high-level command maps to a backend agentic method. Field-level semantics for every method are documented under [Agentic Methods with x402](/api-reference/endpoint/agentic-methods-x402).
 

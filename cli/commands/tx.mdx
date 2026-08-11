@@ -14,7 +14,7 @@ description: 'Raw prepare, sign, send, and status flows for any Brickken API V2 
 
 ## tx prepare
 
-Prepare a raw transaction for any method — preparing is free. With `--execute`, the CLI also sends to `/send-transactions` and pays the x402 charge. The recommended `--execution-mode brickken-relayed` lets Brickken's relayer sign and broadcast (omit `--signer-address`); the default `client-signed` mode signs locally with the configured private key first.
+Prepare a raw transaction for any method. Relayed preparation is free; client-controlled modes charge the prepare share. With `--execute`, the CLI also sends to `/send-transactions` and pays the remaining x402 charge. The recommended `--execution-mode brickken-relayed` lets Brickken's relayer sign and broadcast (omit `--signer-address`); the default `client-signed` mode signs locally with the configured private key first.
 
 | Flag | Type | Required | Description |
 | --- | --- | --- | --- |

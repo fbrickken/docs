@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Brickken Hello World agent</title>
+  <desc id="desc">A blue geometric agent icon for the Brickken developer programme.</desc>
+  <rect width="512" height="512" rx="96" fill="#4C82DF"/>
+  <circle cx="170" cy="224" r="36" fill="#FFFFFF"/>
+  <circle cx="342" cy="224" r="36" fill="#FFFFFF"/>
+  <path d="M128 326c34 46 222 46 256 0" fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round"/>
+  <path d="M256 96v52" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round"/>
+  <circle cx="256" cy="76" r="20" fill="#FFFFFF"/>
+</svg>

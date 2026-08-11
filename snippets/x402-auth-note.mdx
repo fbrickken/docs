@@ -1,4 +1,4 @@
-Preparing is free and needs no credential. The x402 USDC payment is charged on `POST /send-transactions`, which answers `402 Payment Required` with a `PAYMENT-REQUIRED` header describing the chain, asset, transfer method, amount, recipient, and timeout. Sign the payment locally and retry with `X-PAYMENT`.
+Relayed preparation is free and needs no credential. In client-controlled modes, the prepare call charges the first half of the operation. The remaining x402 USDC payment is charged on `POST /send-transactions`, which answers `402 Payment Required` with a `PAYMENT-REQUIRED` header describing the chain, asset, transfer method, amount, recipient, and timeout. Sign each payment locally and retry with `X-PAYMENT`.
 
 In `brickken-relayed` mode Brickken's relayer signs and broadcasts the operation — **API keys are not accepted on a relayed send**. In `client-signed` mode you sign the prepared transaction yourself first.
 

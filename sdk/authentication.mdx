@@ -9,7 +9,7 @@ The SDK does not ask you to pick a credential mode. It derives one from what you
 | --- | --- | --- |
 | `apiKey` | `api-key` | The full Dapp API and KYC, plus agent getters, agentic writes, and RAMS in client-controlled modes |
 | `signer`, no `apiKey` | `x402` | Agent getters, agentic writes, and RAMS, paying per call; every execution mode including relayed |
-| Neither | `anonymous` | Public reads, and free prepares of x402-eligible agentic methods |
+| Neither | `anonymous` | Public reads, and relayed prepares of x402-eligible agentic methods |
 
 Passing both is legal — the SDK uses the key for authentication and the signer for transaction signing — but it takes `brickken-relayed` off the table, because a relayed send must be paid with x402.
 
@@ -68,12 +68,12 @@ await bkn.agent.register(input, { executionMode: 'brickken-relayed' })
 ```
 
 <Note>
-Credential rules that only bind at **send** time are checked only when you pass `execute: true`. A free prepare is never rejected for a credential it does not yet need.
+Credential rules that only bind at **send** time are checked only when you pass `execute: true`. A relayed prepare is not rejected for a credential it does not yet need; client-controlled prepares require the signer and its prepare payment share.
 </Note>
 
 ## Prepare without a credential
 
-An x402-eligible agentic method — everything under `/x402/*` — prepares with no credential at all. A Dapp method does not: the backend requires a key for any non-x402 method at prepare as well as at send, so the SDK refuses the call rather than spending a round trip on it.
+An x402-eligible agentic method — everything under `/x402/*` — can prepare with no credential when it uses relayed execution. A client-controlled prepare needs a signer and its payment share. A Dapp method does not: the backend requires a key for any non-x402 method at prepare as well as at send, so the SDK refuses the call rather than spending a round trip on it.
 
 ```ts
 const anon = new Brickken({ env: 'sandbox' })

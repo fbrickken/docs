@@ -11,7 +11,7 @@ RAMS (ERC-8226) is Brickken's on-chain **mandate** system: a principal grants an
 
 <RamsSepoliaNote />
 
-Every write follows the standard two-step flow: **prepare** (free, unsigned transaction) → **send** (`POST /send-transactions`, x402 USDC charged there). Unlike the ERC-8004 facades, `/x402/rams/*` facades are **client-signed by default** — most RAMS operations require `msg.sender` to hold a specific role, so Brickken's relayer cannot send them. Only the four signed lifecycle operations can be relayed, and only with a principal EIP-712 signature.
+Every write follows the standard two-step flow: **prepare** (unsigned transaction) → **send** (`POST /send-transactions`). Relayed preparation is free; client-controlled RAMS operations split the x402 charge between prepare and send. Unlike the ERC-8004 facades, `/x402/rams/*` facades are **client-signed by default** — most RAMS operations require `msg.sender` to hold a specific role, so Brickken's relayer cannot send them. Only the four signed lifecycle operations can be relayed, and only with a principal EIP-712 signature.
 
 ## Actors
 
@@ -91,6 +91,6 @@ Each endpoint accepts an optional override (`agentMandateAddress`, `compliancePr
     Inspect mandates, dry-run executions, and fetch EIP-712 payloads to sign.
   </Card>
   <Card title="Pricing" icon="badge-dollar-sign" href="/api-reference/endpoint/agentic-pricing">
-    Free prepare; the full x402 fee is collected at send.
+    Relayed prepare is free; client-controlled modes split the x402 fee between prepare and send.
   </Card>
 </CardGroup>

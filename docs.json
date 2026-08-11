@@ -47,6 +47,13 @@
             "pages": [
               "get-started/quickstart"
             ]
+          },
+          {
+            "group": "Developer Build Programme",
+            "pages": [
+              "get-started/build-programme/api-hello-world",
+              "get-started/build-programme/agentic-hello-world"
+            ]
           }
         ]
       },

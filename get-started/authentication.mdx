@@ -35,7 +35,7 @@ Never send a private key or seed phrase to the Brickken API, and never paste one
 | `POST /create-kyc-link` | Required | Not accepted |
 | Agent getters (`/get-agents`, `/get-agent-info`, `/get-agent-transactions`) | Accepted | Accepted |
 | `PATCH /patch-token-docs` | Required | Not accepted |
-| `POST /prepare-transactions` for x402-eligible agentic methods | Optional | Not needed — preparing is free |
+| `POST /prepare-transactions` for x402-eligible agentic methods | Optional in client-controlled modes | Required for client-controlled prepare without a key; relayed prepare is credential-free |
 | Agentic writes in `client-signed` mode | Accepted | Accepted |
 | Agentic sends in `brickken-relayed` mode | **Rejected** | Required |
 | RAMS reads and typed data (`/rams/*`) | Accepted | Accepted |
@@ -126,8 +126,11 @@ Treat both `400` and `401` as "you need a key here", and do not assume a read is
 x402 lets a client pay per call in USDC instead of holding an account. It is the only way to use `brickken-relayed` execution, where Brickken signs and broadcasts the blockchain transaction and pays the native gas.
 
 <Steps>
-  <Step title="Prepare — free">
-    Call a facade such as `POST /x402/agent/register`, or `POST /prepare-transactions` with an eligible `method`. No credential is required. The response returns `txId`, `transactions`, and an `x402Requirements` preview of what the send will cost.
+  <Step title="Choose the execution mode">
+    `brickken-relayed` makes prepare free and charges the full operation at send; `client-signed` and `client-broadcast` split the operation charge between prepare and send. The [Agentic pricing reference](/api-reference/endpoint/agentic-pricing) shows the matrix.
+  </Step>
+  <Step title="Prepare — quote depends on the mode">
+    Call a facade such as `POST /x402/agent/register`, or `POST /prepare-transactions` with an eligible `method`. Relayed preparation needs no credential. A client-controlled prepare without an API key receives a `402` challenge and must complete the x402 payment handshake. The response returns `txId`, `transactions`, and an `x402Requirements` preview.
   </Step>
   <Step title="Send — get the challenge">
     Call `POST /send-transactions`. The API answers `402 Payment Required` with a `PAYMENT-REQUIRED` header describing the exact chain, asset, transfer method, amount, recipient, and timeout.

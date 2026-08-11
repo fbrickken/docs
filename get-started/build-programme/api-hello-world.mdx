@@ -1,0 +1,165 @@
+---
+title: 'API Challenge — Hello World'
+description: 'Create and verify your first tokenized asset with the Brickken Dapp API.'
+icon: 'code'
+---
+
+This walkthrough is the first step for the **API Challenge**. You will create one sandbox tokenized asset with direct HTTP requests, sign the prepared transaction locally, and verify the confirmed symbol through the API.
+
+<Note>
+This is a sandbox walkthrough. It uses one `newTokenization` credit and native Sepolia gas. It does not use the Brickken SDK, so you can see the underlying prepare → sign → send → poll flow used by a direct integration.
+</Note>
+
+## Outcome
+
+At the end, your terminal will show:
+
+- a confirmed Brickken transaction ID and blockchain transaction hash;
+- the wallet that signed the transaction;
+- the generated token symbol;
+- a `GET /get-token-info` response containing that symbol.
+
+The complete runnable sample is in the public [API Hello World example](https://github.com/fbrickken/docs/tree/main/examples/build-programme/api-hello-world).
+
+## Estimated time
+
+Allow 10–15 minutes for setup and one sandbox tokenization, depending on wallet funding and API-key approval.
+
+## Prerequisites
+
+<Steps>
+  <Step title="Use a sandbox account and API key">
+    [Request a sandbox API key](/get-started/request-api-key) with the email of the tokenizer account. Your key needs one `newTokenization` credit.
+  </Step>
+  <Step title="Whitelist the signing wallet">
+    Ask Brickken to whitelist the wallet you will use as `signerAddress` in the same key request. The API rejects an unknown signer before it prepares a transaction.
+  </Step>
+  <Step title="Fund the wallet with Sepolia ETH">
+    The wallet signs the prepared transaction and pays native gas on Ethereum Sepolia. Use a testnet-only wallet.
+  </Step>
+  <Step title="Install Node.js 20 or newer">
+    The sample uses Node's native `--env-file`, `fetch`, and local `ethers` signing.
+  </Step>
+</Steps>
+
+<Warning>
+Never commit `.env`, an API key, or a private key. The private key is used only by the local signer and is never sent to Brickken.
+</Warning>
+
+## Setup
+
+Clone or download the [example directory](https://github.com/fbrickken/docs/tree/main/examples/build-programme/api-hello-world), then run:
+
+```bash
+cp .env.example .env
+# Edit .env with your sandbox values before continuing.
+npm ci
+```
+
+The environment contract is:
+
+```text
+BRICKKEN_API_KEY=your-sandbox-api-key
+BRICKKEN_PRIVATE_KEY=0x...
+BRICKKEN_TOKENIZER_EMAIL=issuer@example.com
+BRICKKEN_BASE_URL=https://api.sandbox.brickken.com
+```
+
+## Run
+
+Start the direct API integration:
+
+```bash
+npm start
+```
+
+The program generates a unique 2–5 character uppercase symbol, derives the signer address from the private key, and sends the following logical operation:
+
+```json
+{
+  "method": "newTokenization",
+  "chainId": "11155111",
+  "tokenizerEmail": "issuer@example.com",
+  "signerAddress": "0xYourWhitelistedWallet",
+  "name": "Hello World Asset H123",
+  "tokenSymbol": "H123",
+  "tokenType": "RWA_TOKEN",
+  "supplyCap": "1000000",
+  "url": "https://docs.brickken.com/get-started/build-programme/api-hello-world"
+}
+```
+
+## What the code does
+
+1. `POST /prepare-transactions` returns unsigned transactions and an internal `txId`. Preparing does not touch the chain.
+2. `ethers` signs every returned transaction locally with the wallet matching `signerAddress`.
+3. `POST /send-transactions` receives `{ txId, signedTransactions }` and broadcasts the signed payload.
+4. `GET /get-transaction-status?txId=...` is polled until the status is `success`.
+5. `GET /get-token-info` confirms that the new symbol is available to the API key.
+
+The program fails on a rejected transaction, a polling timeout, an HTTP error, or a missing token symbol in the final read. It prints structured JSON without printing credentials.
+
+## Expected result
+
+Values vary on every run. The shape is similar to:
+
+```json
+{
+  "chainId": "11155111",
+  "signerAddress": "0x...",
+  "tokenSymbol": "H123",
+  "txId": "0x...",
+  "txHash": "0x...",
+  "status": "success",
+  "tokenInfo": {
+    "tokenSymbols": ["H123"]
+  }
+}
+```
+
+The API's canonical transaction flow and response contract are documented in the [Dapp API reference](/api-reference/introduction) and [Get Transaction Status](/api-reference/endpoint/get-transaction-status).
+
+## Verification
+
+```bash
+npm run check
+```
+
+The check runs TypeScript type-checking and mocked tests for:
+
+- prepare and send requests;
+- pending → success polling;
+- rejected transactions;
+- polling timeouts;
+- required environment variables;
+- final token readback.
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| `BRICKKEN_API_KEY is required` | Copy `.env.example` to `.env` and set the sandbox key. |
+| Prepare rejects `signerAddress` | Ask Brickken to whitelist the exact wallet derived from `BRICKKEN_PRIVATE_KEY`. |
+| `Out of credits for newTokenization` | Request a key with an available sandbox `newTokenization` credit. |
+| The transaction is rejected | Confirm the wallet has Sepolia ETH and that the key, tokenizer email, and signer belong to the same sandbox account. |
+| The final read cannot find the symbol | Wait for `status: success`; do not reuse a symbol from a failed or pending run. |
+
+## Security
+
+- Use a disposable Sepolia wallet and keep the private key in a local environment variable or secret manager.
+- Review the request body and derived signer address before approving a sandbox run.
+- Treat the API key and tokenizer email as credentials; do not include them in screenshots or support tickets.
+- The run consumes one `newTokenization` sandbox credit and native Sepolia gas.
+
+## Next challenge ideas
+
+Once this works, extend the same lifecycle with investor operations: [whitelist an investor](/api-reference/endpoint/prepare-whitelist), [mint tokens](/api-reference/endpoint/prepare-mintToken), and then follow the full [tokenize-and-run-an-STO guide](/api-reference/guides/tokenize-and-run-an-sto) for reporting and offering automation.
+
+<CardGroup cols={2}>
+  <Card title="API reference" icon="book" href="/api-reference/introduction">
+    Explore every Dapp API method and read endpoint.
+  </Card>
+  <Card title="Agentic Hello World" icon="robot" href="/get-started/build-programme/agentic-hello-world">
+    Try the x402-powered CLI path for ERC-8004 and agent-owned tokens.
+  </Card>
+</CardGroup>

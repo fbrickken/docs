@@ -1,0 +1,9 @@
+{
+  "name": "Brickken Hello World Agent",
+  "description": "A public service fixture for the Brickken Developer Build Programme walkthrough.",
+  "url": "https://docs.brickken.com/get-started/build-programme/agentic-hello-world",
+  "version": "0.1.0",
+  "capabilities": {
+    "streaming": false
+  }
+}

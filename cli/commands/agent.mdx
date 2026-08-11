@@ -3,7 +3,7 @@ title: 'agent'
 description: 'Manage ERC-8004 agent identity and reputation from the Brickken CLI.'
 ---
 
-`brickken agent` groups ERC-8004 reads, identity writes, and reputation operations on Base. Read commands execute immediately. Write commands are **prepare-only by default** (free); add `--execute` to also send and pay the x402 charge. The recommended `brickken-relayed` mode (`--execution-mode brickken-relayed`, omit `--signer-address`) lets Brickken's relayer sign and broadcast; `client-signed` signs locally with `--signer-address`.
+`brickken agent` groups ERC-8004 reads, identity writes, and reputation operations on Base. Read commands execute immediately. Write commands are **prepare-only by default**; relayed preparation is free while client-controlled modes charge the prepare share. Add `--execute` to also send and pay the remaining x402 charge. The recommended `brickken-relayed` mode (`--execution-mode brickken-relayed`, omit `--signer-address`) lets Brickken's relayer sign and broadcast; `client-signed` signs locally with `--signer-address`.
 
 For the field-level semantics of each underlying method, see [Agentic Methods with x402](/api-reference/endpoint/agentic-methods-x402).
 

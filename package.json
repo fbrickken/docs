@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "dev": "mint dev",
-    "check": "mint broken-links"
+    "check": "mint broken-links",
+    "check:examples": "npm --prefix examples/build-programme/api-hello-world run check && bash -n examples/build-programme/agentic-hello-world/run.sh && bash examples/build-programme/check-no-secrets.sh"
   },
   "dependencies": {
     "sharp": "^0.34.2"

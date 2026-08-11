@@ -22,6 +22,6 @@ Maps to `ramsGrantMandate`. The principal must already be eligible with the sele
 
 ## Response
 
-Returns `txId`, unsigned `transactions`, and `info` with the contract, authorization `mode`, and EIP-712 nonce when applicable. Preparing is free; x402 is charged at send.
+Returns `txId`, unsigned `transactions`, and `info` with the contract, authorization `mode`, and EIP-712 nonce when applicable. Relayed preparation is free; client-controlled modes split the x402 charge between prepare and send.
 
 <NextPayAndSend />

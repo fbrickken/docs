@@ -84,7 +84,7 @@ Everything here runs against **sandbox** — nothing moves real value.
         serviceName: 'A2A',
         serviceEndpoint: 'https://agent.example/.well-known/agent-card.json',
       },
-      { execute: true },                               // prepare is free here; this also pays and sends
+      { execute: true },                               // relayed prepare is free here; this also pays and sends
     )
 
     console.log(agent.info?.agentUuid)                 // save it: set-uri and set-metadata need it

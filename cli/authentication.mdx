@@ -24,11 +24,11 @@ Use the [MCP server](/mcp/introduction) if an AI agent should drive the Dapp API
 
 ## Write authentication
 
-Transaction writes are x402-paid. Preparing is free; the send is paid through x402:
+Transaction writes are x402-paid. The charge depends on the execution mode:
 
-1. The CLI prepares a transaction with `/prepare-transactions` (free).
-2. On send, the API responds `402 Payment Required` with a `PAYMENT-REQUIRED` header.
-3. The CLI signs the x402 payment locally and retries with an `X-PAYMENT` header.
+1. In `brickken-relayed` mode, the CLI prepares for free and the send carries the full operation charge.
+2. In `client-signed` and `client-broadcast` modes, the operation charge is split between prepare and send; the CLI handles the x402 challenge at each priced step.
+3. When the API responds `402 Payment Required`, the CLI signs the payment locally and retries with an `X-PAYMENT` header.
 
 In the recommended `brickken-relayed` mode the private key signs **only the x402 payment** — Brickken's relayer signs and broadcasts the operation. In the default `client-signed` mode the same key also **signs the blockchain transaction** locally.
 
@@ -121,4 +121,4 @@ Configuration is resolved in this order (highest priority first):
 
 ## Budget note
 
-Preparing is free; only `send` is priced for writes. Agent getters cost `0.000001 USDC` per x402 call. On Base Sepolia and other non-production environments the write reference price is commonly `0.01 USDC` per send. Fund the wallet behind `BRICKKEN_PRIVATE_KEY` with the exact asset returned by the live challenge. See [Pricing](/api-reference/endpoint/agentic-pricing) for the mainnet write table.
+Relayed preparation is free, while client-controlled modes split the write charge between prepare and send. Agent getters cost `0.000001 USDC` per x402 call. On Base Sepolia and other non-production environments the write reference price is commonly `0.01 USDC` per operation. Fund the wallet behind `BRICKKEN_PRIVATE_KEY` with the exact asset returned by the live challenge. See [Pricing](/api-reference/endpoint/agentic-pricing) for the execution-mode matrix and mainnet write table.
