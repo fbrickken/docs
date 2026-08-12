@@ -36,23 +36,16 @@
             ]
           },
           {
-            "group": "Access",
+            "group": "Developer Build Programme",
             "pages": [
-              "get-started/authentication",
-              "get-started/request-api-key"
+              "get-started/build-programme/api-hello-world",
+              "get-started/build-programme/agentic-hello-world"
             ]
           },
           {
             "group": "First call",
             "pages": [
               "get-started/quickstart"
-            ]
-          },
-          {
-            "group": "Developer Build Programme",
-            "pages": [
-              "get-started/build-programme/api-hello-world",
-              "get-started/build-programme/agentic-hello-world"
             ]
           }
         ]
