@@ -57,5 +57,7 @@ When the transaction was paid through x402, the response also carries the paymen
 }
 ```
 
-`paymentError` replaces `settlementTransaction` when the payment itself failed. These three fields are omitted
-for API-key transactions.
+`paymentStatus` is one of `received`, `verified`, `settle_submitted`, `settled`, `released`, `failed`, or
+`replayed`. `settlementTransaction` appears once a settlement transaction exists, and `paymentError` appears when
+the payment recorded a failure reason; either, both, or neither may be present. All three fields are omitted for
+API-key transactions.
