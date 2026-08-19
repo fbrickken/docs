@@ -3,18 +3,18 @@ title: 'Get Investments by STO'
 openapi: 'GET /get-investments-by-sto-id'
 ---
 
-Retrieves investments for a specific STO.
+Lists the investment transactions recorded for one offering.
 
 ## Query Parameters
 
 - `tokenSymbol` (required): Token symbol
-- `id` (required): STO ID
+- `id` (required): Offering `uuid`, as returned by [`GET /get-stos`](/api-reference/endpoint/get-stos)
 
 ## Example
 
 ```bash
 curl --request GET \
-  --url 'https://api.sandbox.brickken.com/get-investments-by-sto-id?tokenSymbol=EXMPL&id=123' \
+  --url 'https://api.sandbox.brickken.com/get-investments-by-sto-id?tokenSymbol=EXMPL&id=a5232594-3f97-47d0-b362-491caac9388f' \
   --header 'x-api-key: YOUR_API_KEY'
 ```
 
@@ -22,12 +22,20 @@ curl --request GET \
 
 ```json
 {
-  "investments": [
+  "offeringTransactionsList": [
     {
-      "investorAddress": "0x...",
-      "amount": "1000",
-      "timestamp": 1234567890
+      "id": "b8341970-b99d-4c75-929c-854ab746723e",
+      "date": "2026-08-10T12:00:00.000Z",
+      "txHash": "0xae08674018f81ce617aa8b6c4d582a681b278542cf30921536b91b2162fe19fb",
+      "user": "investor@example.com",
+      "currency": "USDC",
+      "amountInUSD": "100.0",
+      "status": "invest"
     }
-  ]
+  ],
+  "total": 1
 }
 ```
+
+An unknown or unmatched offering `id` returns an empty list with `total: 0` rather than an error. `status` is the
+claimant operation when one exists, and `invest` otherwise.

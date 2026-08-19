@@ -4,7 +4,8 @@ openapi: 'GET /get-sto-by-id'
 description: 'Read one Security Token Offering by its identifier.'
 ---
 
-Requires `x-api-key`. Returns the full record for a single offering — supply, price, dates, status, and the associated token.
+Requires `x-api-key`. Returns the full record for a single offering — supply, price, dates, status, the escrow
+contract address, and the associated token.
 
 Your key must be the tokenizer of the token behind the offering, or the call returns `Unauthorized token symbol`. See [Authentication](/get-started/authentication).
 

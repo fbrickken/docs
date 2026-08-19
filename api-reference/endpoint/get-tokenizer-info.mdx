@@ -3,7 +3,13 @@ title: 'Get Tokenizer Information'
 openapi: 'GET /get-tokenizer-info'
 ---
 
-Retrieves information about the tokenizer for a specific token.
+Retrieves the tokenizer and contract addresses of a specific token.
+
+<Note>
+This is where you read the deployed token contract address after a `newTokenization` succeeds. The address is
+returned as `tokenAddress`; neither the transaction status response nor
+[`GET /get-token-info`](/api-reference/endpoint/get-token-info) contains it.
+</Note>
 
 ## Query Parameters
 

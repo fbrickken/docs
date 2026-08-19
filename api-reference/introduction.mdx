@@ -108,8 +108,8 @@ curl --request POST 'https://api.sandbox.brickken.com/send-transactions' \
 | Endpoint | Purpose |
 | --- | --- |
 | `GET /get-network-info` | Read chain metadata and supported network configuration. |
-| `GET /get-token-info` | Read token information by symbol or chain. |
-| `GET /get-tokenizer-info` | Read tokenizer account information. |
+| [`GET /get-token-info`](/api-reference/endpoint/get-token-info) | Read one asset record by symbol, or list the symbols available to the API key. |
+| [`GET /get-tokenizer-info`](/api-reference/endpoint/get-tokenizer-info) | Read the tokenizer account and the token, payment-token, and escrow contract addresses. |
 | [`GET /get-stos`](/api-reference/endpoint/get-stos) | List STOs for a token. |
 | [`GET /get-sto-by-id`](/api-reference/endpoint/get-sto-by-id) | Read one STO by ID. |
 | `GET /get-investments-by-sto-id` | List investments for one STO. |

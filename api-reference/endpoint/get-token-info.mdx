@@ -3,17 +3,28 @@ title: 'Get Token Information'
 openapi: 'GET /get-token-info'
 ---
 
-Retrieves the list of token symbols available for the current API key.
+Reads token information. This endpoint has two modes, selected by whether you send `tokenSymbol`.
 
-## Example
+<Note>
+This endpoint does **not** return the deployed token contract address. After a `newTokenization` succeeds, read
+the address from [`GET /get-tokenizer-info`](/api-reference/endpoint/get-tokenizer-info) as `tokenAddress`.
+It also does not return wallet balances — use
+[`GET /get-balance-whitelist`](/api-reference/endpoint/get-balance-whitelist) for those.
+</Note>
+
+## Query Parameters
+
+- `tokenSymbol` (optional): Token symbol. Omit it to list what the API key can see.
+
+## Mode 1 — list what the API key can see
+
+Omit `tokenSymbol`. Useful right after a tokenization, to confirm the new symbol is registered.
 
 ```bash
 curl --request GET \
   --url 'https://api.sandbox.brickken.com/get-token-info' \
   --header 'x-api-key: YOUR_API_KEY'
 ```
-
-## Response
 
 ```json
 {
@@ -26,13 +37,50 @@ curl --request GET \
 }
 ```
 
-## Important
+## Mode 2 — read one asset record
 
-`tokenSymbol` may still be accepted in query, but it is currently ignored by backend logic.
+Send `tokenSymbol`. Your key must be the tokenizer of that token, or the call returns `Unauthorized token symbol`.
 
-`GET /get-token-info` does **not** return wallet balances.
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-token-info?tokenSymbol=EXMPL' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
 
-If you need an owner's balance for a token, use `GET /get-balance-whitelist` with:
+```json
+{
+  "uuid": "a5232594-3f97-47d0-b362-491caac9388f",
+  "name": "Example Corp",
+  "tokenName": "Example Token",
+  "tokenSymbol": "EXMPL",
+  "tokenType": "equity",
+  "tokenizerEmail": "tokenizer@example.com",
+  "companyWalletAddress": "0x1111111111111111111111111111111111111111",
+  "tokenLogotype": "https://cdn.example.com/logo.png",
+  "subscriptionAgreement": "ipfs://...",
+  "legalDocs": "ipfs://...",
+  "allowedTokenDecimals": 18,
+  "initialTokenSupply": "1000000",
+  "maxTokenSupply": "10000000",
+  "paymentToken": {
+    "symbol": "USDC",
+    "address": "0x2222222222222222222222222222222222222222",
+    "decimals": 6,
+    "blockchain": {
+      "chainId": "aa36a7",
+      "chainName": "Ethereum Sepolia",
+      "blockExplorerUrl": "https://sepolia.etherscan.io"
+    }
+  }
+}
+```
 
-- `tokenSymbol`
-- `investorEmail` (the owner/investor email associated with that wallet)
+## Where to find each address
+
+| You need | Endpoint | Field |
+| --- | --- | --- |
+| Token contract address | [`GET /get-tokenizer-info`](/api-reference/endpoint/get-tokenizer-info) | `tokenAddress` |
+| Payment token address | [`GET /get-tokenizer-info`](/api-reference/endpoint/get-tokenizer-info) | `paymentTokenAddress` |
+| Escrow address | [`GET /get-tokenizer-info`](/api-reference/endpoint/get-tokenizer-info) | `escrowAddress` |
+| Factory and BKN addresses | [`GET /get-network-info`](/api-reference/endpoint/get-network-info) | `factoryAddress`, `BKNAddress` |
+| Holder balance | [`GET /get-balance-whitelist`](/api-reference/endpoint/get-balance-whitelist) | `tokenBalance` |

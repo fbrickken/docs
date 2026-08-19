@@ -3,12 +3,12 @@ title: 'Get Balance and Whitelist Status'
 openapi: 'GET /get-balance-whitelist'
 ---
 
-Retrieves token balance data for an investor/owner associated with an email.
+Reads the on-chain token balance and whitelist flag of the wallet associated with an investor or owner email.
 
 ## Query Parameters
 
 - `tokenSymbol` (required): Token symbol
-- `investorEmail` (required): Email of the investor/owner
+- `investorEmail` (required): Email of the investor or owner
 
 ## Example
 
@@ -22,7 +22,25 @@ curl --request GET \
 
 ```json
 {
+  "walletAddress": "0x1111111111111111111111111111111111111111",
+  "tokenAddress": "0x2222222222222222222222222222222222222222",
+  "tokenDecimals": 18,
+  "tokenBalanceRaw": "500000000000000000000",
+  "tokenBalance": "500.0",
+  "isWhitelisted": true,
+  "balanceSource": "blockchain",
   "bknFees": "0",
-  "senderBalance": "500000000000000000"
+  "senderBalance": "0"
 }
 ```
+
+<Warning>
+`bknFees` and `senderBalance` are deprecated. They are kept in the response for backward compatibility and are
+always `"0"`, whatever the real balance is. Read `tokenBalance` (formatted with `tokenDecimals`) or
+`tokenBalanceRaw` (smallest unit) instead.
+</Warning>
+
+Both the balance and the whitelist flag are read from the token contract, so `balanceSource` is always
+`blockchain`. If you already know the wallet address and only need the whitelist flag, use
+[`GET /get-whitelist-status`](/api-reference/endpoint/get-whitelist-status) — it does not require the address to
+be registered as an investor under an email.

@@ -3,18 +3,18 @@ title: 'Get STO Balance'
 openapi: 'GET /get-sto-balance'
 ---
 
-Retrieves the balance of an STO.
+Reads one offering together with how much it has raised and how much is still available.
 
 ## Query Parameters
 
 - `tokenSymbol` (required): Token symbol
-- `id` (required): STO ID
+- `id` (required): Offering `uuid`, as returned by [`GET /get-stos`](/api-reference/endpoint/get-stos)
 
 ## Example
 
 ```bash
 curl --request GET \
-  --url 'https://api.sandbox.brickken.com/get-sto-balance?tokenSymbol=EXMPL&id=123' \
+  --url 'https://api.sandbox.brickken.com/get-sto-balance?tokenSymbol=EXMPL&id=a5232594-3f97-47d0-b362-491caac9388f' \
   --header 'x-api-key: YOUR_API_KEY'
 ```
 
@@ -22,6 +22,20 @@ curl --request GET \
 
 ```json
 {
-  "balance": "50000"
+  "uuid": "a5232594-3f97-47d0-b362-491caac9388f",
+  "name": "Round A",
+  "companyName": "Example Corp",
+  "status": "active",
+  "tokenAmount": "100000",
+  "hardCap": "500000",
+  "softCap": "50000",
+  "minInvestment": "100",
+  "maxInvestment": "10000",
+  "startDate": "2026-01-01T00:00:00.000Z",
+  "endDate": "2026-12-31T23:59:59.000Z",
+  "tokenPrice": "5.0",
+  "tokenSymbol": "EXMPL",
+  "currentAmountRaised": "25000",
+  "availableAmount": "75000"
 }
 ```

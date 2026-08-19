@@ -3,7 +3,7 @@ title: 'Get Dividend Distribution Info'
 openapi: 'GET /get-dividend-distribution'
 ---
 
-Retrieves information about dividend distributions for a token.
+Lists the dividend distributions executed for a token, newest first.
 
 ## Query Parameters
 
@@ -21,12 +21,25 @@ curl --request GET \
 
 ```json
 {
+  "tokenSymbol": "EXMPL",
+  "companyName": "Example Corp",
+  "tokenizerEmail": "tokenizer@example.com",
   "distributions": [
     {
-      "amount": "1000",
-      "timestamp": 1234567890,
-      "tokenSymbol": "USDT"
+      "uuid": "b8341970-b99d-4c75-929c-854ab746723e",
+      "tokenizerEmail": "tokenizer@example.com",
+      "amountInPaymentToken": "1000.0",
+      "paymentTokenSymbol": "USDC",
+      "paymentTokenAddress": "0x2222222222222222222222222222222222222222",
+      "txHash": "0xae08674018f81ce617aa8b6c4d582a681b278542cf30921536b91b2162fe19fb",
+      "status": "success",
+      "date": "2026-08-10T12:00:00.000Z"
     }
-  ]
+  ],
+  "total": 1
 }
 ```
+
+Amounts are denominated in the payment token, not in the security token. To prepare a new distribution, see
+[`dividendDistribution`](/api-reference/endpoint/prepare-dividendDistribution) and the
+[`approve`](/api-reference/endpoint/prepare-approve) allowance it requires.

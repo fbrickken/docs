@@ -166,29 +166,142 @@
       "AgentSummary": {
         "type": "object",
         "additionalProperties": true,
-        "required": ["uuid", "chainId", "ownerWalletAddress"],
+        "required": [
+          "uuid",
+          "chainId",
+          "ownerWalletAddress"
+        ],
         "properties": {
-          "uuid": { "type": "string", "format": "uuid" },
-          "agentId": { "type": ["string", "null"] },
-          "chainId": { "type": "string", "example": "84532" },
-          "standard": { "type": "string", "example": "ERC-8004" },
-          "registryAddress": { "type": ["string", "null"] },
-          "agentURI": { "type": ["string", "null"] },
-          "metadataCid": { "type": ["string", "null"] },
-          "ownerWalletAddress": { "type": "string", "pattern": "^0x[a-fA-F0-9]{40}$" },
-          "name": { "type": ["string", "null"] },
-          "description": { "type": ["string", "null"] },
-          "image": { "type": ["string", "null"] },
-          "services": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
-          "supportedTrust": { "type": "array", "items": { "type": "string" } },
-          "x402Support": { "type": "boolean" },
-          "active": { "type": "boolean" },
-          "lifecycleStatus": { "type": ["string", "null"] },
-          "status": { "type": ["string", "null"] },
-          "actualTxHash": { "type": ["string", "null"] },
-          "error": { "type": ["string", "null"] },
-          "createdAt": { "type": "string", "format": "date-time" },
-          "updatedAt": { "type": "string", "format": "date-time" }
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agentId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "chainId": {
+            "type": "string",
+            "example": "84532"
+          },
+          "standard": {
+            "type": "string",
+            "example": "ERC-8004"
+          },
+          "registryAddress": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "agentURI": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metadataCid": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ownerWalletAddress": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "image": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "supportedTrust": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "x402Support": {
+            "type": "boolean"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "lifecycleStatus": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "actualTxHash": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "aiModelName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Name of the AI model behind the agent."
+          },
+          "aiModelProvider": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Provider of the AI model behind the agent."
+          },
+          "profileRevision": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Revision counter of the stored agent profile."
+          }
         }
       },
       "AgentDetail": {
@@ -1349,7 +1462,7 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** This endpoint retrieves all stos from a token (`tokenSymbol`).\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The token symbol from a specific token.",
+        "description": "**Description:** Lists every offering of a tokenized asset. The response is a JSON array, not an object.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.",
         "security": [
           {
             "apiKeyAuth": []
@@ -1372,96 +1485,68 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "uuid": {
-                            "type": "string",
-                            "format": "uuid",
-                            "description": "Unique identifier of the STO.",
-                            "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
-                          },
-                          "name": {
-                            "type": "string",
-                            "description": "Name of the STO.",
-                            "example": "Example Project Alpha STO"
-                          },
-                          "status": {
-                            "type": "string",
-                            "description": "Current status of the STO (e.g., UPCOMING, ACTIVE, COMPLETED).",
-                            "example": "ACTIVE"
-                          },
-                          "tokenAmount": {
-                            "type": "string",
-                            "description": "Total amount of tokens offered in the STO (as a string).",
-                            "example": "1000000"
-                          },
-                          "hardCap": {
-                            "type": "string",
-                            "description": "The hard cap funding goal (as a string).",
-                            "example": "500000"
-                          },
-                          "softCap": {
-                            "type": "string",
-                            "description": "The soft cap funding goal (as a string).",
-                            "example": "100000"
-                          },
-                          "maxInvestment": {
-                            "type": "string",
-                            "description": "Maximum allowed investment per participant (as a string).",
-                            "example": "10000"
-                          },
-                          "minInvestment": {
-                            "type": "string",
-                            "description": "Minimum required investment per participant (as a string).",
-                            "example": "100"
-                          },
-                          "tokenSymbol": {
-                            "type": "string",
-                            "description": "Symbol for the token being offered.",
-                            "example": "EXA"
-                          },
-                          "startDate": {
-                            "type": "string",
-                            "format": "date-time",
-                            "description": "The STO start date and time in ISO 8601 format.",
-                            "example": "2025-04-01T10:00:00.000Z"
-                          },
-                          "endDate": {
-                            "type": "string",
-                            "format": "date-time",
-                            "description": "The STO end date and time in ISO 8601 format.",
-                            "example": "2025-07-01T23:59:59.000Z"
-                          },
-                          "tokenPrice": {
-                            "type": "string",
-                            "description": "Price per token (as a string).",
-                            "example": "0.50"
-                          },
-                          "acceptedCoin": {
-                            "type": "string",
-                            "description": "The symbol of the accepted cryptocurrency for payment.",
-                            "example": "USDC"
-                          }
-                        },
-                        "required": [
-                          "uuid",
-                          "name",
-                          "status",
-                          "tokenAmount",
-                          "hardCap",
-                          "softCap",
-                          "maxInvestment",
-                          "minInvestment",
-                          "tokenSymbol",
-                          "startDate",
-                          "endDate",
-                          "tokenPrice",
-                          "acceptedCoin"
-                        ]
+                  "type": "array",
+                  "description": "Offerings of the tokenized asset.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "uuid": {
+                        "type": "string",
+                        "description": "Offering identifier. Pass it as `id` to the other STO endpoints."
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "Offering name."
+                      },
+                      "status": {
+                        "type": "string",
+                        "description": "Offering status."
+                      },
+                      "tokenAmount": {
+                        "type": "string",
+                        "description": "Tokens allocated to the offering."
+                      },
+                      "hardCap": {
+                        "type": "string",
+                        "description": "Maximum raise in USD."
+                      },
+                      "softCap": {
+                        "type": "string",
+                        "description": "Minimum raise in USD."
+                      },
+                      "maxInvestment": {
+                        "type": "string",
+                        "description": "Maximum investment per investor."
+                      },
+                      "minInvestment": {
+                        "type": "string",
+                        "description": "Minimum investment per investor."
+                      },
+                      "tokenSymbol": {
+                        "type": "string",
+                        "description": "Token symbol of the asset."
+                      },
+                      "startDate": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Offering start date."
+                      },
+                      "endDate": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Offering end date."
+                      },
+                      "tokenPrice": {
+                        "type": "string",
+                        "description": "Token price for the offering."
+                      },
+                      "acceptedCoin": {
+                        "type": "string",
+                        "description": "Payment token accepted by the offering."
+                      },
+                      "escrow": {
+                        "type": "string",
+                        "description": "Escrow contract address of the offering."
                       }
                     }
                   }
@@ -1507,97 +1592,71 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response - STO details retrieved",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "description": "Represents the structure of an STO based on the defined interface.",
                   "properties": {
                     "uuid": {
                       "type": "string",
-                      "format": "uuid",
-                      "description": "Unique identifier of the STO.",
-                      "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                      "description": "Offering identifier. Pass it as `id` to the other STO endpoints."
                     },
                     "name": {
                       "type": "string",
-                      "description": "Name of the STO.",
-                      "example": "Example Project Alpha STO"
+                      "description": "Offering name."
                     },
                     "status": {
                       "type": "string",
-                      "description": "Current status of the STO (e.g., UPCOMING, ACTIVE, COMPLETED).",
-                      "example": "ACTIVE"
+                      "description": "Offering status."
                     },
                     "tokenAmount": {
                       "type": "string",
-                      "description": "Total amount of tokens offered in the STO (as a string).",
-                      "example": "1000000"
+                      "description": "Tokens allocated to the offering."
                     },
                     "hardCap": {
                       "type": "string",
-                      "description": "The hard cap funding goal (as a string).",
-                      "example": "500000"
+                      "description": "Maximum raise in USD."
                     },
                     "softCap": {
                       "type": "string",
-                      "description": "The soft cap funding goal (as a string).",
-                      "example": "100000"
+                      "description": "Minimum raise in USD."
                     },
                     "maxInvestment": {
                       "type": "string",
-                      "description": "Maximum allowed investment per participant (as a string).",
-                      "example": "10000"
+                      "description": "Maximum investment per investor."
                     },
                     "minInvestment": {
                       "type": "string",
-                      "description": "Minimum required investment per participant (as a string).",
-                      "example": "100"
+                      "description": "Minimum investment per investor."
                     },
                     "tokenSymbol": {
                       "type": "string",
-                      "description": "Symbol for the token being offered.",
-                      "example": "EXA"
+                      "description": "Token symbol of the asset."
                     },
                     "startDate": {
                       "type": "string",
                       "format": "date-time",
-                      "description": "The STO start date and time in ISO 8601 format.",
-                      "example": "2025-04-01T10:00:00.000Z"
+                      "description": "Offering start date."
                     },
                     "endDate": {
                       "type": "string",
                       "format": "date-time",
-                      "description": "The STO end date and time in ISO 8601 format.",
-                      "example": "2025-07-01T23:59:59.000Z"
+                      "description": "Offering end date."
                     },
                     "tokenPrice": {
                       "type": "string",
-                      "description": "Price per token (as a string).",
-                      "example": "0.50"
+                      "description": "Token price for the offering."
                     },
                     "acceptedCoin": {
                       "type": "string",
-                      "description": "The symbol of the accepted cryptocurrency for payment.",
-                      "example": "USDC"
+                      "description": "Payment token accepted by the offering."
+                    },
+                    "escrow": {
+                      "type": "string",
+                      "description": "Escrow contract address of the offering."
                     }
-                  },
-                  "required": [
-                    "uuid",
-                    "name",
-                    "status",
-                    "tokenAmount",
-                    "hardCap",
-                    "softCap",
-                    "maxInvestment",
-                    "minInvestment",
-                    "tokenSymbol",
-                    "startDate",
-                    "endDate",
-                    "tokenPrice",
-                    "acceptedCoin"
-                  ]
+                  }
                 }
               }
             }
@@ -2080,9 +2139,25 @@
                         "rejected"
                       ]
                     },
+                    "transactionHash": {
+                      "type": "string",
+                      "description": "On-chain transaction hash, once Brickken has resolved it."
+                    },
                     "error": {
                       "type": "string",
                       "description": "Stored error message when the transaction failed."
+                    },
+                    "paymentStatus": {
+                      "type": "string",
+                      "description": "Status of the linked x402 payment. Present only for x402 transactions."
+                    },
+                    "settlementTransaction": {
+                      "type": "string",
+                      "description": "Settlement transaction of the linked x402 payment. Present only for x402 transactions."
+                    },
+                    "paymentError": {
+                      "type": "string",
+                      "description": "Failure reason of the linked x402 payment. Present only for x402 transactions."
                     }
                   }
                 }
@@ -2098,7 +2173,7 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** Retrieves the allowance of a spender address for a given token from the owner's address.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token (e.g., \"USDT\").\n- `spenderAddress` (string): The Ethereum address of the spender.\n- `ownerAddress` (string): The Ethereum address of the token owner.",
+        "description": "**Description:** Reads the payment-token allowance between two addresses for a tokenized asset. The value is returned as a decimal string in whole units, not in the smallest unit.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.\n- `ownerAddress` (string): Token owner address.\n- `spenderAddress` (string): Spender address.",
         "security": [
           {
             "apiKeyAuth": []
@@ -2143,7 +2218,7 @@
                   "properties": {
                     "allowance": {
                       "type": "string",
-                      "description": "Allowance amount."
+                      "description": "Allowance as a decimal string in whole units, for example `\"1.0\"`."
                     }
                   }
                 }
@@ -2159,7 +2234,7 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** Fetches the balance and whitelist status of a user for a specific token.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.\n- `investorEmail` (string): The email of the investor.",
+        "description": "**Description:** Reads the on-chain token balance and whitelist flag of the wallet associated with an investor or owner email.\n\n`bknFees` and `senderBalance` are deprecated legacy fields and are always returned as `\"0\"`. Read `tokenBalance` or `tokenBalanceRaw` instead.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.\n- `investorEmail` (string): Email of the investor or owner.",
         "security": [
           {
             "apiKeyAuth": []
@@ -2193,13 +2268,44 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "walletAddress": {
+                      "type": "string",
+                      "description": "Checksummed wallet address resolved from the email."
+                    },
+                    "tokenAddress": {
+                      "type": "string",
+                      "description": "Token contract address the balance was read from."
+                    },
+                    "tokenDecimals": {
+                      "type": "integer",
+                      "description": "Decimals of the token contract."
+                    },
+                    "tokenBalanceRaw": {
+                      "type": "string",
+                      "description": "Balance in the smallest unit, as returned by the contract."
+                    },
+                    "tokenBalance": {
+                      "type": "string",
+                      "description": "Balance formatted with `tokenDecimals`."
+                    },
+                    "isWhitelisted": {
+                      "type": "boolean",
+                      "description": "Whether the wallet is whitelisted on the token contract."
+                    },
+                    "balanceSource": {
+                      "type": "string",
+                      "description": "Origin of the value. Always `blockchain`.",
+                      "enum": [
+                        "blockchain"
+                      ]
+                    },
                     "bknFees": {
                       "type": "string",
-                      "description": "Amount of BKN fees."
+                      "description": "Deprecated. Always `\"0\"`, kept for backward compatibility."
                     },
                     "senderBalance": {
                       "type": "string",
-                      "description": "Balance of the sender."
+                      "description": "Deprecated. Always `\"0\"`, kept for backward compatibility. Use `tokenBalance`."
                     }
                   }
                 }
@@ -2240,25 +2346,63 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "tokenSymbol": {
+                      "type": "string",
+                      "description": "Token symbol of the asset."
+                    },
+                    "companyName": {
+                      "type": "string",
+                      "description": "Company name of the asset."
+                    },
+                    "tokenizerEmail": {
+                      "type": "string",
+                      "description": "Email of the tokenizer that owns the asset."
+                    },
                     "distributions": {
                       "type": "array",
+                      "description": "Distributions ordered from newest to oldest.",
                       "items": {
                         "type": "object",
                         "properties": {
-                          "amount": {
+                          "uuid": {
                             "type": "string",
-                            "description": "Distributed amount."
+                            "description": "Internal identifier of the distribution."
                           },
-                          "timestamp": {
-                            "type": "integer",
-                            "description": "Distribution timestamp."
-                          },
-                          "tokenSymbol": {
+                          "tokenizerEmail": {
                             "type": "string",
-                            "description": "Currency token symbol."
+                            "description": "Email of the tokenizer that created the distribution."
+                          },
+                          "amountInPaymentToken": {
+                            "type": "string",
+                            "description": "Distributed amount denominated in the payment token."
+                          },
+                          "paymentTokenSymbol": {
+                            "type": "string",
+                            "description": "Payment token symbol."
+                          },
+                          "paymentTokenAddress": {
+                            "type": "string",
+                            "description": "Payment token contract address."
+                          },
+                          "txHash": {
+                            "type": "string",
+                            "description": "Hash of the distribution transaction."
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "Status of the distribution transaction."
+                          },
+                          "date": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "Creation timestamp of the distribution."
                           }
                         }
                       }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "description": "Number of distributions returned."
                     }
                   }
                 }
@@ -2337,7 +2481,7 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** Retrieves detailed information about a specific token.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.",
+        "description": "**Description:** Reads token information. The endpoint has two modes.\n\n- With `tokenSymbol`: returns the stored record of that tokenized asset.\n- Without `tokenSymbol`: returns the token symbols and tokenizer emails available to the API key.\n\nThis endpoint does **not** return the deployed token contract address and does not return wallet balances. Use `GET /get-tokenizer-info` for the contract address (`tokenAddress`) and `GET /get-balance-whitelist` for balances.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string, optional): The symbol of the token.",
         "security": [
           {
             "apiKeyAuth": []
@@ -2347,11 +2491,11 @@
           {
             "name": "tokenSymbol",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "The symbol of the token."
+            "description": "The symbol of the token. Omit it to list the symbols available to the API key."
           }
         ],
         "responses": {
@@ -2360,23 +2504,119 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "tokenSymbols": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "description": "List of token symbols."
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "uuid": {
+                          "type": "string",
+                          "description": "Internal identifier of the tokenized asset."
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "Company or asset name."
+                        },
+                        "tokenName": {
+                          "type": "string",
+                          "description": "Token name."
+                        },
+                        "tokenSymbol": {
+                          "type": "string",
+                          "description": "Token symbol."
+                        },
+                        "tokenType": {
+                          "type": "string",
+                          "description": "Token type."
+                        },
+                        "tokenizerEmail": {
+                          "type": "string",
+                          "description": "Email of the tokenizer that owns the asset."
+                        },
+                        "companyWalletAddress": {
+                          "type": "string",
+                          "description": "Wallet address of the tokenizer company."
+                        },
+                        "tokenLogotype": {
+                          "type": "string",
+                          "description": "Token logo reference."
+                        },
+                        "subscriptionAgreement": {
+                          "type": "string",
+                          "description": "Subscription agreement reference."
+                        },
+                        "legalDocs": {
+                          "type": "string",
+                          "description": "Legal documentation reference."
+                        },
+                        "allowedTokenDecimals": {
+                          "type": "integer",
+                          "description": "Decimals configured for the token."
+                        },
+                        "initialTokenSupply": {
+                          "type": "string",
+                          "description": "Initial token supply."
+                        },
+                        "maxTokenSupply": {
+                          "type": "string",
+                          "description": "Maximum token supply."
+                        },
+                        "paymentToken": {
+                          "type": "object",
+                          "properties": {
+                            "symbol": {
+                              "type": "string",
+                              "description": "Payment token symbol."
+                            },
+                            "address": {
+                              "type": "string",
+                              "description": "Payment token contract address."
+                            },
+                            "decimals": {
+                              "type": "integer",
+                              "description": "Payment token decimals."
+                            },
+                            "blockchain": {
+                              "type": "object",
+                              "properties": {
+                                "chainId": {
+                                  "type": "string",
+                                  "description": "Chain ID of the payment token."
+                                },
+                                "chainName": {
+                                  "type": "string",
+                                  "description": "Human-readable chain name."
+                                },
+                                "blockExplorerUrl": {
+                                  "type": "string",
+                                  "description": "Block explorer base URL."
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
                     },
-                    "tokenizerEmails": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "description": "List of tokenizer emails."
+                    {
+                      "type": "object",
+                      "properties": {
+                        "tokenSymbols": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Token symbols available to the API key."
+                        },
+                        "tokenizerEmails": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Tokenizer emails available to the API key."
+                        }
+                      }
                     }
-                  }
+                  ],
+                  "description": "The asset record when `tokenSymbol` is supplied, otherwise the symbols and tokenizer emails available to the API key."
                 }
               }
             }
@@ -2390,7 +2630,7 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** Retrieves information about the tokenizer of a specific token. For a payment-token approval before `dividendDistribution`, use the returned `tokenAddress` as `spenderAddress`. `paymentTokenAddress` identifies the ERC-20 being approved; `escrowAddress` is not the spender for this allowance.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.",
+        "description": "**Description:** Reads the tokenizer and contract addresses of a specific token. This is the endpoint that returns the deployed token contract address (`tokenAddress`) after a `newTokenization` succeeds.\n\nFor a payment-token approval before `dividendDistribution`, use the returned `tokenAddress` as `spenderAddress`. `paymentTokenAddress` identifies the ERC-20 being approved; `escrowAddress` is not the spender for this allowance.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.",
         "security": [
           {
             "apiKeyAuth": []
@@ -2453,7 +2693,7 @@
         "tags": [
           "Endpoints"
         ],
-        "description": "**Description:** Checks the whitelist status of an investor for a specific token.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.\n- `investorAddress` (string): The Ethereum address of the investor.",
+        "description": "**Description:** Reads the whitelist flag of an address directly from the token contract.\n\n**Headers:**\n\n- `x-api-key`: `YOUR_API_KEY`\n\n**Query Parameters:**\n\n- `tokenSymbol` (string): The symbol of the token.\n- `address` (string): Wallet address to check. `investorAddress` is accepted as a legacy alias.",
         "security": [
           {
             "apiKeyAuth": []
@@ -2470,13 +2710,22 @@
             "description": "The symbol of the token."
           },
           {
-            "name": "investorAddress",
+            "name": "address",
             "in": "query",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "The Ethereum address of the investor."
+            "description": "Wallet address to check. `investorAddress` is accepted as a legacy alias."
+          },
+          {
+            "name": "investorAddress",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Legacy alias of `address`. Send either one, not both."
           }
         ],
         "responses": {
@@ -2487,9 +2736,24 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "whitelistStatus": {
+                    "isWhitelisted": {
                       "type": "boolean",
-                      "description": "Whitelist status of the investor."
+                      "description": "Whether the address is whitelisted on the token contract."
+                    },
+                    "address": {
+                      "type": "string",
+                      "description": "Checksummed address that was checked."
+                    },
+                    "tokenSymbol": {
+                      "type": "string",
+                      "description": "Token symbol that was checked."
+                    },
+                    "source": {
+                      "type": "string",
+                      "description": "Origin of the value. Always `blockchain`.",
+                      "enum": [
+                        "blockchain"
+                      ]
                     }
                   }
                 }

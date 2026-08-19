@@ -3,17 +3,18 @@ title: 'Get Network Information'
 openapi: 'GET /get-network-info'
 ---
 
-Retrieves information about a blockchain network.
+Reads the chain metadata and the Brickken contract addresses deployed on a network. This endpoint does not
+require a token symbol, so it works before you have created any asset.
 
 ## Query Parameters
 
-- `chainId` (required): Blockchain network ID
+- `chainId` (required): Blockchain network ID. Decimal (`11155111`) and hexadecimal (`0xaa36a7`) forms are both accepted.
 
 ## Example
 
 ```bash
 curl --request GET \
-  --url 'https://api.sandbox.brickken.com/get-network-info?chainId=0x89' \
+  --url 'https://api.sandbox.brickken.com/get-network-info?chainId=11155111' \
   --header 'x-api-key: YOUR_API_KEY'
 ```
 
@@ -21,14 +22,14 @@ curl --request GET \
 
 ```json
 {
-  "chainId": "0x89",
-  "networkName": "Polygon",
-  "rpcUrl": "https://polygon-rpc.com",
-  "blockExplorerUrl": "https://polygonscan.com",
-  "nativeCurrency": {
-    "name": "MATIC",
-    "symbol": "MATIC",
-    "decimals": 18
-  }
+  "currencyName": "ETH",
+  "blockExplorerUrl": "https://sepolia.etherscan.io",
+  "factoryAddress": "0x1111111111111111111111111111111111111111",
+  "BKNAddress": "0x2222222222222222222222222222222222222222",
+  "USDTAddress": "0x3333333333333333333333333333333333333333",
+  "USDCAddress": "0x4444444444444444444444444444444444444444"
 }
 ```
+
+`factoryAddress`, `BKNAddress`, `USDTAddress`, and `USDCAddress` are `null` when the corresponding contract is
+not configured on that network.

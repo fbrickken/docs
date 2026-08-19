@@ -10,7 +10,7 @@ Retrieves the status of a transaction submitted through `/send-transactions`.
 - `hash` (optional): On-chain transaction hash returned after the transaction is sent. Use the exact hash value starting with `0x`.
 - `txId` (optional): Internal transaction ID returned by `/prepare-transactions`. Use this when the on-chain transaction hash is not available yet.
 
-At least one of `hash` or `txId` is required. Do not include `--data` in the request, because this endpoint only accepts `GET`. 
+At least one of `hash` or `txId` is required. Do not include `--data` in the request, because this endpoint only accepts `GET`.
 
 ## Example
 
@@ -23,9 +23,13 @@ curl --location --request GET 'https://api.sandbox.brickken.com/get-transaction-
 
 ```json
 {
-  "status": "success"
+  "status": "success",
+  "transactionHash": "0x46f7114878c49ad5af0f1e6f0a2ce9c700c1fdf36455fd956b20f492ee813e80"
 }
 ```
+
+`status` is `pending`, `success`, or `rejected`. `transactionHash` appears as soon as Brickken has resolved the
+on-chain hash, so a `pending` response may not include it yet.
 
 If the transaction failed, the response includes the stored error:
 
@@ -35,3 +39,23 @@ If the transaction failed, the response includes the stored error:
   "error": "Transaction failed"
 }
 ```
+
+A confirmed `newTokenization` does not carry the new token contract address. Read it from
+[`GET /get-tokenizer-info`](/api-reference/endpoint/get-tokenizer-info) as `tokenAddress` once the status is
+`success`.
+
+## x402 transactions
+
+When the transaction was paid through x402, the response also carries the payment outcome:
+
+```json
+{
+  "status": "success",
+  "transactionHash": "0x46f7114878c49ad5af0f1e6f0a2ce9c700c1fdf36455fd956b20f492ee813e80",
+  "paymentStatus": "settled",
+  "settlementTransaction": "0xae08674018f81ce617aa8b6c4d582a681b278542cf30921536b91b2162fe19fb"
+}
+```
+
+`paymentError` replaces `settlementTransaction` when the payment itself failed. These three fields are omitted
+for API-key transactions.

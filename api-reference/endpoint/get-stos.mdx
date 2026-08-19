@@ -3,35 +3,43 @@ title: 'Get STOs'
 openapi: 'GET /get-stos'
 ---
 
-Retrieves information about Security Token Offerings (STOs).
+Lists every Security Token Offering of a tokenized asset. The response is a JSON array, not an object.
 
 ## Query Parameters
 
-- `tokenSymbol` (optional): Filter by specific token symbol
+- `tokenSymbol` (required): Token symbol
 
 ## Example
 
 ```bash
 curl --request GET \
-  --url 'https://api.sandbox.brickken.com/get-stos' \
+  --url 'https://api.sandbox.brickken.com/get-stos?tokenSymbol=EXMPL' \
   --header 'x-api-key: YOUR_API_KEY'
 ```
 
 ## Response
 
 ```json
-{
-  "stos": [
-    {
-      "id": "123",
-      "tokenSymbol": "EXMPL",
-      "status": "active",
-      "startDate": "2024-01-01T00:00:00Z",
-      "endDate": "2024-12-31T23:59:59Z",
-      "softCap": "50000",
-      "hardCap": "500000",
-      "raised": "25000"
-    }
-  ]
-}
+[
+  {
+    "uuid": "a5232594-3f97-47d0-b362-491caac9388f",
+    "name": "Round A",
+    "status": "active",
+    "tokenAmount": "100000",
+    "hardCap": "500000",
+    "softCap": "50000",
+    "maxInvestment": "10000",
+    "minInvestment": "100",
+    "tokenSymbol": "EXMPL",
+    "startDate": "2026-01-01T00:00:00.000Z",
+    "endDate": "2026-12-31T23:59:59.000Z",
+    "tokenPrice": "5.0",
+    "acceptedCoin": "USDC",
+    "escrow": "0x3333333333333333333333333333333333333333"
+  }
+]
 ```
+
+Use `uuid` as the `id` parameter of [`GET /get-sto-by-id`](/api-reference/endpoint/get-sto-by-id),
+[`GET /get-sto-balance`](/api-reference/endpoint/get-sto-balance), and
+[`GET /get-investments-by-sto-id`](/api-reference/endpoint/get-investments-by-sto).

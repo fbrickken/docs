@@ -3,18 +3,18 @@ title: 'Get Whitelist Status'
 openapi: 'GET /get-whitelist-status'
 ---
 
-Checks if an address is whitelisted for a specific token.
+Checks the token contract directly to determine whether an address is whitelisted.
 
 ## Query Parameters
 
 - `tokenSymbol` (required): Token symbol
-- `investorAddress` (required): Wallet address to check
+- `address` (required): Wallet address to check. `investorAddress` is accepted as a legacy alias — send either one.
 
 ## Example
 
 ```bash
 curl --request GET \
-  --url 'https://api.sandbox.brickken.com/get-whitelist-status?tokenSymbol=EXMPL&investorAddress=0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b' \
+  --url 'https://api.sandbox.brickken.com/get-whitelist-status?tokenSymbol=EXMPL&address=0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b' \
   --header 'x-api-key: YOUR_API_KEY'
 ```
 
@@ -24,6 +24,10 @@ curl --request GET \
 {
   "isWhitelisted": true,
   "address": "0x742d35Cc6634C0532925a3b8D4C9db96c4b4d8b",
-  "tokenSymbol": "EXMPL"
+  "tokenSymbol": "EXMPL",
+  "source": "blockchain"
 }
 ```
+
+`address` is returned in checksummed form, and `source` is always `blockchain` because the flag is read from the
+token contract rather than from Brickken's database.
