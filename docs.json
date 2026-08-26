@@ -47,6 +47,12 @@
             "pages": [
               "get-started/quickstart"
             ]
+          },
+          {
+            "group": "BKN Faucet",
+            "pages": [
+              "api-reference/endpoint/bkn-faucet"
+            ]
           }
         ]
       },
@@ -64,12 +70,6 @@
             "group": "Guides",
             "pages": [
               "api-reference/guides/tokenize-and-run-an-sto"
-            ]
-          },
-          {
-            "group": "BKN Faucet",
-            "pages": [
-              "api-reference/endpoint/bkn-faucet"
             ]
           },
           {
