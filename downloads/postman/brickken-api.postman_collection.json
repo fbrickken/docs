@@ -36,6 +36,12 @@
       "type": "string"
     },
     {
+      "key": "bknFaucetIdempotencyKey",
+      "value": "",
+      "type": "string",
+      "description": "Materialized UUID v4 for the current faucet claim. Reuse for retries; clear before a new claim."
+    },
+    {
       "key": "tokenSymbol",
       "value": "EXMPL",
       "type": "string"
@@ -137,6 +143,68 @@
     }
   ],
   "item": [
+    {
+      "name": "BKN Faucet",
+      "description": "Sandbox/Forge faucet for 100 BKN on Ethereum Sepolia. API keys have 10 dedicated lifetime claims, separate from mintToken. Recipients have a 24-hour cooldown.",
+      "item": [
+        {
+          "name": "Request 100 BKN",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const uuidV4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;",
+                  "let idempotencyKey = pm.environment.get('bknFaucetIdempotencyKey') || pm.collectionVariables.get('bknFaucetIdempotencyKey');",
+                  "if (!uuidV4.test(idempotencyKey || '')) {",
+                  "    idempotencyKey = pm.variables.replaceIn('{{$guid}}');",
+                  "    if (!uuidV4.test(idempotencyKey)) {",
+                  "        throw new Error('Postman did not materialize a valid UUID v4 for bknFaucetIdempotencyKey');",
+                  "    }",
+                  "    pm.environment.set('bknFaucetIdempotencyKey', idempotencyKey);",
+                  "    pm.collectionVariables.set('bknFaucetIdempotencyKey', idempotencyKey);",
+                  "}",
+                  "console.log('BKN faucet Idempotency-Key:', idempotencyKey);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{bknFaucetIdempotencyKey}}",
+                "description": "Reuse for a retry of this claim; clear before a new claim."
+              },
+              {
+                "key": "X-Payment",
+                "value": "",
+                "disabled": true,
+                "description": "Optional manual x402 retry. Do not send together with x-api-key."
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/faucet/bkn",
+              "host": ["{{baseUrl}}"],
+              "path": ["faucet", "bkn"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipientAddress\": \"{{recipientAddress}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Requests 100 BKN on Ethereum Sepolia. The inherited API key consumes one of 10 dedicated lifetime faucet credits. The pre-request script materializes and validates UUID v4; keep it for retries and clear bknFaucetIdempotencyKey before a new claim. The x402 alternative costs 0.01 USDC, but Postman does not sign the payment payload automatically."
+          },
+          "response": []
+        }
+      ]
+    },
     {
       "name": "Create Transaction",
       "item": [

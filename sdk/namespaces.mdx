@@ -8,7 +8,7 @@ One client exposes nine namespaces. Writes take `(input, options?)` and return a
 ```ts
 const bkn = new Brickken({ env: 'sandbox', apiKey })
 
-bkn.tokenization   bkn.sto      bkn.kyc       bkn.agent     bkn.agentToken
+bkn.tokenization   bkn.sto      bkn.faucet    bkn.agent     bkn.agentToken
 bkn.rams           bkn.tx       bkn.network   bkn.discovery
 ```
 
@@ -50,15 +50,15 @@ Security Token Offerings: the lifecycle, plus the reads scoped to an offering. *
 | `investments(query)` | `GET /get-investments-by-sto-id` |
 | `investor(query)` | `GET /get-investor-info` |
 
-## `kyc`
+## `faucet`
 
-Investor onboarding. **API key required.**
+Sandbox/Forge BKN faucet. **API key or x402 signer; configure exactly one.**
 
 | Method | Backend |
 | --- | --- |
-| `createLink(input)` | `POST /create-kyc-link` |
+| `requestBkn({ recipientAddress, idempotencyKey? })` | `POST /faucet/bkn` |
 
-`createLink` can create an investor record and send an invitation email. Treat the returned Sumsub URL as sensitive.
+It requests 100 BKN on Ethereum Sepolia. An API key has 10 dedicated lifetime claims, separate from `mintToken`; x402 costs 0.01 USDC. The SDK generates and returns a UUID v4 when omitted and includes payment metadata for x402 calls. Recipients have a 24-hour cooldown.
 
 ## `agent`
 

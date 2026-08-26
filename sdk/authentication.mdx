@@ -35,6 +35,7 @@ agentic.credentialMode   // 'x402'
 | | `apiKey` | `signer`, no key |
 | --- | :---: | :---: |
 | KYC link creation | Yes | No |
+| BKN faucet (Sandbox/Forge) | Yes, 10 dedicated lifetime claims | Yes, 0.01 USDC |
 | Agent getters | Yes | Yes |
 | Dapp API writes (`tokenization.*`, `sto.*`) | Yes | No |
 | Dapp API reads | Yes | No |
@@ -60,6 +61,7 @@ These throw before any request leaves your process, with the fix named in the me
 | A Dapp method with no credential at all, even to prepare | `ValidationError` |
 | `execute: true` with no credential | `ValidationError` |
 | `client-signed` or `client-broadcast` with a signer that has no `signTransaction` | `ValidationError` |
+| BKN faucet with both `apiKey` and `signer`, or in production | `ValidationError` |
 
 ```ts
 const bkn = new Brickken({ apiKey: 'key', signer })

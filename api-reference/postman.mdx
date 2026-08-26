@@ -6,7 +6,7 @@ icon: 'download'
 
 ## Overview
 
-Get started with the Brickken API in minutes using our official Postman collection. It includes ready-to-run requests for every public endpoint — KYC onboarding, agent getters, transaction preparation, signed transaction submission, token documentation management, and the Agentic (x402) API — pre-configured with example payloads and environment variables.
+Get started with the Brickken API in minutes using our official Postman collection. It includes ready-to-run requests for every public endpoint — the BKN faucet, KYC onboarding, agent getters, transaction preparation, signed transaction submission, token documentation management, and the Agentic (x402) API — pre-configured with example payloads and environment variables.
 
 ## Downloads
 
@@ -60,6 +60,16 @@ Business endpoints are authenticated with an API key in the `x-api-key` header, 
 Agentic (x402) endpoints alternatively accept a per-call payment via the `X-Payment` header. See [Authentication](/get-started/authentication) for the full credential matrix.
 
 The **Agent Getters** folder defaults to API-key authentication and includes disabled `X-Payment` headers for manual x402 retries. The **KYC** folder always requires the API key; creating a link can create an investor and send an invitation email.
+
+### Faucet UUID lifecycle
+
+The **BKN Faucet** request uses the materialized `bknFaucetIdempotencyKey` environment variable. Its pre-request script creates and validates UUID v4 when the variable is empty.
+
+- Keep the variable unchanged when retrying the same logical claim.
+- Clear `bknFaucetIdempotencyKey` before a new claim; the next run generates a new UUID v4.
+- Never reuse the UUID with another recipient.
+
+The faucet uses one of the API key's 10 dedicated lifetime claims. Postman does not sign x402 payment payloads; use the SDK, CLI, or MCP for the 0.01 USDC x402 path.
 
 ## Typical Workflow
 

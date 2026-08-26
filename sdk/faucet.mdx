@@ -1,0 +1,31 @@
+---
+title: 'BKN Faucet'
+description: 'Request test BKN with automatic UUID-v4 idempotency and API-key or x402 authentication.'
+---
+
+The `faucet` namespace exposes the Sandbox/Forge BKN faucet. It does not expose the public bearer/reCAPTCHA flow.
+
+```ts
+const result = await bkn.faucet.requestBkn({
+  recipientAddress: '0x1111111111111111111111111111111111111111',
+  idempotencyKey: '4d0f91d8-453d-4fb5-a8e1-c722bc7b75a1', // optional
+})
+```
+
+With `apiKey`, the call consumes one of the key's 10 dedicated lifetime faucet credits. With `signer` and no key, the SDK handles the 0.01 USDC x402 challenge and exposes the payment as `result.payment`. Do not configure both for this namespace.
+
+When `idempotencyKey` is omitted, the SDK generates UUID v4 locally and returns it as `result.idempotencyKey`. A new claim needs a new UUID; retry the same logical claim with the same UUID. The recipient cooldown is 24 hours.
+
+```ts
+interface BknFaucetResult {
+  claimId: string
+  status: 'confirmed' | 'submitted'
+  chainId: '11155111'
+  recipientAddress: Address
+  amount: '100'
+  transactionHash: string
+  cooldownEndsAt: string
+  idempotencyKey: string
+  payment?: PaymentRecord
+}
+```

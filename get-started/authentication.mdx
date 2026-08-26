@@ -33,6 +33,7 @@ Never send a private key or seed phrase to the Brickken API, and never paste one
 | Dapp API writes (`/prepare-transactions/*` for tokenization and STO methods) | Required | Not accepted |
 | Dapp API reads (excluding agent getters) | Required, with exceptions below | Not accepted |
 | `POST /create-kyc-link` | Required | Not accepted |
+| `POST /faucet/bkn` (Sandbox/Forge) | Accepted: 10 dedicated lifetime claims | Accepted: 0.01 USDC |
 | Agent getters (`/get-agents`, `/get-agent-info`, `/get-agent-transactions`) | Accepted | Accepted |
 | `PATCH /patch-token-docs` | Required | Not accepted |
 | `POST /prepare-transactions` for x402-eligible agentic methods | Optional in client-controlled modes | Required for client-controlled prepare without a key; relayed prepare is credential-free |
@@ -87,6 +88,8 @@ Every key belongs to a plan, and the plan grants a **separate credit balance for
 | Enterprise | 10 000 |
 
 Metered methods: `newTokenization`, `whitelist`, `mintToken`, `burnToken`, `transferTo`, `transferFrom`, `approve`, `dividendDistribution`, `newSto`, `newInvest`, `claimTokens`, `closeOffer`, and `patch-token-docs`. When a balance runs out, the call fails with `Out of credits for <method>`.
+
+The BKN faucet has a separate fixed balance: **10 lifetime claims per API key**, for every plan. Faucet claims never consume `mintToken` credits. When this balance is spent, the call fails with `Out of credits for faucet`. The alternative x402 path costs 0.01 USDC and does not use the API-key balance.
 
 <Note>
 Per-tier request throttles and quotas are configured on the usage plan attached to your key and are not published here. Ask `tech@brickken.com` for the limits on your tier.
@@ -249,6 +252,7 @@ brickken rams status --chain 11155111 --agent 0x… --principal 0x…
 | `400 brickken-relayed execution requires x402 payment; API keys are not accepted` | Drop the key, or prepare in `client-signed` mode |
 | `402 Payment Required` | Read `PAYMENT-REQUIRED`, sign, and retry with `X-PAYMENT` |
 | `Out of credits for <method>` | Your plan's balance for that method is exhausted |
+| `Out of credits for faucet` | The API key has spent its 10 dedicated lifetime faucet claims |
 | `Unauthorized token symbol` | Your key did not tokenize that symbol |
 | `429` with `Retry-After: 60` | Rate limited on `prepare-transactions` |
 

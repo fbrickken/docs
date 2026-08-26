@@ -30,6 +30,43 @@
       }
     },
     "schemas": {
+      "BknFaucetResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claimId",
+          "status",
+          "chainId",
+          "recipientAddress",
+          "amount",
+          "amountRaw",
+          "token",
+          "transactionHash",
+          "explorerUrl",
+          "cooldownEndsAt"
+        ],
+        "properties": {
+          "claimId": { "type": "string", "format": "uuid" },
+          "status": { "type": "string", "enum": ["confirmed", "submitted"] },
+          "chainId": { "type": "string", "const": "11155111" },
+          "recipientAddress": { "type": "string", "pattern": "^0x[a-fA-F0-9]{40}$" },
+          "amount": { "type": "string", "const": "100" },
+          "amountRaw": { "type": "string", "const": "100000000000000000000" },
+          "token": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["address", "symbol", "decimals"],
+            "properties": {
+              "address": { "type": "string", "const": "0x2458fB1620ff84019d73216fF20aA1F82Bc8E4CC" },
+              "symbol": { "type": "string", "const": "BKN" },
+              "decimals": { "type": "integer", "const": 18 }
+            }
+          },
+          "transactionHash": { "type": "string", "pattern": "^0x[a-fA-F0-9]{64}$" },
+          "explorerUrl": { "type": "string", "format": "uri" },
+          "cooldownEndsAt": { "type": "string", "format": "date-time" }
+        }
+      },
       "UnsignedTransaction": {
         "type": "object",
         "description": "An unsigned transaction to sign. In client-signed and client-broadcast execution this is a fully populated EIP-1559 transaction; in brickken-relayed execution it is the bare call (to, data, value) that Brickken's relayer signs and broadcasts. BigNumber fields are serialised as { type, hex }.",
@@ -8436,6 +8473,83 @@
               }
             }
           }
+        }
+      }
+    },
+    "/faucet/bkn": {
+      "post": {
+        "operationId": "mintSepoliaBkn",
+        "summary": "Request 100 BKN on Ethereum Sepolia",
+        "description": "Sandbox/Forge only. Uses one of the API key's 10 dedicated lifetime faucet credits, separate from mintToken, or a 0.01 USDC x402 payment. Recipients have a 24-hour cooldown. A new logical claim needs a new UUID v4; retry the same claim with the same UUID.",
+        "tags": ["BKN Faucet"],
+        "security": [
+          { "apiKeyAuth": [] },
+          { "x402Payment": [] }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "UUID v4. Reuse only for a retry of the same logical claim.",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["recipientAddress"],
+                "properties": {
+                  "recipientAddress": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "not": { "const": "0x0000000000000000000000000000000000000000" },
+                    "description": "Non-zero Ethereum Sepolia recipient address."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The mint transaction was confirmed during the request.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/BknFaucetResponse" } } }
+          },
+          "202": {
+            "description": "The mint transaction was submitted and may confirm asynchronously.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/BknFaucetResponse" } } }
+          },
+          "400": { "description": "Invalid recipient, UUID, or exhausted API-key faucet balance." },
+          "402": {
+            "description": "x402 payment required when no API key is sent.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 payment request.",
+                "schema": { "type": "string" }
+              }
+            }
+          },
+          "409": { "description": "The UUID was already used with another recipient or authentication identity." },
+          "429": {
+            "description": "The recipient is still within its 24-hour cooldown.",
+            "headers": {
+              "Retry-After": { "schema": { "type": "integer" } }
+            }
+          },
+          "503": { "description": "The faucet could not prepare or reconcile the mint safely." }
+        },
+        "x-payment-info": {
+          "protocols": [{ "x402": {} }],
+          "price": { "mode": "fixed", "currency": "USDC", "amount": "0.01" }
         }
       }
     },

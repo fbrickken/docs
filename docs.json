@@ -67,6 +67,12 @@
             ]
           },
           {
+            "group": "BKN Faucet",
+            "pages": [
+              "api-reference/endpoint/bkn-faucet"
+            ]
+          },
+          {
             "group": "KYC",
             "pages": [
               "api-reference/endpoint/create-kyc-link"
@@ -225,6 +231,7 @@
             "group": "Commands",
             "pages": [
               "cli/commands/kyc",
+              "cli/commands/faucet",
               "cli/commands/agent",
               "cli/commands/token-economics",
               "cli/commands/rams",
@@ -265,6 +272,7 @@
             "group": "Reference",
             "pages": [
               "sdk/namespaces",
+              "sdk/faucet",
               "sdk/configuration"
             ]
           },

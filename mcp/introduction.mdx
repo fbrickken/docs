@@ -5,7 +5,7 @@ description: 'Hosted Brickken MCP server for API-key and x402 workflows in MCP-c
 
 ## Overview
 
-The Brickken MCP server exposes the Brickken Dapp API and Agentic API as 62 tools for MCP-compatible AI agents.
+The Brickken MCP server exposes the Brickken Dapp API and Agentic API as 63 tools for MCP-compatible AI agents.
 
 It is **the client to reach for when an AI agent should drive the full Dapp API with nothing but an API key**, including KYC link creation. If your own code is driving rather than an agent, use the [SDK](/sdk/introduction). See [Choose your surface](/get-started/choose-your-surface).
 
@@ -88,6 +88,12 @@ The hosted `/mcp` endpoint has no inbound authentication — anyone can connect,
 | `configure` | Set `env`, `baseUrl`, `apiKey`, or `privateKey` for the current session. |
 | `get_config` | Inspect `env`, `baseUrl`, `hasApiKey`, and `hasPrivateKey`. |
 
+## BKN Faucet Tool
+
+`request_bkn_faucet` requests 100 BKN on Ethereum Sepolia in Sandbox or Forge. Pass `recipientAddress` and optionally `idempotencyKey` as UUID v4. The tool generates and returns a UUID when omitted; use a new UUID for a new claim and the same UUID for a retry of that claim.
+
+Configure exactly one credential. An API key has 10 dedicated lifetime faucet claims, separate from `mintToken`; private-key mode pays 0.01 USDC through x402. Recipients have a 24-hour cooldown. The public bearer/reCAPTCHA flow is not exposed.
+
 ## Transaction Tools
 
 | Tool | Purpose |
@@ -105,6 +111,7 @@ The signer wallet must be whitelisted by Brickken before a write is accepted, an
 | Area | Tools |
 | --- | --- |
 | KYC | `create_kyc_link` |
+| BKN faucet | `request_bkn_faucet` |
 | Tokenization | `create_tokenization` |
 | STOs | `create_sto`, `invest_in_sto`, `claim_sto`, `close_sto` |
 | Security-token operations | `mint_tokens`, `whitelist_investor`, `burn_tokens`, `transfer_tokens`, `approve_tokens`, `distribute_dividend` |

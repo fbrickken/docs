@@ -1,0 +1,92 @@
+---
+title: 'Request BKN from the Faucet'
+openapi: '/api-reference/openapi.json POST /faucet/bkn'
+description: 'Request 100 BKN on Ethereum Sepolia with an API key or a 0.01 USDC x402 payment.'
+---
+
+`POST /faucet/bkn` is available in Sandbox and Forge. It mints **100 BKN on Ethereum Sepolia** to `recipientAddress`.
+
+Use exactly one authentication mode:
+
+- `x-api-key`: consumes one of the key's **10 dedicated lifetime faucet credits**, separate from the `mintToken` balance.
+- `X-PAYMENT`: settles the live **0.01 USDC** x402 challenge and consumes no API-key credit.
+
+Every request needs `Idempotency-Key`, and its value must be a UUID v4.
+
+<Warning>
+Create a new UUID v4 for every new logical claim. If a request times out or its response is lost, retry the same claim with the same UUID. Reusing that UUID with a different recipient returns `409 Conflict`.
+</Warning>
+
+The recipient address has a separate 24-hour cooldown. An idempotent retry does not spend another faucet credit, and a request rejected by validation or cooldown does not spend one either.
+
+## Client examples
+
+<Tabs>
+  <Tab title="REST">
+```bash
+curl --request POST 'https://api.sandbox.brickken.com/faucet/bkn' \
+  --header 'Content-Type: application/json' \
+  --header 'x-api-key: YOUR_BRICKKEN_API_KEY' \
+  --header 'Idempotency-Key: 4d0f91d8-453d-4fb5-a8e1-c722bc7b75a1' \
+  --data '{"recipientAddress":"0x1111111111111111111111111111111111111111"}'
+```
+  </Tab>
+  <Tab title="SDK">
+```ts
+const result = await bkn.faucet.requestBkn({
+  recipientAddress: '0x1111111111111111111111111111111111111111',
+  // Optional: generated as UUID v4 when omitted.
+  idempotencyKey: '4d0f91d8-453d-4fb5-a8e1-c722bc7b75a1',
+})
+
+console.log(result.idempotencyKey)
+console.log(result.payment) // present only when the SDK paid through x402
+```
+  </Tab>
+  <Tab title="CLI">
+```bash
+brickken faucet bkn \
+  --recipient-address 0x1111111111111111111111111111111111111111 \
+  --idempotency-key 4d0f91d8-453d-4fb5-a8e1-c722bc7b75a1 \
+  --json
+```
+  </Tab>
+  <Tab title="MCP">
+```json
+{
+  "name": "request_bkn_faucet",
+  "arguments": {
+    "recipientAddress": "0x1111111111111111111111111111111111111111",
+    "idempotencyKey": "4d0f91d8-453d-4fb5-a8e1-c722bc7b75a1"
+  }
+}
+```
+  </Tab>
+</Tabs>
+
+SDK, CLI, and MCP generate a UUID v4 when you omit it and return the actual value used. If crash recovery matters, generate and persist the UUID before the first call so it remains available even if the client never receives a response.
+
+## Response
+
+The API returns `200` when confirmation completed within the request and `202` when the mint was submitted and can finish asynchronously.
+
+```json
+{
+  "claimId": "1d0f91d8-453d-4fb5-a8e1-c722bc7b75a2",
+  "status": "submitted",
+  "chainId": "11155111",
+  "recipientAddress": "0x1111111111111111111111111111111111111111",
+  "amount": "100",
+  "amountRaw": "100000000000000000000",
+  "token": {
+    "address": "0x2458fB1620ff84019d73216fF20aA1F82Bc8E4CC",
+    "symbol": "BKN",
+    "decimals": 18
+  },
+  "transactionHash": "0x...",
+  "explorerUrl": "https://sepolia.etherscan.io/tx/0x...",
+  "cooldownEndsAt": "2026-08-26T12:00:00.000Z"
+}
+```
+
+`429` means the recipient is still in cooldown and includes `Retry-After`. `Out of credits for faucet` means the API key has spent all 10 lifetime claims; use x402 for a paid request or contact Brickken.

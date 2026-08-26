@@ -5,19 +5,20 @@ description: 'KYC API-key authentication, API-key-or-x402 reads, private-key sig
 
 ## What the CLI can authenticate
 
-The CLI uses endpoint-specific authentication. Transaction writes use x402; KYC link creation requires an API key; agent getters and RAMS reads use an API key when configured and otherwise fall back to x402.
+The CLI uses endpoint-specific authentication. Transaction writes use x402; KYC link creation requires an API key; the BKN faucet, agent getters, and RAMS reads use an API key when configured and otherwise fall back to x402.
 
 | Request | Credential the CLI sends |
 | --- | --- |
 | Every write (`agent`, `create-token`, `mint`, `burn`, `transfer`, `rams` writes, `tx prepare`, `tx send`) | x402 payment only |
 | `kyc create-link` | `x-api-key` (required) |
+| `faucet bkn` (Sandbox/Forge) | Exactly one: `x-api-key`, or 0.01 USDC x402 with a private key |
 | `agent list`, `info`, `transactions` | `x-api-key` if configured, otherwise x402 |
 | `tx status` | none |
 | `rams inspect`, `status`, `can-execute`, `compliance-status`, `executor-action`, `sign` | `x-api-key` if configured, otherwise x402 |
 | Other Dapp API methods | **not supported — see below** |
 
 <Warning>
-**The CLI cannot drive the full legacy Dapp API.** KYC link creation is the explicit supported exception. There are no commands or method mappers for `newTokenization`, `newSto`, `mintToken`, `whitelist`, `get-stos`, or other Dapp methods, and no API key is attached to transaction writes even if you set one. `brickken tx prepare --method newTokenization` forwards the method name, but the backend rejects it with `API key is required for this method`.
+**The CLI cannot drive the full legacy Dapp API.** KYC link creation and the Sandbox/Forge BKN faucet are the explicit supported exceptions. There are no commands or method mappers for `newTokenization`, `newSto`, `mintToken`, `whitelist`, `get-stos`, or other Dapp methods, and no API key is attached to transaction writes even if you set one. `brickken tx prepare --method newTokenization` forwards the method name, but the backend rejects it with `API key is required for this method`.
 
 Use the [MCP server](/mcp/introduction) if an AI agent should drive the Dapp API, or call the [REST API](/api-reference/introduction) directly from your own code.
 </Warning>
