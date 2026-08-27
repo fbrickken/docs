@@ -32,7 +32,7 @@ Allow 15–20 minutes for setup, faucet funding, two x402 payments, and confirma
     Use the version validated for this programme:
 
     ```bash
-    npm install -g brickken-cli@0.4.11
+    npm install -g brickken-cli@0.4.13
     brickken --version
     ```
   </Step>
@@ -119,7 +119,7 @@ Inspect the sanitized fields in `out/register-output.json`, `out/agent-info-outp
 
 | Symptom | Check |
 | --- | --- |
-| `brickken-cli is required` | Install the pinned `brickken-cli@0.4.11` package and confirm `brickken --version`. |
+| `brickken-cli is required` | Install the pinned `brickken-cli@0.4.13` package and confirm `brickken --version`. |
 | `image is required` or service validation fails | Keep the public fixture URLs or replace them with reachable HTTPS URLs. |
 | x402 payment fails | Confirm the wallet has the exact quoted Base Sepolia USDC asset and retry only after checking the quote. |
 | Client transaction fails for gas | Fund the same `WALLET` with Base Sepolia ETH and confirm it matches the private key. |

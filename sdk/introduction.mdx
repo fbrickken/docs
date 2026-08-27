@@ -22,7 +22,7 @@ npm install brickken-sdk
 
 ## Why this surface
 
-The SDK is the client to reach for when **your own code** is driving. Unlike the [CLI](/cli/introduction), it reaches the full Dapp API; unlike the [MCP server](/mcp/introduction), it runs in your process rather than behind a hosted agent endpoint.
+The SDK is the client to reach for when **your own code** is driving and you want typed methods for the full Dapp API. The [CLI](/cli/introduction) also reaches Dapp transaction methods and JSON endpoints through raw commands, while the SDK additionally covers the typed multipart surface. Unlike the [MCP server](/mcp/introduction), it runs in your process rather than behind a hosted agent endpoint.
 
 - **One client, three APIs.** Dapp, agentic, and RAMS live behind the same `Brickken` instance.
 - **Illegal combinations fail locally.** The SDK derives the credential mode from what you pass and refuses combinations the API rejects, before a request leaves your process.

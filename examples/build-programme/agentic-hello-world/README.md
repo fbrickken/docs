@@ -5,7 +5,7 @@ This example uses the Brickken CLI and x402 on Base Sepolia to register an ERC-8
 ## Prerequisites
 
 - Node.js 18 or newer.
-- `brickken-cli@0.4.11`, installed with `npm install -g brickken-cli@0.4.11`.
+- `brickken-cli@0.4.13`, installed with `npm install -g brickken-cli@0.4.13`.
 - `jq` and `curl`.
 - A fresh Base Sepolia wallet whose address is set in `WALLET` and whose private key is set in `BRICKKEN_PRIVATE_KEY`.
 - Base Sepolia Circle USDC for x402 payments and Base Sepolia ETH for client-signed gas.

@@ -1,9 +1,9 @@
 ---
 title: 'tx'
-description: 'Raw prepare, sign, send, and status flows for any Brickken API V2 method.'
+description: 'API-key or x402 prepare, sign, send, and status flows for Brickken Dapp and Agentic API methods.'
 ---
 
-`brickken tx` exposes the raw [API V2 transaction flow](/api-reference/introduction#api-flow). Use it when you want full control over the payload, need to call a specific backend method directly, or want to inspect the unsigned transaction before broadcasting.
+`brickken tx` exposes the raw [API transaction flow](/api-reference/introduction#api-flow) for Dapp and Agentic API methods. Use it when you want full control over the payload, need to call a specific backend method directly, or want to inspect the unsigned transaction before broadcasting. Dapp API methods use the configured API key; client-controlled Agentic and RAMS methods use the key when configured and otherwise use x402.
 
 | Subcommand | Purpose |
 | --- | --- |
@@ -14,18 +14,18 @@ description: 'Raw prepare, sign, send, and status flows for any Brickken API V2 
 
 ## tx prepare
 
-Prepare a raw transaction for any method. Relayed preparation is free; client-controlled modes charge the prepare share. With `--execute`, the CLI also sends to `/send-transactions` and pays the remaining x402 charge. The recommended `--execution-mode brickken-relayed` lets Brickken's relayer sign and broadcast (omit `--signer-address`); the default `client-signed` mode signs locally with the configured private key first.
+Prepare a raw transaction for any method. Dapp API methods use the configured API key and consume the method's credits; eligible Agentic and RAMS methods use the key when configured and otherwise use x402. Relayed preparation is free. With `--execute`, the CLI also sends to `/send-transactions`; API-key-authenticated Dapp sends use the key, while x402 sends pay the operation charge. The `--execution-mode brickken-relayed` mode lets Brickken's relayer sign and broadcast (omit `--signer-address`) and always uses x402; the default `client-signed` mode signs locally with the configured private key first.
 
 | Flag | Type | Required | Description |
 | --- | --- | --- | --- |
 | `--method <method>` | string | Yes | Brickken transaction method |
-| `--chain <chain>` | string | No | Chain identifier (`8453` Base, `84532` Base Sepolia) |
+| `--chain <chain>` | string | No | Chain identifier (`8453` Base, `84532` Base Sepolia, `11155111` Ethereum Sepolia) |
 | `--execution-mode <mode>` | string | No | `client-signed` (default) or `brickken-relayed` (recommended) |
 | `--signer-address <address>` | string | No | Signer wallet address (required for `client-signed`) |
 | `-f, --file <path>` | string | No | JSON/YAML input file (merged with CLI flags) |
 | `--execute` | flag | No | Send and pay the x402 charge (otherwise prepare-only) |
 
-Supported agentic token methods include `agentCreateToken`, `agentMintToken`, `agentBurnToken`, `agentTransferToken`, `agentTransferFromToken`, `agentApproveToken` (and the `agentApprove` alias, normalized to `agentApproveToken`). Agent identity and reputation methods (`agentRegister`, `agentSetURI`, `agentSetMetadata`, `agentSetWallet`, `agentTransferOwnership`, `agentGiveFeedback`, `agentRevokeFeedback`, `agentAppendFeedbackResponse`) and other API V2 methods are also accepted. You can also set `executionMode` directly in the `--file` body. See [Agentic Methods with x402](/api-reference/endpoint/agentic-methods-x402) for each method's fields.
+Supported Dapp transaction methods include `newTokenization`, `newSto`, `newInvest`, `claimTokens`, `closeOffer`, `mintToken`, `whitelist`, `burnToken`, `transferFrom`, `transferTo`, `approve`, and `dividendDistribution`. Agentic token methods include `agentCreateToken`, `agentMintToken`, `agentBurnToken`, `agentTransferToken`, `agentTransferFromToken`, and `agentApproveToken` (and the `agentApprove` alias, normalized to `agentApproveToken`). Agent identity, reputation, and RAMS methods are also accepted. You can also set `executionMode` directly in the `--file` body. See the [Dapp API reference](/api-reference/introduction) and [Agentic Methods with x402](/api-reference/endpoint/agentic-methods-x402) for each method's fields.
 
 One-shot execution from a file:
 
@@ -49,6 +49,28 @@ brickken tx prepare \
 <Tip>
 Prefer `--file` for nested JSON, long text, or values assembled by shell scripts. A file avoids the quoting pitfalls of inline JSON. The file's keys use the backend field names (e.g. `chainId`, `signerAddress`, `metadataValue`).
 </Tip>
+
+Example Dapp API tokenization file:
+
+```json
+{
+  "chainId": "11155111",
+  "tokenizerEmail": "issuer@example.com",
+  "signerAddress": "0xYourWhitelistedWallet",
+  "name": "Example Asset",
+  "tokenSymbol": "EXMPL",
+  "tokenType": "RWA_TOKEN",
+  "supplyCap": "1000000",
+  "url": "https://example.com/token-docs"
+}
+```
+
+Prepare it with the API key that pays for the Dapp API operation:
+
+```bash
+export BRICKKEN_API_KEY=...
+brickken tx prepare --method newTokenization --file new-tokenization.json --json
+```
 
 Example metadata file:
 
@@ -95,7 +117,7 @@ brickken tx send \
 ```
 
 <Note>
-x402 send batches must contain only x402-eligible prepared transactions, and all transactions in a batch must be on the same chain.
+API-key-authenticated Dapp sends use the API key's credits and do not need an x402 payment header. Relayed Agentic/RAMS sends still use x402, and x402 send batches must contain only x402-eligible prepared transactions on the same chain.
 </Note>
 
 ## tx status

@@ -1,9 +1,9 @@
 ---
 title: 'CLI'
-description: 'Public Brickken CLI for KYC, agent getters, x402-paid writes, and ERC-8226 RAMS mandates.'
+description: 'Public Brickken CLI for the Dapp API, KYC, the Sandbox/Forge BKN faucet, agent getters, x402-paid writes, and ERC-8226 RAMS mandates.'
 ---
 
-The **Brickken CLI** is the public terminal client for KYC onboarding and the [Agentic API](/api-reference/endpoint/agentic-methods-x402). It supports ERC-8004 on Base and ERC-8226 RAMS mandates on Ethereum Sepolia. In relayed mode it prepares writes for free and pays the full operation through x402 at send; client-controlled modes split the operation charge between prepare and send. Agent getters and RAMS reads use API-key authentication or x402.
+The **Brickken CLI** is the public terminal client for the [Dapp API](/api-reference/introduction), KYC onboarding, the Sandbox/Forge BKN faucet, and the [Agentic API](/api-reference/endpoint/agentic-methods-x402). It supports Dapp API transaction methods through `brickken tx`, Dapp API JSON endpoints through `brickken dapp`, ERC-8004 on Base, and ERC-8226 RAMS mandates on Ethereum Sepolia. Client-controlled requests use an API key when configured and otherwise use x402 where supported; relayed sends always use x402.
 
 <CardGroup cols={2}>
   <Card title="npm package" icon="box" href="https://www.npmjs.com/package/brickken-cli">
@@ -30,7 +30,7 @@ npx brickken-cli --help
 
 ## Authentication
 
-Writes use x402. KYC requires an API key. Agent getters and RAMS reads/typed-data fetches use the key when configured and otherwise fall back to x402.
+Dapp API requests and KYC require an API key. Client-controlled Agentic API and RAMS requests use the key when configured and otherwise fall back to x402. Agent getters and the BKN faucet use an API key when configured and support x402 where documented.
 
 ```bash
 export BRICKKEN_API_KEY=...
@@ -39,9 +39,9 @@ export BRICKKEN_PRIVATE_KEY=0x...
 
 `BKN_API_KEY` and `BKN_PRIVATE_KEY` are accepted aliases. The private key signs the x402 payment, client-signed transactions, and requested RAMS typed data locally.
 
-<Warning>
-**The CLI does not reach the general legacy Dapp API.** KYC link creation is the supported exception. It has no commands for tokenization, STOs, or their Dapp reads. For those workflows use the [MCP server](/mcp/introduction) or the [REST API](/api-reference/introduction) — see [Choose your surface](/get-started/choose-your-surface).
-</Warning>
+<Note>
+With `BRICKKEN_API_KEY` configured, the CLI can prepare and send Dapp API transaction methods and call Dapp API JSON endpoints. Multipart file uploads such as `/patch-token-docs` remain REST-only.
+</Note>
 
 <Warning>
 Never paste production private keys into shared terminals, tickets, or chat logs. Prefer environment variables or an `.env` file that is not committed.
@@ -87,7 +87,7 @@ export BRICKKEN_RPC_URL="https://sepolia.base.org"   # Base Sepolia
 
 ## Command Model
 
-High-level commands are prepare-only by default. Relayed preparation is free; client-controlled preparation charges the first half of the operation. Add `--execute` to also send and pay the remaining x402 charge in one step. Add `--json` for machine-readable output.
+High-level commands are prepare-only by default. With an API key, client-controlled requests use API-key authentication; without one, eligible Agentic API and RAMS requests use x402. Relayed preparation is free and relayed sends use x402. Add `--execute` to also send in one step. Add `--json` for machine-readable output.
 
 The recommended path is `brickken-relayed` mode: pass `--execution-mode brickken-relayed` and omit `--signer-address` — Brickken's relayer signs and broadcasts. The default is `client-signed`, where you provide `--signer-address` and the CLI signs the prepared transaction locally.
 
@@ -127,8 +127,10 @@ brickken create-token \
 | `brickken transfer` | `agentTransferToken` | Transfer an agent-owned token. |
 | `brickken transfer-from` | `agentTransferFromToken` | Transfer through allowance. |
 | `brickken approve` | `agentApproveToken` | Approve an allowance. |
+| `brickken dapp get` | `GET <path>` | Call a Dapp API read endpoint with an API key. |
+| `brickken dapp request` | `POST/PATCH <path>` | Call a Dapp API JSON endpoint with an API key. |
 | `brickken rams <command>` | `rams*` / `GET /rams/*` | Manage ERC-8226 mandates, compliance, execution, reads, and signatures. |
-| `brickken tx prepare --method <method>` | any supported method | Prepare a raw backend method. |
+| `brickken tx prepare --method <method>` | any supported method | Prepare a Dapp or Agentic API transaction; sends an API key when configured. |
 | `brickken tx sign` | local only | Sign prepared transaction JSON locally. |
 | `brickken tx send` | `POST /send-transactions` | Submit signed transactions. |
 | `brickken tx status` | `GET /get-transaction-status` | Poll transaction status. |
@@ -136,6 +138,8 @@ brickken create-token \
 | `brickken skill install` | local only | Install the bundled skill into an agent skills directory. |
 
 See the complete [`brickken rams` command reference](/cli/commands/rams) and [end-to-end mandate workflow](/cli/guides/rams-mandate-workflow).
+
+See the [Dapp API command reference](/cli/commands/dapp) for authenticated reads and JSON requests, and the [raw transaction reference](/cli/commands/tx) for tokenization and STO methods.
 
 ## AI Agent Skill
 

@@ -232,6 +232,7 @@
             "pages": [
               "cli/commands/kyc",
               "cli/commands/faucet",
+              "cli/commands/dapp",
               "cli/commands/agent",
               "cli/commands/token-economics",
               "cli/commands/rams",

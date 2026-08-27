@@ -14,7 +14,7 @@ fi
 : "${BRICKKEN_RPC_URL:?Set BRICKKEN_RPC_URL, for example https://sepolia.base.org}"
 : "${WALLET:?Set WALLET to the address for BRICKKEN_PRIVATE_KEY}"
 
-command -v brickken >/dev/null || { echo "brickken-cli is required (install brickken-cli@0.4.11)" >&2; exit 1; }
+command -v brickken >/dev/null || { echo "brickken-cli is required (install brickken-cli@0.4.13)" >&2; exit 1; }
 command -v jq >/dev/null || { echo "jq is required" >&2; exit 1; }
 command -v curl >/dev/null || { echo "curl is required" >&2; exit 1; }
 

@@ -19,24 +19,24 @@ The Dapp API's core loop. Every write follows the same shape: **prepare** an uns
 
 | Capability | Method | HTTP | SDK | MCP | CLI |
 | --- | --- | :---: | :---: | :---: | :---: |
-| Create a tokenized asset | `newTokenization` | Yes | Yes | Yes | No |
-| Mint tokens | `mintToken` | Yes | Yes | Yes | No |
-| Burn tokens | `burnToken` | Yes | Yes | Yes | No |
-| Whitelist or remove an investor | `whitelist` | Yes | Yes | Yes | No |
-| Transfer tokens | `transferTo` | Yes | Yes | Yes | No |
-| Transfer through an allowance | `transferFrom` | Yes | Yes | Yes | No |
-| Approve an allowance | `approve` | Yes | Yes | Yes | No |
-| Distribute dividends | `dividendDistribution` | Yes | Yes | Yes | No |
+| Create a tokenized asset | `newTokenization` | Yes | Yes | Yes | Yes |
+| Mint tokens | `mintToken` | Yes | Yes | Yes | Yes |
+| Burn tokens | `burnToken` | Yes | Yes | Yes | Yes |
+| Whitelist or remove an investor | `whitelist` | Yes | Yes | Yes | Yes |
+| Transfer tokens | `transferTo` | Yes | Yes | Yes | Yes |
+| Transfer through an allowance | `transferFrom` | Yes | Yes | Yes | Yes |
+| Approve an allowance | `approve` | Yes | Yes | Yes | Yes |
+| Distribute dividends | `dividendDistribution` | Yes | Yes | Yes | Yes |
 | Update token documents and branding | `PATCH /patch-token-docs` | Yes | Yes | Yes | No |
 
 ## Run a Security Token Offering
 
 | Capability | Method | HTTP | SDK | MCP | CLI |
 | --- | --- | :---: | :---: | :---: | :---: |
-| Launch an offering | `newSto` | Yes | Yes | Yes | No |
-| Take an investment | `newInvest` | Yes | Yes | Yes | No |
-| Let investors claim their tokens | `claimTokens` | Yes | Yes | Yes | No |
-| Close the offering | `closeOffer` | Yes | Yes | Yes | No |
+| Launch an offering | `newSto` | Yes | Yes | Yes | Yes |
+| Take an investment | `newInvest` | Yes | Yes | Yes | Yes |
+| Let investors claim their tokens | `claimTokens` | Yes | Yes | Yes | Yes |
+| Close the offering | `closeOffer` | Yes | Yes | Yes | Yes |
 
 ## Read platform state
 
@@ -44,22 +44,22 @@ Thirteen read endpoints cover chains, tokens, offerings, investors, allowances, 
 
 | Capability | Endpoint | HTTP | SDK | MCP | CLI |
 | --- | --- | :---: | :---: | :---: | :---: |
-| Chain metadata and contract addresses | `GET /get-network-info` | Yes | Yes | Yes | No |
-| Token information | `GET /get-token-info` | Yes | Yes | Yes | No |
-| Tokenizer account and token contract address | `GET /get-tokenizer-info` | Yes | Yes | Yes | No |
-| List offerings for a token | `GET /get-stos` | Yes | Yes | Yes | No |
-| One offering by ID | `GET /get-sto-by-id` | Yes | Yes | Yes | No |
-| Offering balance and status | `GET /get-sto-balance` | Yes | Yes | Yes | No |
-| Investments in an offering | `GET /get-investments-by-sto-id` | Yes | Yes | Yes | No |
-| Investor status | `GET /get-investor-info` | Yes | Yes | Yes | No |
-| Whitelist status of a wallet | `GET /get-whitelist-status` | Yes | Yes | Yes | No |
-| Balance and whitelist together | `GET /get-balance-whitelist` | Yes | Yes | Yes | No |
-| Allowance between two parties | `GET /get-allowance` | Yes | Yes | Yes | No |
-| Dividend distribution | `GET /get-dividend-distribution` | Yes | Yes | Yes | No |
+| Chain metadata and contract addresses | `GET /get-network-info` | Yes | Yes | Yes | Yes |
+| Token information | `GET /get-token-info` | Yes | Yes | Yes | Yes |
+| Tokenizer account and token contract address | `GET /get-tokenizer-info` | Yes | Yes | Yes | Yes |
+| List offerings for a token | `GET /get-stos` | Yes | Yes | Yes | Yes |
+| One offering by ID | `GET /get-sto-by-id` | Yes | Yes | Yes | Yes |
+| Offering balance and status | `GET /get-sto-balance` | Yes | Yes | Yes | Yes |
+| Investments in an offering | `GET /get-investments-by-sto-id` | Yes | Yes | Yes | Yes |
+| Investor status | `GET /get-investor-info` | Yes | Yes | Yes | Yes |
+| Whitelist status of a wallet | `GET /get-whitelist-status` | Yes | Yes | Yes | Yes |
+| Balance and whitelist together | `GET /get-balance-whitelist` | Yes | Yes | Yes | Yes |
+| Allowance between two parties | `GET /get-allowance` | Yes | Yes | Yes | Yes |
+| Dividend distribution | `GET /get-dividend-distribution` | Yes | Yes | Yes | Yes |
 | Transaction status | `GET /get-transaction-status` | Yes | Yes | Yes | Yes |
 
 <Note>
-The **No** column for the CLI is not an oversight. The CLI is built for agentic workflows and has no commands for the Dapp methods. Use the [SDK](/sdk/introduction), HTTP, or MCP for everything above — see [Choose your surface](/get-started/choose-your-surface).
+The CLI uses `brickken tx` for Dapp transaction methods and `brickken dapp get` for reads. The `PATCH /patch-token-docs` endpoint remains REST-only because it requires multipart file uploads. See the [CLI command reference](/cli/introduction).
 </Note>
 
 ## Give an AI agent an on-chain identity
@@ -123,7 +123,7 @@ RAMS (ERC-8226) lets a principal grant an agent a **compliance-gated, value-capp
 
 Being explicit about the edges saves you an afternoon:
 
-- **The CLI cannot call the general Dapp API.** It supports KYC link creation, agent getters, and RAMS reads, but not tokenization, STO, or their Dapp reads. The [SDK](/sdk/introduction) is the client to use for full Dapp work from your own code.
+- **The CLI does not provide multipart file uploads.** Use the REST API for `/patch-token-docs`; Dapp transaction methods and JSON reads are supported through the CLI with an API key.
 - **`brickken-relayed` sends cannot be paid with an API key.** Brickken pays the gas, so the x402 payment is mandatory.
 - **RAMS runs on Ethereum Sepolia only** at launch, on both sandbox and production.
 - **The MCP packages are not published to npm.** Use the hosted server at `https://mcp.brickken.com/mcp`.

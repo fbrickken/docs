@@ -1,0 +1,75 @@
+---
+title: 'dapp'
+description: 'Call API-key-authenticated Dapp API read and JSON endpoints from the terminal.'
+---
+
+`brickken dapp` calls Dapp API JSON endpoints with the configured API key. Use [`brickken tx`](/cli/commands/tx) for Dapp transaction methods that follow the prepare/sign/send flow.
+
+```bash
+export BRICKKEN_API_KEY=...
+```
+
+## dapp get
+
+Call a Dapp API `GET` endpoint. The path must be relative to the configured Brickken base URL.
+
+```bash
+brickken dapp get \
+  --path /get-token-info \
+  --query tokenSymbol=EXMPL \
+  --json
+```
+
+For several query parameters, repeat `--query`:
+
+```bash
+brickken dapp get \
+  --path /get-stos \
+  --query tokenSymbol=EXMPL \
+  --query page=1 \
+  --query limit=20 \
+  --json
+```
+
+You can also load query parameters from a JSON or YAML file:
+
+```json
+{
+  "tokenSymbol": "EXMPL",
+  "page": 1,
+  "limit": 20
+}
+```
+
+```bash
+brickken dapp get --path /get-stos --file query.json --json
+```
+
+## dapp request
+
+Call a Dapp API JSON `POST` or `PATCH` endpoint with a request body loaded from a JSON or YAML file:
+
+```bash
+brickken dapp request \
+  --method POST \
+  --path /some-dapp-endpoint \
+  --file request.json \
+  --json
+```
+
+The command sends `x-api-key` and does not create an x402 payment. The operation is charged against the API key's credits.
+
+Multipart file uploads such as `/patch-token-docs` are not supported by this JSON command. Use the [REST API](/api-reference/introduction) directly for multipart requests.
+
+## Related transaction flow
+
+Dapp tokenization, STO, and security-token methods use `brickken tx prepare`:
+
+```bash
+brickken tx prepare \
+  --method newTokenization \
+  --file new-tokenization.json \
+  --json
+```
+
+The transaction payload must include a whitelisted `signerAddress` and the API key must have sufficient credits. See the [raw transaction reference](/cli/commands/tx) for the method list and client-controlled signing flow.

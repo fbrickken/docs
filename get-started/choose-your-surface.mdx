@@ -12,6 +12,7 @@ The REST API, the SDK, the CLI, the MCP server, and the Skill all talk to the sa
 | --- | --- | --- |
 | An API key and a TypeScript codebase | **SDK** | Typed client for the whole platform, running in your process |
 | An API key and any other stack | **REST API** | Plain HTTP reaches everything |
+| An API key and a terminal | **CLI** | Dapp transaction methods and JSON endpoints from your terminal |
 | A funded wallet and no API key | **SDK**, **Agentic API**, or **CLI** | Pay per call with x402; no account needed |
 | An MCP-capable AI agent | **MCP** | One hosted endpoint, 62 tools, credentials set per session |
 | A terminal and an agentic workflow | **CLI** | `npm i -g brickken-cli`, then one command per operation |
@@ -30,7 +31,7 @@ The REST API, the SDK, the CLI, the MCP server, and the Skill all talk to the sa
     Hosted at `https://mcp.brickken.com/mcp`. The client to use when an **AI agent** should drive the full Dapp API with just an API key.
   </Card>
   <Card title="CLI" icon="terminal" href="/cli/introduction">
-    `brickken-cli` on npm. KYC plus agentic and RAMS workflows from your terminal; no general Dapp API support.
+    `brickken-cli` on npm. Dapp API, KYC, the Sandbox/Forge BKN faucet, agentic, and RAMS workflows from your terminal.
   </Card>
   <Card title="Skill" icon="sparkles" href="/skill/introduction">
     Brickken knowledge for AI coding agents, with or without the CLI installed.
@@ -41,22 +42,23 @@ The REST API, the SDK, the CLI, the MCP server, and the Skill all talk to the sa
 
 | | REST | SDK | MCP | CLI | Skill |
 | --- | :---: | :---: | :---: | :---: | :---: |
-| Dapp API writes | Yes | Yes | Yes | **No** | Guides the agent |
-| Dapp API reads | Yes | Yes | Yes | **No** | Guides the agent |
+| Dapp API writes | Yes | Yes | Yes | Yes | Guides the agent |
+| Dapp API reads | Yes | Yes | Yes | Yes | Guides the agent |
 | KYC link creation | Yes | Yes | Yes | Yes | Guides the agent |
+| BKN faucet (Sandbox/Forge) | Yes | Yes | Yes | Yes | Guides the agent |
 | Agent getters | Yes | Yes | Yes | Yes | Guides the agent |
 | Agentic writes (ERC-8004, agent tokens) | Yes | Yes | Yes | Yes | Guides the agent |
 | RAMS writes | Yes | Yes | Yes | Yes | Guides the agent |
 | RAMS reads | Yes | Yes | Yes | Yes | Guides the agent |
-| Accepts an API key | Yes | Yes | Yes | KYC and supported reads | — |
+| Accepts an API key | Yes | Yes | Yes | Dapp API, KYC, faucet, and reads | — |
 | Pays with x402 | Yes | Yes | Yes | Yes | — |
 | Where it runs | Your code | Your code | Hosted by Brickken | Your machine | Your agent |
 
-<Warning>
-**The CLI cannot call the general legacy Dapp API.** KYC link creation is the explicit exception. It has no commands or method mappers for tokenization, STO, or their read methods. `brickken tx prepare --method newTokenization` forwards the method name, but the backend answers `API key is required for this method`.
+<Note>
+The CLI reaches the Dapp API with `BRICKKEN_API_KEY`: use `brickken tx prepare --method <method>` for tokenization, STO, and security-token transaction methods, and `brickken dapp get` for Dapp reads. Multipart file uploads such as `/patch-token-docs` remain REST-only.
 
 For Dapp API work, use the **SDK** if you write TypeScript, **MCP** if an agent is driving, or plain **HTTP** otherwise.
-</Warning>
+</Note>
 
 ## SDK or MCP for the Dapp API?
 

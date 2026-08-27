@@ -223,13 +223,13 @@ The MCP server attaches `x-api-key` to every outbound request when one is config
 
 See [MCP](/mcp/introduction) for the connection details and the full tool list.
 
-### CLI — KYC and supported reads
+### CLI — Dapp API, KYC, faucet, and supported reads
 
-<Warning>
-**The CLI cannot drive the general legacy Dapp API.** KYC link creation is the explicit supported exception. The CLI sends `x-api-key` for KYC and, when configured, for agent getters and RAMS reads/typed-data fetches. It still has no commands for tokenization, STO, or their Dapp read methods. `brickken tx prepare --method newTokenization` forwards the method name but the backend rejects it with `API key is required for this method`.
+<Note>
+The CLI sends `x-api-key` for Dapp API transaction methods, Dapp API JSON endpoints, KYC, the Sandbox/Forge BKN faucet, and, when configured, agent getters and RAMS reads/typed-data fetches. Use `brickken tx prepare --method <method>` for Dapp tokenization, STO, and security-token transactions, and `brickken dapp get` or `brickken dapp request` for JSON endpoints.
 
-For Dapp API work from an agent or a script, use **MCP** or call the REST API directly.
-</Warning>
+Relayed sends still require x402, and multipart endpoints such as `/patch-token-docs` remain REST-only.
+</Note>
 
 Set the key for KYC and authenticated reads like this:
 
@@ -238,6 +238,7 @@ export BRICKKEN_API_KEY=...
 brickken kyc create-link --email investor@example.com --need-kyc true
 brickken agent list --chain 84532 --limit 20
 brickken rams status --chain 11155111 --agent 0x… --principal 0x…
+brickken dapp get --path /get-token-info --query tokenSymbol=EXMPL
 ```
 
 ## Error reference
