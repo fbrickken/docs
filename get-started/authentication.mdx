@@ -257,6 +257,9 @@ brickken dapp get --path /get-token-info --query tokenSymbol=EXMPL
 | `Unauthorized token symbol` | Your key did not tokenize that symbol |
 | `429` with `Retry-After: 60` | Rate limited on `prepare-transactions` |
 
+These are authentication and quota errors. For request validation, preflight failures, and raw
+on-chain revert data, see [Troubleshooting](/api-reference/guides/troubleshooting).
+
 ## Security rules
 
 1. Never transmit a private key or seed phrase to any Brickken endpoint.

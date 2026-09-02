@@ -1,0 +1,188 @@
+---
+title: 'Troubleshooting'
+description: 'Decode a failed Dapp API call, from HTTP validation errors to raw on-chain revert data.'
+icon: 'stethoscope'
+---
+
+Most failures against the Dapp API come from one of a small number of causes. This page tells you
+which layer failed, what the message actually means, and what to change.
+
+## Which layer failed
+
+A `POST /prepare-transactions` call passes through three checks, in this order. Knowing which one
+rejected you narrows the cause immediately.
+
+<Steps>
+  <Step title="Request validation">
+    Field names, types, and formats. Returns `400` with a message naming the field, such as
+    `tokenAmount is required`. Nothing was read from the chain and nothing was created.
+  </Step>
+  <Step title="API preflight">
+    Balances, allowances, credits, and identity lookups the API performs itself. Returns `400`
+    with a business message, such as `Insufficient allowance to distribute dividends`. Still no
+    transaction was broadcast.
+  </Step>
+  <Step title="On-chain gas estimation">
+    The API simulates the transaction against live chain state. If the contract would revert, the
+    simulation reverts and the raw revert data is returned to you. **The transaction never left
+    Brickken** — this is a simulated revert, not a failed broadcast.
+  </Step>
+</Steps>
+
+<Note>
+  A **contract revert is always a chain-state problem** — a timestamp, an allowance, a balance, a
+  whitelist entry, or the offering's lifecycle stage. It is never a compliance verdict. The KYC
+  gate on `newInvest` runs *after* gas estimation, so if the chain state is wrong you see the
+  revert first and the friendlier KYC message never appears. Fix the chain state, then re-run; if
+  KYC is genuinely missing, you will get a plain `400` at that point.
+</Note>
+
+## Decoding a revert
+
+Revert data is a hex string. The first 4 bytes are the error selector; everything after is the
+ABI-encoded arguments, one 32-byte word each.
+
+```text
+0x3ecda1e8 000000000000000000000000c540a73f578d677dda60a5f5a1899459d6787209
+└─ selector ┘└─────────────────── argument 1: an address ──────────────────┘
+```
+
+An address argument is the last 20 bytes of its word. A small integer is the whole word read as a
+number.
+
+### Selectors you are likely to see
+
+| Selector | Error | What it means |
+| --- | --- | --- |
+| `0x3ecda1e8` | `IssuanceNotStarted(address)` | The offering's `startDate` is still in the future. The address is the issuance's issuer as recorded on-chain — it is **not** a verdict on your investor wallet. |
+| `0xffac9d14` | `IssuanceNotEnded(address,uint256)` | The offering's `endDate` has not passed yet, so it cannot be closed. |
+| `0x04c7a3b1` | `IssuanceNotInRollback(uint256)` | The issuance has not been finalised. The argument is the issuance index. |
+| `0xaafefe9b` | `UserIsNotWhitelisted(address)` | The address in the argument is not whitelisted for this token. |
+| `0x418f5699` | `InitialValueWrong(address)` | The escrow rejected the offering parameters or the caller's state for this operation. Check the offering fields you submitted and that the signer is the asset's issuer. |
+| `0x4e487b71` | `Panic(uint256)` | A Solidity panic. See below. |
+
+<Note>
+  Selectors are the first 4 bytes of the keccak-256 hash of the error's canonical signature, so an
+  overload with different arguments is a **different** selector. `IssuanceNotStarted(address)` and
+  `IssuanceNotStarted(address,uint256)` do not decode interchangeably.
+</Note>
+
+### Solidity panics
+
+A panic is not a custom error. It always arrives as selector `0x4e487b71` followed by a code word:
+
+```text
+0x4e487b71 0000000000000000000000000000000000000000000000000000000000000011
+                                                                        └─ 0x11
+```
+
+Code `0x11` is **arithmetic overflow or underflow**. On `newInvest` it almost always means the
+payment token is being asked to subtract more than the wallet holds, or to pull against an
+allowance that is zero. Check the balance and the allowance for *this* offering's escrow before
+looking anywhere else.
+
+Some reverts arrive as `execution reverted: Address: low-level delegate call failed`. That is
+OpenZeppelin's message when an inner call reverts with no reason string; the real reason has been
+swallowed by a proxy wrapper. Retry once, and if it persists send the exact request body to
+[tech@brickken.com](mailto:tech@brickken.com) so the call can be replayed directly.
+
+## Symptom to cause
+
+### Offerings
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `newSto` returns a message about `txId` and transaction values not matching | A validation error was masked by a response-shape check — usually a field name `newSto` does not accept | Use `tokenAmount` (not `totalTokensOffered`), `acceptedCoin` (not `paymentTokenSymbol`), and drop `tokenPrice`. See [`newSto`](/api-reference/endpoint/prepare-newSto). |
+| `newSto` returns `Tokenizer already has an ongoing STO` | An offering for this token is already `ONGOING` | Only one ongoing offering per token. Wait for it to end and close it, or use a different token. |
+| `newInvest` reverts with `IssuanceNotStarted` | The offering has not opened yet | Send `startDate` as explicit UTC with a `Z` suffix. A timestamp with no offset is read as UTC, so a local-time value opens the offering later than you intended. |
+| `closeOffer` reverts with `IssuanceNotEnded` | The offering's `endDate` has not passed | Wait for the window to close. There is **no** minimum offering duration, so a short test offering is a valid way to exercise the flow. |
+| `claimTokens` reverts with `IssuanceNotInRollback` | The issuance has not been finalised | Close the offering first. See the [lifecycle](#offering-lifecycle) below. |
+
+### Payments and allowances
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `newInvest` reverts with panic `0x11` | Zero allowance to this offering's escrow, or not enough payment token in the wallet | Approvals are **spender-specific** — approving one offering's escrow does not approve another's. Approve this escrow, and confirm the wallet balance covers the amount. |
+| `dividendDistribution` returns `Insufficient allowance to distribute dividends` | The allowance was granted on the wrong token, or to the wrong spender | Approve the **payment token**, with the **security-token address** as spender. See [`approve`](/api-reference/endpoint/prepare-approve). |
+| `approve` returns `Missing spender address parameter` | The field was sent as `spender` | The field is `spenderAddress`. |
+| `approve` returns `Bad to address` | A malformed `spenderAddress` | Despite the wording, this validates `spenderAddress`. There is no `to` field on this method. The usual cause is a leading or trailing space from a copied value or an environment variable, or a bad EIP-55 checksum. Trim it, or send it all lowercase. |
+| `approve` reverts with empty revert data (`"data": "0x"`) | The token refuses a non-zero to non-zero allowance change | Set the allowance to `0`, wait for that transaction to confirm, then approve the new amount. If the existing allowance is already enough, skip the approval entirely. |
+
+### Tokens and investors
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `burnToken` returns `Insufficient token balance` although the investor holds the tokens | `burnToken` burns the **signer's** balance | `investorEmail` is a bookkeeping label; it does not select whose tokens are burned. See [`burnToken`](/api-reference/endpoint/prepare-burnToken). |
+| `mintToken` succeeds but your client reports that no transaction came back | `mintToken` returns `transactions` as a **single object**, not an array | Handle both shapes. See [`mintToken`](/api-reference/endpoint/prepare-mintToken). |
+| A later call reports the token or balance does not exist, although a transaction confirmed | An earlier transaction in a multi-transaction response was never broadcast | When a response contains `whitelistTx`/`txIdWhitelist` alongside `transactions`/`txId`, sign and send **both, whitelist first**. Skipping the first leaves the second on an unusable nonce. |
+| `Investor not found`, or `get-balance-whitelist` does not recognise the investor | The investor email is the same as a tokenizer account | An email already registered as a tokenizer cannot also be onboarded as an investor. Give the investor its own email. |
+| `investorEmail cannot be the tokenizer email (index N)` | Same cause, reported at mint time | Use a distinct `investorEmail` for entry `N` of `userToMint`. |
+| `No company found with this token symbol` right after a confirmed tokenization | The next call was made before backend finalisation completed | Poll `GET /get-transaction-status` until `success`, then confirm the symbol with `GET /get-token-info` before preparing the next operation. |
+| `Mint credit limit exceeded` / `Invitation credit limit exceeded` | Two separate license counters: mint recipients, and invitations for never-seen emails | These are account limits with no public reset endpoint. Contact [support@brickken.com](mailto:support@brickken.com). |
+
+### Wallets and environments
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| A browser wallet throws a different generic JavaScript error in every wallet | A prepared transaction was passed straight to `eth_sendTransaction` | Prepared transactions are ethers-style unsigned transactions, not EIP-1193 payloads. See [Browser wallets](/api-reference/guides/browser-wallets). |
+| MetaMask returns code `4100` | `from` is an account the user has not connected | Ask the user to connect or switch to the wallet that actually holds the asset. |
+| The storefront hangs on "Loading Secure Environment", or the KYC widget spins forever | The wrong host | Use `https://<SYMBOL>.store.sandbox.brickken.com`. The KYC widget resolves the asset from the host it is served from. See [Sandbox](/get-started/sandbox). |
+| `License for user not found` | A production storefront is being used for a Sandbox asset | Same fix — Sandbox assets only resolve on Sandbox hosts. |
+| Test payment tokens obtained from a public faucet are not accepted | The Sandbox uses its own payment-token contracts | Resolve the correct token through the API. See [Sandbox](/get-started/sandbox). |
+
+## Offering lifecycle
+
+`claimTokens` is gated on finalisation, and what it does depends on whether the offering met its
+soft cap.
+
+<Steps>
+  <Step title="Create and open">
+    `newSto` schedules the offering. It opens when `startDate` passes.
+  </Step>
+  <Step title="Collect investments">
+    `newInvest` works while the offering is open. Investors need a whitelisted wallet, an allowance
+    to this offering's escrow, and the payment-token balance.
+  </Step>
+  <Step title="Wait for the end date">
+    `closeOffer` reverts with `IssuanceNotEnded` until `endDate` has passed. There is no admin
+    override and no minimum duration.
+  </Step>
+  <Step title="Finalise">
+    `closeOffer` finalises the issuance. If the soft cap was reached, the offering is successful.
+    If it was not, the issuance enters **rollback**.
+  </Step>
+  <Step title="Claim or refund">
+    `claimTokens` releases the purchased tokens on a successful issuance, and **refunds the payment
+    token** on a rolled-back one. It is the same call either way.
+  </Step>
+</Steps>
+
+<Warning>
+  An offering that ends without reaching its soft cap will refund rather than deliver tokens. To
+  demonstrate a successful claim, size the soft cap so the offering can actually reach it.
+</Warning>
+
+## Check the chain state yourself
+
+Before reporting a problem, read the state the contract is reading:
+
+| Question | Call |
+| --- | --- |
+| Is this wallet whitelisted for the token? | `GET /get-whitelist-status?tokenSymbol=…&address=…` |
+| How much has this wallet approved, and to whom? | `GET /get-allowance` |
+| What are the offering's dates, caps, and raised amount? | `GET /get-sto-by-id` |
+| Does this investor exist, and what is their compliance status? | `GET /get-investor-info?tokenSymbol=…&email=…` |
+| Which token does this asset actually take as payment? | `GET /get-tokenizer-info?tokenSymbol=…` → `paymentTokenAddress` |
+| Did my transaction land? | `GET /get-transaction-status?txId=…` |
+
+If a call still fails after checking all of the above, send the exact request body, the `txId`, and
+the timestamp to [tech@brickken.com](mailto:tech@brickken.com).
+
+<CardGroup cols={2}>
+  <Card title="Sandbox" icon="flask" href="/get-started/sandbox">
+    Test tokens, storefront hosts, and fast test investors.
+  </Card>
+  <Card title="Browser wallets" icon="wallet" href="/api-reference/guides/browser-wallets">
+    Send a prepared transaction from MetaMask or another injected wallet.
+  </Card>
+</CardGroup>

@@ -32,7 +32,8 @@
             "pages": [
               "index",
               "get-started/what-you-can-do",
-              "get-started/choose-your-surface"
+              "get-started/choose-your-surface",
+              "get-started/sandbox"
             ]
           },
           {
@@ -69,7 +70,9 @@
           {
             "group": "Guides",
             "pages": [
-              "api-reference/guides/tokenize-and-run-an-sto"
+              "api-reference/guides/tokenize-and-run-an-sto",
+              "api-reference/guides/browser-wallets",
+              "api-reference/guides/troubleshooting"
             ]
           },
           {

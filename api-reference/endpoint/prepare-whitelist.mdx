@@ -1,10 +1,85 @@
 ---
 title: 'whitelist'
+description: 'Authorize a wallet to hold a token, creating the investor record if it does not exist.'
 openapi: '/api-reference/prepare/whitelist.json POST /prepare-transactions'
 ---
 
 import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
 
 Prepares unsigned transactions for whitelisting or blacklisting users. Use `POST /prepare-transactions` with `method=whitelist`.
+
+Whitelisting is an on-chain, per-token permission. A wallet must be whitelisted before it can hold or receive that token, which makes this the standalone step to run before a transfer, a resale, or an investment — no minting required.
+
+## Fields
+
+`tokenSymbol`, `signerAddress` (the tokenizer wallet), and `userToWhitelist` are required. Each entry
+in `userToWhitelist` needs:
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `investorAddress` | yes | The wallet being authorized |
+| `investorEmail` | yes | The identity the wallet is attached to |
+| `whitelistStatus` | yes | `true` to whitelist, `false` to blacklist |
+| `needKyc` | no | Defaults to `true`. `false` creates the investor with no KYC requirement |
+
+An optional `newInvestor` object supplies profile defaults used when a record has to be created:
+`name`, `surname`, `middleName`, `secondSurname`, and `type` (defaults to `INVESTOR_PERSON`).
+
+```json
+{
+  "method": "whitelist",
+  "chainId": "aa36a7",
+  "signerAddress": "0x<tokenizer wallet>",
+  "tokenSymbol": "EXMPL",
+  "userToWhitelist": [
+    {
+      "investorAddress": "0x<investor wallet>",
+      "investorEmail": "investor@example.com",
+      "whitelistStatus": true,
+      "needKyc": false
+    }
+  ],
+  "newInvestor": { "name": "Jane", "surname": "Doe", "type": "INVESTOR_PERSON" }
+}
+```
+
+## The investor record
+
+The investor record is created during the **prepare** call, not when the transaction is mined. Two
+consequences matter:
+
+<Warning>
+  The investor's email must not already belong to a tokenizer account. When the email is already
+  registered, the call still succeeds and whitelists the address on-chain, but no investor record is
+  added — so `GET /get-balance-whitelist` and `newInvest` both go on reporting `Investor not found`.
+
+  Give every test investor its own email, separate from the account you issue with. In a real flow
+  the issuer and the investor are different parties anyway.
+</Warning>
+
+When the investor already exists but has no wallet address on file, whitelisting attaches the
+`investorAddress` you pass to that record. An investor whose stored wallet differs from the one you
+send is rejected with `Investor <email> is already associated with a different wallet address` — a
+wallet address is set once and is not silently replaced.
+
+## Preparing is not sending
+
+Preparing a whitelist only returns an unsigned transaction. The signed transaction must also be
+submitted, confirmed on-chain, and processed by the backend before the wallet counts as whitelisted.
+
+Verify the on-chain result before relying on it:
+
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-whitelist-status?tokenSymbol=EXMPL&address=0x<investor wallet>' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
+<Note>
+  Whitelisting is not KYC. Whitelisting authorizes a **wallet** for one token on-chain; KYC is an
+  off-chain compliance record for an **investor email**, shared across every asset that investor
+  touches. Whitelisting a wallet does not approve KYC, and an approved KYC does not whitelist a
+  wallet.
+</Note>
 
 <NextSignAndSend />

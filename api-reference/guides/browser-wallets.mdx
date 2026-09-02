@@ -1,0 +1,143 @@
+---
+title: 'Browser wallets'
+description: 'Send a prepared transaction from MetaMask or another injected wallet without breaking on its parameter validator.'
+icon: 'wallet'
+---
+
+`POST /prepare-transactions` returns **ethers-style unsigned transactions**. They are built to be
+passed to `wallet.signTransaction()` and submitted through
+[`POST /send-transactions`](/api-reference/endpoint/send).
+
+They are **not** EIP-1193 payloads. Handing one straight to `eth_sendTransaction` fails, and the
+way it fails is misleading.
+
+## Why it fails, and why every wallet fails differently
+
+A prepared transaction looks like this:
+
+```json
+{
+  "from": "0xfd1cbe1783ca6ed03412be9cdf7b7842f8567f81",
+  "to": "0x28d2B01854D0aBec267a3DDcad9163580E6E8604",
+  "value": "0x00",
+  "nonce": 51,
+  "chainId": 11155111,
+  "data": "0x095ea7b3...",
+  "type": 2,
+  "maxPriorityFeePerGas": "1150000",
+  "maxFeePerGas": "1209073256",
+  "gasLimit": "0xc920"
+}
+```
+
+Four things break an injected provider:
+
+- `nonce`, `chainId`, and `type` are **numbers**; EIP-1193 requires hex strings.
+- `maxPriorityFeePerGas` and `maxFeePerGas` are **decimal strings** without a `0x` prefix.
+- The gas key is `gasLimit`; `eth_sendTransaction` expects `gas`.
+- `from` is the wallet the API prepared for, which may not be the account the user connected.
+
+Each wallet validates parameters in its own code, so each one throws a different generic error from
+inside its own validator — `Internal JSON-RPC error`, `e.startsWith is not a function`, `undefined
+is not a function`. These errors are not coming from your application, and the differences between
+them mean nothing. They are all the same malformed payload.
+
+## Normalise before sending
+
+Convert the numeric fields to hex, rename `gasLimit` to `gas`, and let the wallet supply the nonce
+and the gas fees itself.
+
+```js
+const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+await window.ethereum.request({
+  method: 'wallet_switchEthereumChain',
+  params: [{ chainId: '0xaa36a7' }], // Ethereum Sepolia
+});
+
+const raw = Array.isArray(response.transactions)
+  ? response.transactions[0]
+  : response.transactions;
+
+const hex = (value) => '0x' + BigInt(value).toString(16);
+
+const txHash = await window.ethereum.request({
+  method: 'eth_sendTransaction',
+  params: [{
+    from: account,
+    to: raw.to,
+    data: raw.data,
+    value: hex(raw.value ?? 0),
+    gas: hex(raw.gasLimit),
+    // Omit nonce, chainId, type and the gas fees — the wallet fills them in.
+  }],
+});
+```
+
+<Note>
+  The `Array.isArray` check is deliberate. Most methods return `transactions` as an array, but
+  [`mintToken`](/api-reference/endpoint/prepare-mintToken) returns a single object. Handle both.
+</Note>
+
+Switch the chain before sending. A wallet pointed at a different network will either reject the
+call or, worse, prompt the user to sign against the wrong chain.
+
+## Report the hash back
+
+`eth_sendTransaction` broadcasts the transaction itself, so the wallet returns a real transaction
+hash rather than the `txId` from the prepare step. Close the loop by telling Brickken which hash
+corresponds to which prepared transaction, using the `client-broadcast` execution mode:
+
+```bash
+curl --request POST \
+  --url 'https://api.sandbox.brickken.com/send-transactions' \
+  --header 'x-api-key: YOUR_API_KEY' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "txId": "0x6eaf02ca...",
+    "txHash": "0x9ac676fc..."
+  }'
+```
+
+Prepare with `"executionMode": "client-broadcast"` when you intend to broadcast from the wallet, so
+the prepared transaction is recorded for that mode. See
+[Send Transactions](/api-reference/endpoint/send) for all three execution modes.
+
+## MetaMask error 4100
+
+`4100 — The requested account and/or method has not been authorized by the user` means `from` is
+not an account the user has connected.
+
+The transaction must be signed by the wallet that actually holds the asset — the token holder for a
+transfer, the investor for `newInvest` and `claimTokens`, the issuer for issuance operations. If
+that wallet can differ from the connected one in your application, check them and ask the user to
+switch rather than letting the wallet reject the request.
+
+<Warning>
+  If the signing wallet is a Brickken-managed wallet, no injected wallet can sign for it at all,
+  because the browser does not hold its key. Those flows must go through
+  [`POST /send-transactions`](/api-reference/endpoint/send) with a locally signed transaction
+  instead.
+</Warning>
+
+## Multi-transaction responses
+
+Some responses contain more than one transaction — `approve` when an existing allowance has to be
+reset first, and `mintToken` when a recipient still needs whitelisting. Prepared transactions carry
+sequential nonces, so they must be signed and broadcast **in order**, each one confirmed before the
+next.
+
+<Warning>
+  Broadcasting only the second transaction leaves it stranded on a nonce that will never be used,
+  and it silently never mines. If a later call reports a balance or a token that "should" exist,
+  this is usually why.
+</Warning>
+
+<CardGroup cols={2}>
+  <Card title="Send Transactions" icon="paper-plane" href="/api-reference/endpoint/send">
+    Execution modes and submission shapes.
+  </Card>
+  <Card title="Troubleshooting" icon="stethoscope" href="/api-reference/guides/troubleshooting">
+    Decode a failed call.
+  </Card>
+</CardGroup>

@@ -1,10 +1,35 @@
 ---
 title: 'burnToken'
+description: 'Burn tokens held by the signing wallet.'
 openapi: '/api-reference/prepare/burnToken.json POST /prepare-transactions'
 ---
 
 import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
 
 Prepares unsigned transactions for burning tokens from the signer's balance. Use `POST /prepare-transactions` with `method=burnToken`.
+
+Burning reduces the token's current `totalSupply`. It does not reduce the configured maximum supply.
+
+## The signer's balance is what burns
+
+The prepared transaction calls `burn(amount)`, which burns the caller's own tokens. The API checks
+the balance of `signerAddress` and returns `Insufficient token balance` when it is short.
+
+<Warning>
+  `investorEmail` is required, but it only attributes the burn in Brickken's records. It does **not**
+  select whose tokens are burned, and there is no `investorAddress` selector on this method.
+
+  A tokenizer wallet that holds none of the token therefore gets `Insufficient token balance` even
+  when the investor named in the request holds plenty.
+</Warning>
+
+## Burning tokens an investor holds
+
+The API does not expose a delegated burn. Two supported routes:
+
+- **The investor signs.** Use the investor's wallet as `signerAddress`, so the burn comes out of the balance that actually holds the tokens.
+- **Recover, then burn.** Have the investor `approve` the company wallet, use [`transferFrom`](/api-reference/endpoint/prepare-transferFrom) to move the tokens to it, then burn from the company wallet.
+
+If your application only ever acts for the issuer and can never obtain an investor signature, only the second route is available.
 
 <NextSignAndSend />

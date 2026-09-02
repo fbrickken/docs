@@ -1,17 +1,46 @@
 ---
 title: 'closeOffer'
+description: 'Finalize an offering after its end date, releasing the raise or entering rollback.'
 openapi: '/api-reference/prepare/closeOffer.json POST /prepare-transactions'
 ---
 
 import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
 
-Prepares unsigned transactions for closing an active Security Token Offering (STO). Use `POST /prepare-transactions` with `method=closeOffer`.
+Prepares unsigned transactions for finalizing a Security Token Offering (STO). Use `POST /prepare-transactions` with `method=closeOffer`.
+
+Finalizing is what unlocks [`claimTokens`](/api-reference/endpoint/prepare-claimTokens): until it runs, investors can neither receive their tokens nor be refunded.
+
+## The end date has to have passed
+
+<Warning>
+  An offering cannot be closed early. The escrow refuses to finalize an offering that has not
+  started, and refuses to finalize one whose `endDate` has not yet passed — returning
+  `0xffac9d14` `IssuanceNotEnded(address,uint256)`. There is no administrative or time override,
+  in Sandbox or in production.
+</Warning>
+
+An offering therefore runs for its full configured window. Since there is no minimum duration, give
+test offerings a short `endDate` so you can exercise close and claim quickly.
+
+## Success or rollback
+
+What finalization does depends on whether the raise reached `minRaiseUSD`, the offering's soft cap:
+
+| Outcome | Condition | Effect |
+| --- | --- | --- |
+| Successful | Amount raised reached the soft cap | The raise is withdrawn to the issuer, and investors can claim their tokens |
+| Rollback | Amount raised fell short of the soft cap | Investors are refunded their payment token instead of receiving tokens |
+
+<Note>
+  Waiting for the end date does not by itself produce a successful offering. An offering that ends
+  under its soft cap finalizes into rollback, and `claimTokens` then refunds. To demonstrate a
+  successful claim, size the soft cap so the offering can actually reach it.
+</Note>
 
 ## Notes
 
-- Only the tokenizer who created the STO can close it
-- Closing an STO before the end date will make it unavailable for new investments
-- Existing investments remain valid and tokens can still be claimed
-- This action is irreversible once the transaction is confirmed
+- Only the issuer of the offering can close it.
+- Existing investments remain valid throughout; nothing is lost by waiting for the window to end.
+- Finalization is irreversible once the transaction is confirmed.
 
 <NextSignAndSend />

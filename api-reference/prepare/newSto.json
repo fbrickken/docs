@@ -79,7 +79,7 @@
                   },
                   "tokenizerEmail": {
                     "type": "string",
-                    "description": "Required. Email of the tokenizer that owns the token. The tokenizer must not have another ongoing offering.",
+                    "description": "Required. Email of the tokenizer that owns the token. The token must not already have an ongoing offering; a second one is rejected with `Tokenizer already has an ongoing STO`.",
                     "example": "tokenizer@example.com",
                     "format": "email"
                   },
@@ -95,34 +95,34 @@
                   },
                   "tokenAmount": {
                     "type": "string",
-                    "description": "Required. Number of tokens offered in the STO.",
+                    "description": "Required. Number of tokens offered in the STO. This is the field some clients call `totalTokensOffered`, which is not accepted.",
                     "example": "1000"
                   },
                   "acceptedCoin": {
                     "type": "string",
-                    "description": "Required. Symbol of the payment token accepted for investments. It must be supported on `chainId`.",
+                    "description": "Required. Symbol of the payment token accepted for investments. It must be supported on `chainId`. This method does not accept `paymentTokenSymbol`.",
                     "example": "USDT"
                   },
                   "startDate": {
                     "type": "string",
-                    "description": "Required. STO start date. It must be in the future when the transaction is mined and earlier than `endDate`; set it at least 10 minutes after the planned send time.",
+                    "description": "Required. STO start date, as explicit UTC with a `Z` suffix or a unix timestamp. A timestamp with no offset is read as UTC. It must be in the future when the transaction is mined and earlier than `endDate`; set it at least 10 minutes after the planned send time.",
                     "example": "2026-09-01T00:00:00.000Z",
                     "format": "date-time"
                   },
                   "endDate": {
                     "type": "string",
-                    "description": "Required. STO end date.",
+                    "description": "Required. STO end date, as explicit UTC with a `Z` suffix or a unix timestamp. There is no minimum offering duration, but the offering cannot be closed before this date has passed.",
                     "example": "2026-12-31T23:59:59.000Z",
                     "format": "date-time"
                   },
                   "minRaiseUSD": {
                     "type": "string",
-                    "description": "Required. Minimum raise amount in USD.",
+                    "description": "Required. Minimum raise amount in USD. This is the offering's soft cap: an offering that ends below it enters rollback and refunds investors instead of delivering tokens.",
                     "example": "10000"
                   },
                   "maxRaiseUSD": {
                     "type": "string",
-                    "description": "Required. Maximum raise amount in USD.",
+                    "description": "Required. Maximum raise amount in USD. Token price is derived as `maxRaiseUSD / tokenAmount`; there is no `tokenPrice` input.",
                     "example": "100000"
                   },
                   "minInvestment": {

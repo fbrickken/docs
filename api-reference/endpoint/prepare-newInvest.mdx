@@ -1,5 +1,6 @@
 ---
 title: 'newInvest'
+description: 'Invest in an open Security Token Offering on behalf of a registered investor.'
 openapi: '/api-reference/prepare/newInvest.json POST /prepare-transactions'
 ---
 
@@ -7,11 +8,63 @@ import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
 
 Prepares unsigned transactions for making an investment in a Security Token Offering (STO). Use `POST /prepare-transactions` with `method=newInvest`.
 
-## Notes
+The prepared transaction is signed and sent by `investorAddress`, not by the tokenizer.
 
-- The investor must have sufficient balance of the payment token
-- Investment amount must be within the STO's min/max investment limits
-- The STO must be active and within the investment period
-- The investor address will be automatically whitelisted if required
+## Prerequisites
+
+`newInvest` prepares a single `buyToken` transaction and nothing else. It does **not** whitelist the
+investor and it does **not** return an `approve` transaction. Everything below must already be true
+before you call it.
+
+<Steps>
+  <Step title="The investor exists, with a wallet address">
+    Create the investor with [`whitelist`](/api-reference/endpoint/prepare-whitelist) or
+    [`create-kyc-link`](/api-reference/endpoint/create-kyc-link), passing the wallet address. Verify
+    with `GET /get-investor-info`: a null `walletAddress` fails the call.
+
+    The investor's email must be different from the tokenizer account's email, or no investor record
+    is created and lookups return `Investor not found`.
+  </Step>
+  <Step title="The investor's wallet is whitelisted for this token">
+    Confirm with `GET /get-whitelist-status?tokenSymbol=…&address=…`. Whitelisting is per token, and
+    the whitelist transaction must be signed, sent, and confirmed — preparing it is not enough.
+  </Step>
+  <Step title="KYC is approved, or not required">
+    `GET /get-investor-info` → `complianceStatus` must be `APPROVED` or `NOT_REQUIRED`.
+  </Step>
+  <Step title="The investor approved this offering's escrow">
+    Use [`approve`](/api-reference/endpoint/prepare-approve) with the offering's `escrowAddress` as
+    `spenderAddress`. Allowances are per spender: approving one offering's escrow grants nothing to
+    another's.
+  </Step>
+  <Step title="The investor holds enough payment token">
+    An allowance is a permission, not a balance. Both must cover the investment amount.
+  </Step>
+  <Step title="The offering is open">
+    `startDate` must have passed and `endDate` must not have. Check with `GET /get-sto-by-id`.
+  </Step>
+</Steps>
+
+The amount must also sit within the offering's `minInvestment` and `maxInvestment`.
+
+## How failures surface
+
+The whitelist, the allowance, and the balance are enforced by the contract, not by an API
+precondition check — they are caught when the API simulates the transaction. So they come back as
+**contract reverts**, not as friendly messages:
+
+| Revert | Meaning |
+| --- | --- |
+| `0x3ecda1e8` `IssuanceNotStarted(address)` | The offering has not opened yet. Check the `Z` suffix on the `startDate` you used at `newSto`. |
+| `0xaafefe9b` `UserIsNotWhitelisted(address)` | The wallet in the argument is not whitelisted for this token. |
+| Panic `0x11` | Arithmetic underflow — a zero or insufficient allowance to this escrow, or not enough payment token in the wallet. |
+
+<Note>
+  The KYC check runs after gas estimation, so if the chain state is wrong you see the revert and the
+  KYC message never appears. A revert is always a chain-state problem; KYC always comes back as a
+  plain `400`.
+</Note>
 
 <NextSignAndSend />
+
+See [Troubleshooting](/api-reference/guides/troubleshooting) for full revert decoding.

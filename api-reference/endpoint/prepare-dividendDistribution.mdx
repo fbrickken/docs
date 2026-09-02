@@ -1,5 +1,6 @@
 ---
 title: 'dividendDistribution'
+description: 'Distribute payment-token dividends to the holders of a tokenized asset.'
 openapi: '/api-reference/prepare/dividendDistribution.json POST /prepare-transactions'
 ---
 
@@ -14,6 +15,40 @@ Prepares unsigned transactions for distributing payment token dividends to holde
 - The signer must first approve the configured payment token to the STO contract. Retrieve the STO address from `GET /get-tokenizer-info?tokenSymbol=...` and use its `tokenAddress` as `spenderAddress` in the `approve` request.
 - Do not use `escrowAddress` as the approval spender for this operation. Wait for the payment-token approval to be confirmed on-chain before preparing the distribution.
 - Only the tokenizer can distribute dividends for their tokens
+
+## Which token, and which spender
+
+The allowance is read as `paymentToken.allowance(signerAddress, tokenAddress)`, where the payment
+token is resolved from the asset on-chain. Getting either half wrong produces the same error:
+
+| Approve this | With this spender |
+| --- | --- |
+| The asset's **payment token** (for example `USDT`) — not the security token | The **security token contract**, `tokenAddress` |
+
+<Warning>
+  `GET /get-token-info` returns the asset's configured payment token, not the security token's own
+  address. The address you need as `spenderAddress` is `tokenAddress` from
+  `GET /get-tokenizer-info`. Approving the security token itself, or approving to `escrowAddress`,
+  both leave the dividend allowance at zero.
+</Warning>
+
+## Preflight errors
+
+| Message | Meaning |
+| --- | --- |
+| `Insufficient allowance to distribute dividends` | The allowance from `signerAddress` to `tokenAddress`, on the payment token, is below the requested amount |
+| `Insufficient balance to distribute dividends` | The signer does not hold enough payment token |
+
+Both are returned as `400` before anything is prepared, so **nothing was broadcast** and no funds
+moved. Fix the allowance or the balance and prepare again.
+
+<Note>
+  There is no additional platform fee folded into this check: the allowance only has to cover the
+  dividend amount you requested.
+</Note>
+
+Once distributed, it can take a little while for a storefront's claim action to become available to
+holders.
 
 See [`approve`](/api-reference/endpoint/prepare-approve) for the complete allowance workflow and field mapping.
 

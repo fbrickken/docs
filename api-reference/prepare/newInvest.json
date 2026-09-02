@@ -29,7 +29,7 @@
       "post": {
         "operationId": "prepare_newInvest",
         "summary": "Prepare an STO investment",
-        "description": "Prepares the unsigned transactions that invest payment tokens in an ongoing Security Token Offering.",
+        "description": "Prepares the unsigned `buyToken` transaction that invests payment tokens in an ongoing Security Token Offering. This method prepares that transaction only: it does not whitelist the investor and it does not return an ERC-20 `approve`. The whitelist, the allowance towards the offering's escrow, and the investor's payment-token balance must all be in place beforehand, and are enforced by the contract during gas estimation rather than by an API precondition check.",
         "security": [
           {
             "apiKeyAuth": []
@@ -66,13 +66,13 @@
                   },
                   "investorAddress": {
                     "type": "string",
-                    "description": "Required. Investor wallet address. It is used as the signer and sender of the prepared transactions.",
+                    "description": "Required. Investor wallet address. It is used as the signer and sender of the prepared transaction, and must already be whitelisted for the token and hold both the payment-token balance and an allowance towards the offering's escrow.",
                     "example": "0x1111111111111111111111111111111111111111",
                     "pattern": "^0x[a-fA-F0-9]{40}$"
                   },
                   "investorEmail": {
                     "type": "string",
-                    "description": "Required. Email of the investor. The investor must already exist in Brickken and be KYC eligible.",
+                    "description": "Required. Email of the investor. The investor must already exist in Brickken with a wallet address on record, and must be KYC eligible: `complianceStatus` from `GET /get-investor-info` has to be `APPROVED` or `NOT_REQUIRED`. The email must differ from the tokenizer account's email, otherwise no investor record exists and the call returns `Investor not found`.",
                     "example": "investor@example.com",
                     "format": "email"
                   },
@@ -83,7 +83,7 @@
                   },
                   "investmentAmount": {
                     "type": "string",
-                    "description": "Required. Payment-token amount to invest. It must be at least the offering minimum investment.",
+                    "description": "Required. Payment-token amount to invest. It must fall within the offering's minimum and maximum investment. An amount above the wallet's balance, or above its allowance towards the escrow, reverts with Solidity panic `0x11`.",
                     "example": "1000"
                   },
                   "signerAddress": {

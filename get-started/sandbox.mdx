@@ -1,0 +1,194 @@
+---
+title: 'Sandbox'
+description: 'Fund a test wallet, reach the right storefront, and create a test investor without a KYC document.'
+icon: 'flask'
+---
+
+Sandbox is a full deployment of the Brickken platform on public testnets. Everything you build
+against it uses the same API, the same methods, and the same contracts as production.
+
+import Environments from '/snippets/environments.mdx';
+
+<Environments />
+
+## Sandbox is a separate world
+
+Sandbox and production have separate databases, separate API keys, and separate contract
+deployments. An asset created in Sandbox does not exist in production, and vice versa.
+
+That extends to the web surfaces, which is the single most common source of confusion:
+
+| Surface | Sandbox host |
+| --- | --- |
+| API | `https://api.sandbox.brickken.com` |
+| Dashboard | `https://dapp.sandbox.brickken.com` |
+| Asset storefront | `https://<SYMBOL>.store.sandbox.brickken.com` |
+
+<Warning>
+  The `sandbox` label comes **after** `store` — `tusc.store.sandbox.brickken.com`, not
+  `sandbox.tusc.store.brickken.com`. The production storefront will happily load its application
+  shell for any host, so a wrong URL looks like a broken page rather than a wrong environment.
+  Symptoms of using a production host for a Sandbox asset are an investor page stuck on **Loading
+  Secure Environment**, an Investor Hub that never finishes loading, and `License for user not
+  found`.
+</Warning>
+
+The KYC widget resolves which asset it is verifying for from the host it is served from. On a
+generic host that lookup returns nothing and the widget spins forever. Start the KYC flow from the
+asset's own storefront.
+
+## Networks
+
+import NetworksDapp from '/snippets/networks-dapp.mdx';
+
+<NetworksDapp />
+
+Sandbox assets in this guide use Ethereum Sepolia (`11155111` / `aa36a7`). Every wallet that signs
+a transaction needs Sepolia ETH for gas, from any public Sepolia faucet.
+
+## Payment tokens
+
+Sandbox uses its own payment-token registry. A token you obtained from an unrelated public faucet
+will not match the contract the escrow actually pulls from, which is why generic "Sepolia USDT"
+never works.
+
+### Resolve the token from the API
+
+Always let the API tell you which contract an asset takes as payment, rather than hardcoding one.
+Different assets can be configured with different payment tokens.
+
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-tokenizer-info?tokenSymbol=EXMPL' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
+`paymentTokenAddress` in the response is the authoritative value for that asset. The `newInvest`
+prepare response also carries `paymentTokenAddress` and `paymentTokenSymbol` for the specific
+offering.
+
+### Registered Sepolia payment tokens
+
+<Warning>
+  These addresses are a convenience for funding a wallet by hand. They can change — one of them
+  already has. Resolve the payment token through the API before you invest, and never hardcode an
+  address in application code.
+</Warning>
+
+| Symbol | Contract | Decimals | How to get test funds |
+| --- | --- | --- | --- |
+| `USDT` | `0x28d2B01854D0aBec267a3DDcad9163580E6E8604` | 6 | Unrestricted `mint(address,uint256)` — mint to yourself |
+| `USDC` | `0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238` | 6 | Circle's own Sepolia testnet USDC — use [Circle's faucet](https://faucet.circle.com) |
+| `BKN` | `0x97a13487f889dc770Ac925Be2d3b6c833FA7746a` | 18 | See [BKN Faucet](/api-reference/endpoint/bkn-faucet) |
+
+`USDT` is the default payment token on Sepolia when a request does not specify one, and it is the
+one you can mint freely. It is the path of least resistance for testing.
+
+<Note>
+  Sandbox `USDC` is Circle's real testnet token, not a Brickken mock, so it has a permissioned
+  minter and you cannot mint it yourself. An older mintable mock named "Circle USD" is still
+  deployed on Sepolia but is no longer registered with the API — funding a wallet with it produces
+  a balance the escrow will not accept.
+</Note>
+
+### Minting test USDT
+
+`mint(address,uint256)` takes a raw amount, so apply the token's decimals yourself. USDT has 6
+decimals, so 1,000 USDT is `1000000000`. Minting costs roughly 51,000 gas, so the wallet still
+needs a little Sepolia ETH.
+
+```js
+import { Contract, JsonRpcProvider, Wallet } from 'ethers';
+
+const provider = new JsonRpcProvider(SEPOLIA_RPC_URL);
+const wallet = new Wallet(PRIVATE_KEY, provider);
+
+const usdt = new Contract(
+  '0x28d2B01854D0aBec267a3DDcad9163580E6E8604',
+  ['function mint(address to, uint256 amount)'],
+  wallet
+);
+
+await (await usdt.mint(wallet.address, 1_000_000_000n)).wait(); // 1,000 USDT
+```
+
+<Warning>
+  Minting adds funds; it does not grant an allowance. Before investing you must also `approve` the
+  offering's escrow, and approvals are **per spender** — approving one offering's escrow does
+  nothing for another's.
+</Warning>
+
+## A test investor without a KYC document
+
+Sandbox KYC runs against a Sumsub sandbox tenant. For most testing you do not need it at all:
+create the investor with KYC not required.
+
+<Tabs>
+  <Tab title="API">
+    ```bash
+    curl --request POST \
+      --url 'https://api.sandbox.brickken.com/create-kyc-link' \
+      --header 'x-api-key: YOUR_API_KEY' \
+      --header 'Content-Type: application/json' \
+      --data '{
+        "email": "builder+sbx1@example.com",
+        "needKyc": false,
+        "walletAddress": "0x1111111111111111111111111111111111111111"
+      }'
+    ```
+  </Tab>
+  <Tab title="CLI">
+    ```bash
+    brickken kyc create-link --email builder+sbx1@example.com --need-kyc false
+    ```
+  </Tab>
+</Tabs>
+
+Confirm the result before going further:
+
+```bash
+curl --request GET \
+  --url 'https://api.sandbox.brickken.com/get-investor-info?tokenSymbol=EXMPL&email=builder%2Bsbx1@example.com' \
+  --header 'x-api-key: YOUR_API_KEY'
+```
+
+`complianceStatus` should read `NOT_REQUIRED`, and `walletAddress` should be the address you
+passed. An investor with a null `walletAddress` cannot invest.
+
+<Warning>
+  `needKyc: false` is only applied when the investor record is created. For an email that already
+  has an account the stored value wins and cannot be downgraded, so use a fresh address — a `+`
+  alias such as `builder+sbx2@example.com` is enough.
+</Warning>
+
+If you want to exercise the real KYC flow instead, a sample document image is enough to reach a
+green applicant in the Sandbox tenant; no genuine liveness check is required. Never upload real
+identity documents to a test account.
+
+<Note>
+  KYC and whitelisting are independent. KYC is an off-chain, per-investor compliance record keyed
+  by email. Whitelisting is an on-chain, per-token permission keyed by wallet address. Whitelisting
+  a wallet does not approve KYC, and passing KYC does not whitelist a wallet — an offering needs
+  both.
+</Note>
+
+## Identities are shared across the environment
+
+A Brickken account is one identity for the whole Sandbox environment, not one per asset:
+
+- Login is global.
+- KYC is global — one record per email, reused by every asset that investor touches.
+- Whitelisting is **per asset** — each token tracks its own relationship with an investor.
+
+An email already registered as a tokenizer cannot also be onboarded as an investor. Give test
+investors their own email, separate from the account you issue with; otherwise investor lookups
+return `Investor not found`.
+
+<CardGroup cols={2}>
+  <Card title="Troubleshooting" icon="stethoscope" href="/api-reference/guides/troubleshooting">
+    Decode a failed call, from validation errors to raw revert data.
+  </Card>
+  <Card title="Tokenize an asset and run an STO" icon="route" href="/api-reference/guides/tokenize-and-run-an-sto">
+    The full lifecycle, end to end.
+  </Card>
+</CardGroup>

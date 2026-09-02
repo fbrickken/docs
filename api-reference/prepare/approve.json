@@ -76,13 +76,13 @@
                   },
                   "spenderAddress": {
                     "type": "string",
-                    "description": "Required. Address allowed to spend the approved amount. For a payment-token approval before `dividendDistribution`, use the STO `tokenAddress` returned by `GET /get-tokenizer-info`; never use `escrowAddress` for that allowance.",
+                    "description": "Required. Address allowed to spend the approved amount. Allowances are per spender, so each offering's escrow must be approved separately. For an investment, use that offering's `escrowAddress`. For a payment-token approval before `dividendDistribution`, use the STO `tokenAddress` returned by `GET /get-tokenizer-info`; never use `escrowAddress` for that allowance. A malformed value is rejected with the message `Bad to address`, which validates this field despite its wording.",
                     "example": "0x2222222222222222222222222222222222222222",
                     "pattern": "^0x[a-fA-F0-9]{40}$"
                   },
                   "amount": {
                     "type": "string",
-                    "description": "Required. Amount the spender is allowed to spend.",
+                    "description": "Required. Amount the spender is allowed to spend, in whole tokens. The API applies the token's decimals, so send `100` for 100 USDT rather than the raw six-decimal value.",
                     "example": "100"
                   },
                   "investorAddress": {

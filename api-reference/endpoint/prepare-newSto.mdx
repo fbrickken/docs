@@ -1,5 +1,6 @@
 ---
 title: 'newSto'
+description: 'Launch a Security Token Offering for an existing tokenized asset.'
 openapi: '/api-reference/prepare/newSto.json POST /prepare-transactions'
 ---
 
@@ -7,10 +8,61 @@ import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
 
 Prepares unsigned transactions for creating a new Security Token Offering (STO). Use `POST /prepare-transactions` with `method=newSto`.
 
+Wait for the tokenization to succeed before preparing the STO, and use the exact token symbol available to the API key on the selected chain.
+
+## Fields
+
+All of the following are required: `method`, `chainId`, `signerAddress`, `tokenizerEmail`, `tokenSymbol`, `offeringName`, `tokenAmount`, `acceptedCoin`, `startDate`, `endDate`, `minRaiseUSD`, `maxRaiseUSD`, `minInvestment`, `maxInvestment`.
+
+Three field names are commonly guessed and are **not** accepted:
+
+| Not accepted | Use instead |
+| --- | --- |
+| `totalTokensOffered` | `tokenAmount` — the number of tokens offered |
+| `paymentTokenSymbol` | `acceptedCoin` — the payment token symbol, such as `USDT` |
+| `tokenPrice` | Nothing. The price is derived, see below. |
+
+<Warning>
+  A rejected field name currently surfaces as a message about `txId` and transaction values not
+  matching, rather than naming the field. If you see that message, check your field names against
+  the list above before anything else.
+</Warning>
+
+### There is no token price input
+
+Price is derived as `maxRaiseUSD / tokenAmount`. To offer 50,000 tokens at 1 USD each, send
+`tokenAmount: "50000"` and `maxRaiseUSD: "50000"`.
+
+`minRaiseUSD` is the offering's **soft cap**. It decides what happens at the end: an offering that
+reaches it can deliver tokens, and one that does not enters rollback and refunds investors instead.
+
 ## Timing
+
+<Warning>
+  Send `startDate` and `endDate` as explicit UTC, with a `Z` suffix — `2026-09-01T00:00:00Z` — or as
+  a unix timestamp. A timestamp with no offset is read as UTC by the server, so a local-time value
+  such as `2026-09-01T14:00:00` schedules the offering at a different moment than you intended. Every
+  `newInvest` in that gap reverts with `IssuanceNotStarted`.
+</Warning>
 
 `startDate` is validated against the timestamp of the block that mines the STO transaction. Set it at least 10 minutes after the time you expect to send the transaction, rather than from the prepare time. This buffer covers signing, broadcast, and block inclusion; an elapsed `startDate` makes the transaction revert on-chain.
 
-Wait for the tokenization to succeed before preparing the STO, and use the exact token symbol available to the API key on the selected chain.
+There is **no minimum offering duration**. A short window is a legitimate way to exercise close and
+claim in testing.
+
+## One ongoing offering per token
+
+A token can have only one offering in the `ONGOING` state. Preparing a second returns
+`Tokenizer already has an ongoing STO`.
+
+<Warning>
+  An offering cannot be cancelled, and it cannot be closed before its `endDate` has passed. A
+  mistake in `newSto` therefore blocks that token until the window elapses. Use a short `endDate`
+  on test offerings so you can close and recreate quickly.
+</Warning>
 
 <NextSignAndSend />
+
+Once the offering is live, see [`newInvest`](/api-reference/endpoint/prepare-newInvest), then
+[`closeOffer`](/api-reference/endpoint/prepare-closeOffer) and
+[`claimTokens`](/api-reference/endpoint/prepare-claimTokens) for the rest of the lifecycle.

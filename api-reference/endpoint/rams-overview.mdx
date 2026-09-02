@@ -68,6 +68,23 @@ Before an agent's `execute` can succeed, the operational chain must be set up in
 5. Grant a wallet **`ENFORCER_ROLE`** for freeze/unfreeze. The AgentMandate admin **cannot** be its own enforcer (`AdminEnforcerOverlap`).
 6. The compliance provider owner runs [`grant-principal`](/api-reference/endpoint/x402-rams-grant-principal) **before** any `grant-mandate` — an ineligible principal fails the grant pre-check.
 
+<Note>
+  The **AgentExecutor is a contract, not a wallet**. It has no private key, and nobody signs "as" the
+  executor. Calls are signed by the principal, which is the executor's owner, and the executor then
+  calls the registry on its own behalf. Requesting a private key for an executor address means the
+  model has been misread.
+</Note>
+
+On the shared Sandbox deployment, Brickken owns the ComplianceProvider and administers the
+AgentMandate registry, so steps 2 and 6 cannot be self-served. Send your principal address to
+[tech@brickken.com](mailto:tech@brickken.com) and you will be given a dedicated executor bound to
+that principal, already holding `RECORDER_ROLE`, together with the `identityRef` registered for you.
+
+<Warning>
+  Use that exact `identityRef` when granting the mandate. The AgentMandate checks it against the
+  ComplianceProvider record, and any mismatch makes the principal ineligible.
+</Warning>
+
 ## Sepolia contracts
 
 | Contract | Address |

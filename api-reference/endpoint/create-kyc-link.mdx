@@ -12,7 +12,48 @@ This operation can create an investor account and send an invitation email. The 
 
 When `needKyc` is `false`, the investor is created without a KYC requirement and `url` is `null`.
 
+## Fields
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `email` | yes | Normalized to lowercase before lookup |
+| `needKyc` | no | Defaults to `true` |
+| `walletAddress` | no | The investor's wallet, as a valid EVM address |
+| `tokenSymbol` | no | Scopes the investor to a tokenized asset |
+
+### Attach the wallet address
+
+An investor record with no wallet address cannot invest. Pass `walletAddress` here so the record is
+complete from the start:
+
+```json
+{
+  "email": "investor@example.com",
+  "needKyc": false,
+  "walletAddress": "0x1111111111111111111111111111111111111111"
+}
+```
+
+<Note>
+  A wallet address is set once. If the investor already has a different address on file, the call is
+  rejected with `Investor <email> is already associated with a different wallet address` rather than
+  overwriting it. Preparing a [`whitelist`](/api-reference/endpoint/prepare-whitelist) transaction
+  also attaches the address when the record does not yet have one.
+</Note>
+
+Confirm the result with `GET /get-investor-info`, which returns `walletAddress` and
+`complianceStatus`. A `complianceStatus` of `NOT_REQUIRED` together with a non-null `walletAddress`
+is a ready-to-invest test investor.
+
+<Warning>
+  `needKyc` is only applied when the investor record is created. For an email that already has an
+  account, the stored value wins and cannot be downgraded — use a fresh address, such as a `+` alias.
+</Warning>
+
 ## Client examples
+
+`walletAddress` and `tokenSymbol` are currently available through the API only; the CLI, MCP and SDK
+clients still accept `email` and `needKyc`.
 
 <Tabs>
   <Tab title="CLI">
@@ -52,6 +93,8 @@ const result = await bkn.kyc.createLink({
   "needKyc": true,
   "userCreated": true,
   "invitationSent": true,
+  "tokenSymbol": null,
+  "walletAddress": "0x1111111111111111111111111111111111111111",
   "url": "https://in.sumsub.com/..."
 }
 ```

@@ -1,17 +1,59 @@
 ---
 title: 'claimTokens'
+description: 'Collect tokens from a successful offering, or a refund from a rolled-back one.'
 openapi: '/api-reference/prepare/claimTokens.json POST /prepare-transactions'
 ---
 
 import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
 
-Prepares unsigned transactions for claiming tokens from a completed Security Token Offering (STO) investment. Use `POST /prepare-transactions` with `method=claimTokens`.
+Prepares unsigned transactions for claiming from a Security Token Offering (STO) investment. Use `POST /prepare-transactions` with `method=claimTokens`.
+
+The prepared transaction is signed and sent by the investor.
+
+## The offering must be finalized first
+
+<Warning>
+  `claimTokens` reverts with `0x04c7a3b1` `IssuanceNotInRollback(uint256)` while the issuance has not
+  been finalized. The argument is the issuance index, not an address.
+
+  Run [`closeOffer`](/api-reference/endpoint/prepare-closeOffer) first — and `closeOffer` itself only
+  works once the offering's `endDate` has passed.
+</Warning>
+
+## What you get back
+
+The same call does one of two things, decided at finalization:
+
+- **Successful offering** — the purchased tokens are released to the investor.
+- **Rolled-back offering** — the payment token is refunded instead, because the soft cap was not reached.
+
+## Testing a successful claim end to end
+
+Because there is no minimum offering duration, a short offering is the reliable way to exercise the
+full lifecycle:
+
+<Steps>
+  <Step title="Create a short offering with a reachable soft cap">
+    Set `minRaiseUSD` low enough that your test investment alone can meet it, and set `endDate` a few
+    minutes out. Remember the `Z` suffix on both dates.
+  </Step>
+  <Step title="Whitelist, approve and invest">
+    Invest at least the soft cap, so finalization resolves to success rather than rollback.
+  </Step>
+  <Step title="Wait for the end date">
+    There is no way to close early.
+  </Step>
+  <Step title="Close the offer">
+    Run `closeOffer` and wait for it to confirm.
+  </Step>
+  <Step title="Claim">
+    `claimTokens` now releases the tokens.
+  </Step>
+</Steps>
 
 ## Notes
 
-- Tokens can only be claimed after the STO has ended successfully
-- The investor must have participated in the STO
-- Each investor can only claim their allocated tokens once
-- The claiming process transfers the purchased tokens to the investor's address
+- The investor must have participated in the offering.
+- Each investor can only claim once.
 
 <NextSignAndSend />

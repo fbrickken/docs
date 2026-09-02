@@ -12,8 +12,11 @@ Every step below is the same three moves: **prepare** an unsigned transaction, *
   <Step title="Get an API key">
     [Request one](/get-started/request-api-key). Every call below needs `x-api-key`.
   </Step>
-  <Step title="Get your signer whitelisted">
-    Brickken must whitelist the wallet you pass as `signerAddress` before any prepare call accepts it. Ask for it in the same request as the key.
+  <Step title="Get your signer registered">
+    Brickken registers the wallet you pass as `signerAddress` in the factory. Include that address in
+    your API key request. If you did not, or you want to use a different wallet, send it to
+    [tech@brickken.com](mailto:tech@brickken.com) — there is nothing for you to do on-chain, and no
+    separate whitelist call to make.
   </Step>
   <Step title="Fund that wallet with native gas">
     You broadcast the transactions, so the signer pays the gas — Sepolia ETH here.
@@ -173,7 +176,19 @@ curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
   }'
 ```
 
-Every one of those fields is required. Dates are ISO 8601. `acceptedCoin` is a payment token symbol — `USDT`, `USDC`, or `BKN`.
+Every one of those fields is required. `acceptedCoin` is a payment token symbol — `USDT`, `USDC`, or
+`BKN` — and `minRaiseUSD` is the offering's soft cap.
+
+There is no `tokenPrice` field: the price is derived as `maxRaiseUSD / tokenAmount`. `tokenAmount`,
+not `totalTokensOffered`, is the supply on offer, and the payment token field is `acceptedCoin`, not
+`paymentTokenSymbol` — those three wrong names are the most common cause of a rejected `newSto`.
+
+<Warning>
+Send both dates as explicit UTC, with the `Z` suffix shown above, or as a unix timestamp. A timestamp
+with no offset is read as UTC by the server, so a local-time value schedules the offering at a
+different moment than you intended, and every investment in that gap reverts with
+`IssuanceNotStarted`.
+</Warning>
 
 <Warning>
 `startDate` is checked against the block timestamp when the STO transaction is mined, not when you prepare it. Set it at least 10 minutes after the time you expect to call `send-transactions`, then sign and broadcast promptly. A date that has elapsed while signing, sending, or waiting for inclusion causes the transaction to revert even when prepare and send succeeded.
@@ -205,11 +220,46 @@ curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
   }'
 ```
 
-The investor needs the payment token in their wallet, and the prepare response may contain **two** transactions — an ERC-20 `approve` followed by the investment. Sign and send both, in order.
+`newInvest` prepares the investment transaction only. Before calling it, the investor must already
+have a whitelisted wallet, the payment token in that wallet, and an allowance towards **this
+offering's** `escrowAddress` — prepared separately with
+[`approve`](/api-reference/endpoint/prepare-approve) and confirmed on-chain. Allowances are per
+spender, so an allowance granted for another offering does not count.
+
+<Warning>
+  The whitelist and the allowance are enforced by the contract, not by an API precondition check, so
+  a missing one comes back as a revert rather than a readable message. See
+  [Troubleshooting](/api-reference/guides/troubleshooting).
+</Warning>
 
 Track progress with [`GET /get-investments-by-sto-id`](/api-reference/endpoint/get-investments-by-sto) and [`GET /get-sto-balance`](/api-reference/endpoint/get-sto-balance).
 
-## 6. Let investors claim their tokens
+## 6. Close the offering
+
+An offering can only be closed once its `endDate` has passed — there is no early close and no
+override. Closing finalizes the issuance, which is what unlocks claiming.
+
+```bash
+curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
+  --header 'Content-Type: application/json' \
+  --header 'x-api-key: YOUR_BRICKKEN_API_KEY' \
+  --data '{
+    "method": "closeOffer",
+    "signerAddress": "0xYourWhitelistedWallet",
+    "chainId": "aa36a7",
+    "tokenSymbol": "EXMPL",
+    "tokenizerEmail": "issuer@example.com"
+  }'
+```
+
+<Note>
+  If the raise reached `minRaiseUSD`, the offering is successful and investors receive tokens. If it
+  did not, the issuance enters rollback and investors are refunded instead.
+</Note>
+
+## 7. Let investors claim their tokens
+
+Only after the offering has been finalized. The investor signs this one.
 
 ```bash
 curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
@@ -224,22 +274,7 @@ curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
   }'
 ```
 
-The investor signs this too.
-
-## 7. Close the offering
-
-```bash
-curl --request POST 'https://api.sandbox.brickken.com/prepare-transactions' \
-  --header 'Content-Type: application/json' \
-  --header 'x-api-key: YOUR_BRICKKEN_API_KEY' \
-  --data '{
-    "method": "closeOffer",
-    "signerAddress": "0xYourWhitelistedWallet",
-    "chainId": "aa36a7",
-    "tokenSymbol": "EXMPL",
-    "tokenizerEmail": "issuer@example.com"
-  }'
-```
+The same call refunds the payment token instead of releasing tokens when the offering rolled back.
 
 ## 8. Distribute dividends
 
@@ -266,13 +301,22 @@ Only the tokenizer can do this. Read the result with [`GET /get-dividend-distrib
 | `Unauthorized token symbol` | Your key did not tokenize that symbol |
 | `Out of credits for <method>` | Your plan's balance for that specific method is exhausted |
 | `429` + `Retry-After: 60` | Rate limited on `prepare-transactions` |
-| Prepare rejects your `signerAddress` | The wallet is not whitelisted yet |
+| Prepare rejects your `signerAddress` | It is not a valid EVM address, or not the wallet associated with that asset. An API key does not require a separately whitelisted signer address |
 | `No company found with this token symbol` | The symbol is not a successfully confirmed asset on that chain; inspect `GET /get-token-info` and use the exact symbol it lists |
 | Mint returns a uniqueness conflict | The recipient email is already the asset's tokenizer email; use a distinct `investorEmail` |
 | `newSto` reverts after send | `startDate` became past or too close by the mined block; retry with at least a 10-minute send-time buffer |
 | Send reverts on-chain | Usually an unwhitelisted recipient, an unapproved allowance, or no gas |
+| `Tokenizer already has an ongoing STO` | A token can have only one ongoing offering; wait for it to end |
+| `newInvest` reverts with `IssuanceNotStarted` | The offering has not opened. Send `startDate` as explicit UTC with a `Z` suffix |
+| `newInvest` reverts with panic `0x11` | Zero allowance to *this* offering's escrow, or not enough payment token |
+| `closeOffer` reverts with `IssuanceNotEnded` | The `endDate` has not passed. There is no early close |
+| `claimTokens` reverts with `IssuanceNotInRollback` | The offering has not been finalized; run `closeOffer` first |
+| `Insufficient allowance to distribute dividends` | Approve the **payment token**, with the **security-token address** as spender |
 
 Each write method has its own credit balance, so exhausting `mintCredits` does not block `newSto`. See [Authentication](/get-started/authentication) for plans, scoping, and the full error reference.
+
+For decoding raw revert data and the full symptom-to-cause list, see
+[Troubleshooting](/api-reference/guides/troubleshooting).
 
 ## Doing this without writing HTTP
 

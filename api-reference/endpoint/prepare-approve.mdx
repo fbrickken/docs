@@ -1,5 +1,6 @@
 ---
 title: 'approve'
+description: 'Grant an ERC-20 allowance before an investment or a dividend distribution.'
 openapi: '/api-reference/prepare/approve.json POST /prepare-transactions'
 ---
 
@@ -7,15 +8,46 @@ import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
 
 Prepares unsigned transactions for approving a spender to use tokens on behalf of the signer. Use `POST /prepare-transactions` with `method=approve`.
 
-## Approving payment tokens for dividend distributions
+## Fields
 
-Before calling `dividendDistribution`, approve the tokenized asset's configured payment token and set `spenderAddress` to the **STO token contract address**. Retrieve the required addresses with:
+- `tokenSymbol` selects the **token being approved**, not the asset it relates to.
+- `spenderAddress` is the address allowed to spend it. It is never derived — you must pass it.
+- `tokenizerAddress` is additionally required when `tokenSymbol` is a shared payment token
+  (`USDT`, `USDC`, `BKN`, `HAI`). Use `companyWalletAddress` from `GET /get-tokenizer-info`.
+- `amount` is in **whole tokens**. Send `"100"` for 100 USDT; the API applies the token's decimals
+  for you. Do not pre-multiply.
+
+<Warning>
+  A malformed `spenderAddress` is rejected with the message `Bad to address`. Despite the wording it
+  is validating `spenderAddress` — this method has no `to` field. It fires on an invalid EIP-55
+  checksum and on any leading or trailing whitespace, which is easy to pick up from a copied value or
+  an environment variable. Trim the value, or send the address in all lowercase.
+
+  Sending the field as `spender` instead of `spenderAddress` returns
+  `Missing spender address parameter`.
+</Warning>
+
+## Choosing the spender
+
+Allowances are **per spender**. An allowance granted to one contract gives nothing to another, so an
+investor who has invested in one offering still has to approve the next offering's escrow separately.
+
+| Purpose | `tokenSymbol` | `spenderAddress` |
+| --- | --- | --- |
+| Investing in an offering | the offering's payment token | `escrowAddress` |
+| Distributing dividends | the asset's payment token | `tokenAddress` (the STO token contract) |
+
+Both addresses come from the same call:
 
 ```bash
 curl --request GET \
   --url 'https://api.sandbox.brickken.com/get-tokenizer-info?tokenSymbol=EXMPL' \
   --header 'x-api-key: YOUR_API_KEY'
 ```
+
+## Approving payment tokens for dividend distributions
+
+Before calling `dividendDistribution`, approve the tokenized asset's configured payment token and set `spenderAddress` to the **STO token contract address**.
 
 Use the response fields as follows:
 
@@ -43,5 +75,31 @@ For example, if `get-tokenizer-info` returns the STO address `0x2222222222222222
 ```
 
 Sign and submit the prepared approval, then wait for its on-chain confirmation before preparing `dividendDistribution`.
+
+## Replacing an existing allowance
+
+Some payment tokens refuse to change a non-zero allowance directly. When the signer already has a
+non-zero allowance for that spender, the response therefore contains **two** transactions — a reset
+to `0` followed by the new amount — and `txId` is an array rather than a single value.
+
+```json
+{
+  "transactions": [ { "…reset to 0…" }, { "…new amount…" } ],
+  "txId": ["0xaaa…", "0xbbb…"]
+}
+```
+
+Iterate the array rather than assuming a single entry, and broadcast the transactions **in order**,
+waiting for the reset to confirm before sending the second.
+
+<Warning>
+  Both transactions are gas-estimated at prepare time, while the reset is still unmined. On a token
+  that strictly forbids a non-zero to non-zero change, that estimate can fail and the whole prepare
+  call returns a revert with empty data (`"data": "0x"`).
+
+  If it does: check the current allowance with `GET /get-allowance`. If it already covers the amount
+  you need, skip the approval entirely. Otherwise prepare and send `amount: "0"` on its own first,
+  wait for it to confirm, then prepare the new amount.
+</Warning>
 
 <NextSignAndSend />

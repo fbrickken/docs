@@ -1,5 +1,6 @@
 ---
 title: 'mintToken'
+description: 'Issue tokens directly to investors, optionally whitelisting them in the same call.'
 openapi: '/api-reference/prepare/mintToken.json POST /prepare-transactions'
 ---
 
@@ -7,11 +8,73 @@ import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
 
 Prepares unsigned transactions for minting tokens to specified users. Use `POST /prepare-transactions` with `method=mintToken`.
 
+Minting increases the token's current `totalSupply` and the recipient's balance. It does not change the configured maximum supply.
+
 ## Recipient Requirements
 
 - Every entry in `userToMint` needs a valid `investorEmail` and a positive whole-token `amount`.
-- `investorEmail` must be different from the token's `tokenizerEmail`. Issuer and investor are separate email identities, even when they use the same wallet for sandbox testing.
+- `investorEmail` must be different from the token's `tokenizerEmail`. Issuer and investor are separate email identities, even when they use the same wallet for sandbox testing. A collision returns `investorEmail cannot be the tokenizer email (index N)`, where `N` is the position in `userToMint`.
 - Use the exact symbol from a successfully confirmed `newTokenization`. A symbol that does not resolve on the supplied chain returns `No company found with this token symbol`.
-- `needWhitelist` only determines whether the recipient is whitelisted with the mint. It does not change the identity requirement.
+- `needWhitelist` only determines whether the recipient is whitelisted with the mint. It does not change the identity requirement. It defaults to `true` unless explicitly set to `false`.
+
+<Note>
+  This method is an issuance-to-investors flow. It cannot mint to the tokenizer's own identity, so
+  there is no supported payload for minting into a company treasury.
+</Note>
+
+## Response shape
+
+<Warning>
+  `mintToken` returns `transactions` as a **single object**, not an array. Every other prepare method
+  returns an array. A client that reads `transactions[0]` will conclude that no transaction came
+  back.
+</Warning>
+
+When no recipient needs whitelisting:
+
+```json
+{
+  "transactions": { "…unsigned mint transaction…" },
+  "txId": "0x…"
+}
+```
+
+When at least one recipient still needs whitelisting, the whitelist transaction is returned
+alongside it under its own keys:
+
+```json
+{
+  "whitelistTx": { "…unsigned whitelist transaction…" },
+  "txIdWhitelist": "0x…",
+  "info": { "…" },
+  "transactions": { "…unsigned mint transaction…" },
+  "txId": "0x…"
+}
+```
+
+<Warning>
+  Sign and send **both**, whitelist first, and wait for each to succeed. The two transactions carry
+  sequential nonces, so broadcasting only the mint leaves it on a nonce that will never be used: it
+  never mines, and the tokens never exist. A later `burnToken` or balance read then correctly reports
+  no balance, which looks like an indexing lag but is not one.
+</Warning>
+
+The single-transaction response omits `info`. Handle both shapes rather than assuming its presence.
+
+## Credits
+
+Two independent counters can block a mint:
+
+- **API-key mint credits**, consumed once per mint operation at send time. Exhausting them returns `Out of credits for minting`.
+- **License mint-recipient credits**, counted per distinct recipient. Exhausting them returns `Mint credit limit exceeded`.
+
+A recipient email that has never been invited also consumes an **invitation credit**; exhausting those returns `Invitation credit limit exceeded`. When more than one counter is exhausted the message lists them, for example `Insufficient license credits: mint, invitation`.
+
+None of these have a public reset endpoint. Contact [support@brickken.com](mailto:support@brickken.com) to review an account's balances.
+
+<Note>
+  The first mint to a new recipient sends both a new-shareholder invitation and a token-received
+  notification. Later mints to the same recipient send only the token-received notification.
+</Note>
 
 <NextSignAndSend />
