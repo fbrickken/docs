@@ -55,9 +55,7 @@ await window.ethereum.request({
   params: [{ chainId: '0xaa36a7' }], // Ethereum Sepolia
 });
 
-const raw = Array.isArray(response.transactions)
-  ? response.transactions[0]
-  : response.transactions;
+const [raw] = response.transactions;
 
 const hex = (value) => '0x' + BigInt(value).toString(16);
 
@@ -75,8 +73,9 @@ const txHash = await window.ethereum.request({
 ```
 
 <Note>
-  The `Array.isArray` check is deliberate. Most methods return `transactions` as an array, but
-  [`mintToken`](/api-reference/endpoint/prepare-mintToken) returns a single object. Handle both.
+  This sends the first transaction only. Some responses carry more than one — see
+  [Multi-transaction responses](#multi-transaction-responses) below — so iterate rather than
+  assuming a single entry.
 </Note>
 
 Switch the chain before sending. A wallet pointed at a different network will either reject the

@@ -4,7 +4,11 @@ openapi: 'POST /create-kyc-link'
 description: 'Create or reuse an investor and return a Sumsub verification link.'
 ---
 
+import SandboxNeedKyc from '/snippets/sandbox-needkyc.mdx';
+
 This endpoint always requires `x-api-key`. The email is normalized before lookup, and `needKyc` defaults to `true`.
+
+<SandboxNeedKyc />
 
 <Warning>
 This operation can create an investor account and send an invitation email. The returned Sumsub URL grants access to a verification flow; do not log it, commit it, or expose it to another user.
@@ -17,7 +21,7 @@ When `needKyc` is `false`, the investor is created without a KYC requirement and
 | Field | Required | Notes |
 | --- | --- | --- |
 | `email` | yes | Normalized to lowercase before lookup |
-| `needKyc` | no | Defaults to `true` |
+| `needKyc` | no | Defaults to `true`. `false` creates the investor with no KYC requirement, and is accepted in Sandbox only |
 | `walletAddress` | no | The investor's wallet, as a valid EVM address |
 | `tokenSymbol` | no | Scopes the investor to a tokenized asset |
 

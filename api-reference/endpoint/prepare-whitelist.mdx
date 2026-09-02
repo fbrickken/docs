@@ -5,6 +5,7 @@ openapi: '/api-reference/prepare/whitelist.json POST /prepare-transactions'
 ---
 
 import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
+import SandboxNeedKyc from '/snippets/sandbox-needkyc.mdx';
 
 Prepares unsigned transactions for whitelisting or blacklisting users. Use `POST /prepare-transactions` with `method=whitelist`.
 
@@ -20,7 +21,9 @@ in `userToWhitelist` needs:
 | `investorAddress` | yes | The wallet being authorized |
 | `investorEmail` | yes | The identity the wallet is attached to |
 | `whitelistStatus` | yes | `true` to whitelist, `false` to blacklist |
-| `needKyc` | no | Defaults to `true`. `false` creates the investor with no KYC requirement |
+| `needKyc` | no | Defaults to `true`. `false` creates the investor with no KYC requirement, and is accepted in Sandbox only |
+
+<SandboxNeedKyc />
 
 An optional `newInvestor` object supplies profile defaults used when a record has to be created:
 `name`, `surname`, `middleName`, `secondSurname`, and `type` (defaults to `INVESTOR_PERSON`).

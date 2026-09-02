@@ -5,6 +5,7 @@ openapi: '/api-reference/prepare/mintToken.json POST /prepare-transactions'
 ---
 
 import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
+import SandboxNeedKyc from '/snippets/sandbox-needkyc.mdx';
 
 Prepares unsigned transactions for minting tokens to specified users. Use `POST /prepare-transactions` with `method=mintToken`.
 
@@ -16,6 +17,9 @@ Minting increases the token's current `totalSupply` and the recipient's balance.
 - `investorEmail` must be different from the token's `tokenizerEmail`. Issuer and investor are separate email identities, even when they use the same wallet for sandbox testing. A collision returns `investorEmail cannot be the tokenizer email (index N)`, where `N` is the position in `userToMint`.
 - Use the exact symbol from a successfully confirmed `newTokenization`. A symbol that does not resolve on the supplied chain returns `No company found with this token symbol`.
 - `needWhitelist` only determines whether the recipient is whitelisted with the mint. It does not change the identity requirement. It defaults to `true` unless explicitly set to `false`.
+- `needKyc` on a `userToMint` entry works the same way it does on [`whitelist`](/api-reference/endpoint/prepare-whitelist), and `false` is accepted in Sandbox only.
+
+<SandboxNeedKyc />
 
 <Note>
   This method is an issuance-to-investors flow. It cannot mint to the tokenizer's own identity, so
@@ -24,42 +28,39 @@ Minting increases the token's current `totalSupply` and the recipient's balance.
 
 ## Response shape
 
-<Warning>
-  `mintToken` returns `transactions` as a **single object**, not an array. Every other prepare method
-  returns an array. A client that reads `transactions[0]` will conclude that no transaction came
-  back.
-</Warning>
+`transactions` is an array, as it is for every other prepare method. Iterate it rather than assuming
+a single entry: when a recipient still needs whitelisting, the response carries **two** transactions.
 
 When no recipient needs whitelisting:
 
 ```json
 {
-  "transactions": { "…unsigned mint transaction…" },
+  "transactions": [ { "…unsigned mint transaction…" } ],
+  "info": { "…" },
   "txId": "0x…"
 }
 ```
 
-When at least one recipient still needs whitelisting, the whitelist transaction is returned
-alongside it under its own keys:
+When at least one recipient still needs whitelisting, the whitelist transaction comes first and
+`txId` carries the matching identifiers in the same order:
 
 ```json
 {
-  "whitelistTx": { "…unsigned whitelist transaction…" },
-  "txIdWhitelist": "0x…",
+  "transactions": [
+    { "…unsigned whitelist transaction…" },
+    { "…unsigned mint transaction…" }
+  ],
   "info": { "…" },
-  "transactions": { "…unsigned mint transaction…" },
-  "txId": "0x…"
+  "txId": ["0x…", "0x…"]
 }
 ```
 
 <Warning>
-  Sign and send **both**, whitelist first, and wait for each to succeed. The two transactions carry
-  sequential nonces, so broadcasting only the mint leaves it on a nonce that will never be used: it
-  never mines, and the tokens never exist. A later `burnToken` or balance read then correctly reports
-  no balance, which looks like an indexing lag but is not one.
+  Sign and send **all of them, in order**, and wait for each to succeed before the next. The
+  transactions carry sequential nonces, so broadcasting only the mint leaves it on a nonce that will
+  never be used: it never mines, and the tokens never exist. A later `burnToken` or balance read then
+  correctly reports no balance, which looks like an indexing lag but is not one.
 </Warning>
-
-The single-transaction response omits `info`. Handle both shapes rather than assuming its presence.
 
 ## Credits
 

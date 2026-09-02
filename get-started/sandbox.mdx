@@ -118,10 +118,16 @@ await (await usdt.mint(wallet.address, 1_000_000_000n)).wait(); // 1,000 USDT
   nothing for another's.
 </Warning>
 
-## A test investor without a KYC document
+## Skip KYC while you build
 
-Sandbox KYC runs against a Sumsub sandbox tenant. For most testing you do not need it at all:
-create the investor with KYC not required.
+**Do not run the KYC flow for your test investors.** Sandbox KYC is a real Sumsub verification with
+a document upload, and it proves nothing about your integration. Create investors with
+`needKyc: false` and the compliance gate is satisfied from the start — no documents, no waiting, and
+a fresh test investor whenever you need one.
+
+`needKyc` is accepted on [`create-kyc-link`](/api-reference/endpoint/create-kyc-link), on each
+`userToWhitelist` entry of the [`whitelist`](/api-reference/endpoint/prepare-whitelist) method, and
+on each `userToMint` entry of [`mintToken`](/api-reference/endpoint/prepare-mintToken).
 
 <Tabs>
   <Tab title="API">
@@ -161,9 +167,20 @@ passed. An investor with a null `walletAddress` cannot invest.
   alias such as `builder+sbx2@example.com` is enough.
 </Warning>
 
-If you want to exercise the real KYC flow instead, a sample document image is enough to reach a
-green applicant in the Sandbox tenant; no genuine liveness check is required. Never upload real
-identity documents to a test account.
+### Rehearse the real flow once, before production
+
+`needKyc: false` is a Sandbox affordance. In production the request is rejected with
+`needKyc=false is only available in the sandbox environment`, so every real investor goes through
+Sumsub.
+
+That makes one rehearsal worthwhile before you go live — enough to see the verification screens your
+investors will meet and to confirm your polling of `complianceStatus` behaves. A sample document
+image is enough to reach a green applicant in the Sandbox tenant; no genuine liveness check is
+required.
+
+<Warning>
+  Never upload real identity documents to a test account.
+</Warning>
 
 <Note>
   KYC and whitelisting are independent. KYC is an off-chain, per-investor compliance record keyed

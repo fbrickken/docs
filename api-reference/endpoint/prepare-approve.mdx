@@ -18,10 +18,10 @@ Prepares unsigned transactions for approving a spender to use tokens on behalf o
   for you. Do not pre-multiply.
 
 <Warning>
-  A malformed `spenderAddress` is rejected with the message `Bad to address`. Despite the wording it
-  is validating `spenderAddress` — this method has no `to` field. It fires on an invalid EIP-55
-  checksum and on any leading or trailing whitespace, which is easy to pick up from a copied value or
-  an environment variable. Trim the value, or send the address in all lowercase.
+  `spenderAddress` is validated as an EVM address, and a malformed value is rejected with a
+  validation error naming that field. Two things trip it most often: an invalid EIP-55 checksum, and
+  leading or trailing whitespace picked up from a copied value or an environment variable. Trim the
+  value, or send the address in all lowercase, which always passes the checksum rule.
 
   Sending the field as `spender` instead of `spenderAddress` returns
   `Missing spender address parameter`.

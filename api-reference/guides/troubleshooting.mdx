@@ -31,10 +31,9 @@ rejected you narrows the cause immediately.
 
 <Note>
   A **contract revert is always a chain-state problem** — a timestamp, an allowance, a balance, a
-  whitelist entry, or the offering's lifecycle stage. It is never a compliance verdict. The KYC
-  gate on `newInvest` runs *after* gas estimation, so if the chain state is wrong you see the
-  revert first and the friendlier KYC message never appears. Fix the chain state, then re-run; if
-  KYC is genuinely missing, you will get a plain `400` at that point.
+  whitelist entry, or the offering's lifecycle stage. It is never a compliance verdict. Compliance
+  is checked in the preflight layer, before the chain is simulated, so a KYC problem always reaches
+  you as a plain `400` naming it rather than as revert data.
 </Note>
 
 ## Decoding a revert
@@ -105,7 +104,7 @@ swallowed by a proxy wrapper. Retry once, and if it persists send the exact requ
 | `newInvest` reverts with panic `0x11` | Zero allowance to this offering's escrow, or not enough payment token in the wallet | Approvals are **spender-specific** — approving one offering's escrow does not approve another's. Approve this escrow, and confirm the wallet balance covers the amount. |
 | `dividendDistribution` returns `Insufficient allowance to distribute dividends` | The allowance was granted on the wrong token, or to the wrong spender | Approve the **payment token**, with the **security-token address** as spender. See [`approve`](/api-reference/endpoint/prepare-approve). |
 | `approve` returns `Missing spender address parameter` | The field was sent as `spender` | The field is `spenderAddress`. |
-| `approve` returns `Bad to address` | A malformed `spenderAddress` | Despite the wording, this validates `spenderAddress`. There is no `to` field on this method. The usual cause is a leading or trailing space from a copied value or an environment variable, or a bad EIP-55 checksum. Trim it, or send it all lowercase. |
+| `approve` rejects `spenderAddress` as invalid | A malformed address | Usually a leading or trailing space from a copied value or an environment variable, or a bad EIP-55 checksum. Trim it, or send it all lowercase. |
 | `approve` reverts with empty revert data (`"data": "0x"`) | The token refuses a non-zero to non-zero allowance change | Set the allowance to `0`, wait for that transaction to confirm, then approve the new amount. If the existing allowance is already enough, skip the approval entirely. |
 
 ### Tokens and investors
@@ -113,8 +112,7 @@ swallowed by a proxy wrapper. Retry once, and if it persists send the exact requ
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | `burnToken` returns `Insufficient token balance` although the investor holds the tokens | `burnToken` burns the **signer's** balance | `investorEmail` is a bookkeeping label; it does not select whose tokens are burned. See [`burnToken`](/api-reference/endpoint/prepare-burnToken). |
-| `mintToken` succeeds but your client reports that no transaction came back | `mintToken` returns `transactions` as a **single object**, not an array | Handle both shapes. See [`mintToken`](/api-reference/endpoint/prepare-mintToken). |
-| A later call reports the token or balance does not exist, although a transaction confirmed | An earlier transaction in a multi-transaction response was never broadcast | When a response contains `whitelistTx`/`txIdWhitelist` alongside `transactions`/`txId`, sign and send **both, whitelist first**. Skipping the first leaves the second on an unusable nonce. |
+| A later call reports the token or balance does not exist, although a transaction confirmed | An earlier transaction in a multi-transaction response was never broadcast | When `transactions` holds more than one entry, sign and send **all of them, in order**. Skipping the first leaves the rest on an unusable nonce. |
 | `Investor not found`, or `get-balance-whitelist` does not recognise the investor | The investor email is the same as a tokenizer account | An email already registered as a tokenizer cannot also be onboarded as an investor. Give the investor its own email. |
 | `investorEmail cannot be the tokenizer email (index N)` | Same cause, reported at mint time | Use a distinct `investorEmail` for entry `N` of `userToMint`. |
 | `No company found with this token symbol` right after a confirmed tokenization | The next call was made before backend finalisation completed | Poll `GET /get-transaction-status` until `success`, then confirm the symbol with `GET /get-token-info` before preparing the next operation. |

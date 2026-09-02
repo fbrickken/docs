@@ -4,6 +4,8 @@ description: 'The full Dapp API lifecycle, from creating a token to distributing
 icon: 'route'
 ---
 
+import SandboxNeedKyc from '/snippets/sandbox-needkyc.mdx';
+
 Every step below is the same three moves: **prepare** an unsigned transaction, **sign** it with your whitelisted wallet, **send** it. The examples target Sepolia (`aa36a7`) on sandbox, so nothing here moves real value.
 
 ## Before you start
@@ -100,6 +102,8 @@ curl 'https://api.sandbox.brickken.com/get-token-info' \
 Every field, with the request and response schema, is on the [`newTokenization` reference](/api-reference/endpoint/prepare-newTokenization).
 
 ## 2. Whitelist your investors
+
+<SandboxNeedKyc />
 
 A security token only moves between whitelisted wallets. Whitelist before you mint or accept investment.
 

@@ -76,12 +76,6 @@
             ]
           },
           {
-            "group": "KYC",
-            "pages": [
-              "api-reference/endpoint/create-kyc-link"
-            ]
-          },
-          {
             "group": "Prepare Transactions",
             "pages": [
               "api-reference/endpoint/create",
@@ -127,6 +121,12 @@
             "group": "Token Documents",
             "pages": [
               "api-reference/endpoint/update-docs"
+            ]
+          },
+          {
+            "group": "KYC",
+            "pages": [
+              "api-reference/endpoint/create-kyc-link"
             ]
           }
         ]

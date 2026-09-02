@@ -1,0 +1,8 @@
+<Tip>
+  **Testing in Sandbox?** Pass `needKyc: false` and skip identity verification entirely. The KYC flow
+  is a Sumsub verification with document upload, not something you need to prove your integration
+  works, and every test investor you create without it is one less manual step in your loop.
+
+  Rehearse the real KYC flow once before you go live, since `needKyc: false` is rejected in
+  production with `needKyc=false is only available in the sandbox environment`.
+</Tip>

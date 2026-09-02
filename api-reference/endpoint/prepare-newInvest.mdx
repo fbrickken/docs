@@ -5,6 +5,7 @@ openapi: '/api-reference/prepare/newInvest.json POST /prepare-transactions'
 ---
 
 import NextSignAndSend from '/snippets/next-sign-and-send.mdx';
+import SandboxNeedKyc from '/snippets/sandbox-needkyc.mdx';
 
 Prepares unsigned transactions for making an investment in a Security Token Offering (STO). Use `POST /prepare-transactions` with `method=newInvest`.
 
@@ -30,7 +31,8 @@ before you call it.
     the whitelist transaction must be signed, sent, and confirmed — preparing it is not enough.
   </Step>
   <Step title="KYC is approved, or not required">
-    `GET /get-investor-info` → `complianceStatus` must be `APPROVED` or `NOT_REQUIRED`.
+    `GET /get-investor-info` → `complianceStatus` must be `APPROVED` or `NOT_REQUIRED`. In Sandbox,
+    create the investor with `needKyc: false` and it reads `NOT_REQUIRED` from the start.
   </Step>
   <Step title="The investor approved this offering's escrow">
     Use [`approve`](/api-reference/endpoint/prepare-approve) with the offering's `escrowAddress` as
@@ -47,6 +49,8 @@ before you call it.
 
 The amount must also sit within the offering's `minInvestment` and `maxInvestment`.
 
+<SandboxNeedKyc />
+
 ## How failures surface
 
 The whitelist, the allowance, and the balance are enforced by the contract, not by an API
@@ -60,9 +64,9 @@ precondition check — they are caught when the API simulates the transaction. S
 | Panic `0x11` | Arithmetic underflow — a zero or insufficient allowance to this escrow, or not enough payment token in the wallet. |
 
 <Note>
-  The KYC check runs after gas estimation, so if the chain state is wrong you see the revert and the
-  KYC message never appears. A revert is always a chain-state problem; KYC always comes back as a
-  plain `400`.
+  Compliance is checked before the chain is simulated, so a KYC-ineligible investor always gets a
+  plain `400` naming the compliance problem. A revert therefore always means chain state — a
+  timestamp, a whitelist entry, an allowance, or a balance — never a compliance verdict.
 </Note>
 
 <NextSignAndSend />

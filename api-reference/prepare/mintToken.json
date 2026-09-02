@@ -169,9 +169,11 @@
                   "type": "object",
                   "properties": {
                     "transactions": {
-                      "type": "object",
-                      "description": "The unsigned mint transaction. Unlike other prepare methods, this is returned as a single object, not as an array.",
-                      "properties": {
+                      "type": "array",
+                      "description": "Unsigned transactions ready for signing, in the order they must be broadcast. Contains two entries when a recipient still needs whitelisting: the whitelist transaction first, then the mint.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
                           "from": {
                             "type": "string",
                             "description": "Sender address",
@@ -223,15 +225,7 @@
                             "example": "0xccef"
                           }
                         }
-                    },
-                    "whitelistTx": {
-                      "type": "object",
-                      "description": "Present only when at least one recipient still needs whitelisting. Unsigned whitelist transaction, with the same shape as `transactions`. Sign and send it before the mint transaction: the two carry sequential nonces, so a mint broadcast on its own never mines."
-                    },
-                    "txIdWhitelist": {
-                      "type": "string",
-                      "description": "Present only alongside `whitelistTx`. Identifier of the whitelist transaction, for /send-transactions. This is NOT a blockchain transaction hash.",
-                      "example": "0x8f2c1d5e9a7b3c4d6e8f0a2b4c6d8e0f2a4b6c8d0e2f4a6b8c0d2e4f6a8b0c2d"
+                      }
                     },
                     "info": {
                       "type": "object",
@@ -255,8 +249,11 @@
                       }
                     },
                     "txId": {
-                      "type": "string",
-                      "description": "Unique identifier for this transaction batch (required for /send-transactions). This is NOT a blockchain transaction hash.",
+                      "description": "Identifier for this prepared transaction, required by /send-transactions. When `transactions` holds more than one entry this is an array of identifiers in the same order. This is NOT a blockchain transaction hash.",
+                      "oneOf": [
+                        { "type": "string" },
+                        { "type": "array", "items": { "type": "string" } }
+                      ],
                       "example": "0x46adea7bdf49c576a760102e0d6bc9ecd650b3998588cd3d7f576a7973426aad"
                     }
                   },
