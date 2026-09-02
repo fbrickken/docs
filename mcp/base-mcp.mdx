@@ -1,0 +1,103 @@
+---
+title: 'Base MCP'
+description: 'Drive the Brickken Agentic API from an agent using a Base Account wallet, with Brickken carrying the signing and the gas.'
+icon: 'wallet'
+---
+
+## Overview
+
+The [Base MCP server](https://github.com/base/base-mcp) connects an MCP-compatible agent to a **Base
+Account** and its wallet. With it in the session, an agent pays for Brickken's Agentic API straight
+from that wallet — no separate key management, and no funding a bare EOA just to call the API.
+
+This is the one setup where Brickken can also carry the blockchain side of the operation for you.
+
+<Note>
+  This page describes the Base MCP path specifically. Everywhere else in the Agentic API you sign the
+  prepared transaction yourself and the operation price is split evenly between prepare and send —
+  see [Agentic API](/api-reference/endpoint/agentic-methods-x402) and
+  [Pricing](/api-reference/endpoint/agentic-pricing).
+</Note>
+
+## What the Base Account gives the agent
+
+Brickken's Agentic API is paid with x402: every call answers `402 Payment Required` with a
+`PAYMENT-REQUIRED` header, and the caller signs a payment authorization to proceed. The Base Account
+wallet is what signs those authorizations.
+
+That means an agent running with Base MCP can:
+
+- Pay for Brickken operations from an account the user already controls.
+- Do it without the agent holding a raw private key of its own.
+- Settle in USDC on Base, the asset the Agentic API quotes.
+
+## Relayed execution
+
+In this setup the prepared transaction does not have to be signed by you. Passing
+`executionMode: "brickken-relayed"` hands the blockchain side to Brickken's relayer:
+
+- Brickken signs the prepared transaction and pays the native gas.
+- Your wallet authorizes only the **x402 payment**.
+- You need no EOA, no ETH on Base, and no on-chain signing of your own.
+
+Because Brickken carries the signing and the gas, the charge falls differently: **preparing is free**
+and the full operation price is collected on `POST /send-transactions`.
+
+```json
+{
+  "chainId": "8453",
+  "executionMode": "brickken-relayed",
+  "name": "Research Agent",
+  "description": "On-chain AI research agent",
+  "image": "https://example.com/agent.png",
+  "serviceName": "A2A",
+  "serviceEndpoint": "https://agent.example/.well-known/agent-card.json",
+  "x402Support": true,
+  "active": true
+}
+```
+
+Omit `signerAddress` — and `agentWallet` for `agent_create_token` — since Brickken supplies the
+signer. Prepare returns a single `txId`, exactly one transaction, and `x402Requirements`.
+
+<Warning>
+  Relayed execution is only available through this path. A direct
+  [`POST /prepare-transactions`](/api-reference/endpoint/create) call, the
+  [Brickken MCP server](/mcp/introduction), the [SDK](/sdk/introduction) and the
+  [CLI](/cli/introduction) all sign client-side.
+</Warning>
+
+### What relaying does not cover
+
+Relaying works where Brickken's relayer is allowed to be the sender. It is not available for
+operations whose contract checks `msg.sender` against a specific on-chain role — most of
+[RAMS](/api-reference/endpoint/rams-overview) falls in that group, since `signerAddress` has to be
+the role holder itself.
+
+<Note>
+  Because Brickken's relayer is the sender, it is also the on-chain owner of anything the operation
+  creates. Use
+  [`agentTransferOwnership`](/api-reference/endpoint/x402-agent-transfer-ownership) when you want to
+  take custody of an agent identity yourself.
+</Note>
+
+## Payment behaviour
+
+x402 payment is **mandatory** on a relayed send — an API key is not accepted there, because the whole
+point is that Brickken is doing the signing on your behalf.
+
+The payment is reserved when you pay and **settles only after the operation confirms on-chain**. If
+the operation reverts, or its authorization expires before confirmation, the reservation is released.
+
+Poll with [`GET /get-transaction-status`](/api-reference/endpoint/get-transaction-status) using the
+`txId`. A `status: "pending"` means the operation was broadcast but not yet confirmed — do not pay or
+resubmit the same `txId`.
+
+<CardGroup cols={2}>
+  <Card title="Brickken MCP" icon="plug" href="/mcp/introduction">
+    The hosted Brickken MCP server, for API-key and client-signed x402 workflows.
+  </Card>
+  <Card title="Agentic API" icon="robot" href="/api-reference/endpoint/agentic-methods-x402">
+    The x402 surface, its methods, and the payment handshake.
+  </Card>
+</CardGroup>

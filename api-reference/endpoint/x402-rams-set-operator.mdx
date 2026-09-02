@@ -14,7 +14,6 @@ Maps to `ramsSetOperator`. Set `approved` to `true` or `false`.
 | --- | --- |
 | Direct | `signerAddress` is the principal |
 | Principal signature | Any sender supplies `signature` and matching [typed-data](/api-reference/endpoint/rams-typed-data) `deadline` |
-| Brickken relayed | Principal signature plus `executionMode: "brickken-relayed"` |
 
 An operator may directly revoke or extend mandates, but EIP-712 lifecycle signatures always recover to the principal.
 

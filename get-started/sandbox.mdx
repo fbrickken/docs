@@ -77,46 +77,21 @@ offering.
 
 | Symbol | Contract | Decimals | How to get test funds |
 | --- | --- | --- | --- |
-| `USDT` | `0x28d2B01854D0aBec267a3DDcad9163580E6E8604` | 6 | Unrestricted `mint(address,uint256)` — mint to yourself |
-| `USDC` | `0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238` | 6 | Circle's own Sepolia testnet USDC — use [Circle's faucet](https://faucet.circle.com) |
-| `BKN` | `0x97a13487f889dc770Ac925Be2d3b6c833FA7746a` | 18 | See [BKN Faucet](/api-reference/endpoint/bkn-faucet) |
+| `USDT` | `0x28d2B01854D0aBec267a3DDcad9163580E6E8604` | 6 | Request test funds from [tech@brickken.com](mailto:tech@brickken.com) |
+| `USDC` | `0xb10cE8e28aEb1ae27b968Fb3bfed2FD7dd52daCb` | 6 | Request test funds from [tech@brickken.com](mailto:tech@brickken.com) |
+| `BKN` | `0x2458fB1620ff84019d73216fF20aA1F82Bc8E4CC` | 18 | See [BKN Faucet](/api-reference/endpoint/bkn-faucet) |
 
-`USDT` is the default payment token on Sepolia when a request does not specify one, and it is the
-one you can mint freely. It is the path of least resistance for testing.
+`USDT` is the default payment token on Sepolia when a request does not specify one, so it is the
+path of least resistance for testing.
+
+To fund a test wallet, send the wallet address and the amount you need to
+[tech@brickken.com](mailto:tech@brickken.com).
 
 <Note>
-  Sandbox `USDC` is Circle's real testnet token, not a Brickken mock, so it has a permissioned
-  minter and you cannot mint it yourself. An older mintable mock named "Circle USD" is still
-  deployed on Sepolia but is no longer registered with the API — funding a wallet with it produces
-  a balance the escrow will not accept.
+  These are the payment tokens of the Dapp API. The Agentic API settles x402 payments on a separate
+  rail with its own assets, including Circle's own testnet USDC, so an address you see quoted for an
+  x402 payment is not interchangeable with the ones above.
 </Note>
-
-### Minting test USDT
-
-`mint(address,uint256)` takes a raw amount, so apply the token's decimals yourself. USDT has 6
-decimals, so 1,000 USDT is `1000000000`. Minting costs roughly 51,000 gas, so the wallet still
-needs a little Sepolia ETH.
-
-```js
-import { Contract, JsonRpcProvider, Wallet } from 'ethers';
-
-const provider = new JsonRpcProvider(SEPOLIA_RPC_URL);
-const wallet = new Wallet(PRIVATE_KEY, provider);
-
-const usdt = new Contract(
-  '0x28d2B01854D0aBec267a3DDcad9163580E6E8604',
-  ['function mint(address to, uint256 amount)'],
-  wallet
-);
-
-await (await usdt.mint(wallet.address, 1_000_000_000n)).wait(); // 1,000 USDT
-```
-
-<Warning>
-  Minting adds funds; it does not grant an allowance. Before investing you must also `approve` the
-  offering's escrow, and approvals are **per spender** — approving one offering's escrow does
-  nothing for another's.
-</Warning>
 
 ## Skip KYC while you build
 

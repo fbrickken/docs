@@ -10,7 +10,7 @@ import NextPayAndSend from '/snippets/next-pay-and-send.mdx';
 
 Prepares an unsigned ERC-721 `safeTransferFrom` that moves an ERC-8004 agent identity from Brickken custody to a wallet you control. This facade maps to `agentTransferOwnership`.
 
-By default Brickken is the on-chain owner of the agent identity in `brickken-relayed` mode. Call this method only when you explicitly want to take custody of the identity NFT yourself.
+Call this method when you want to move custody of the identity NFT to another owner.
 
 ## Authentication
 
@@ -23,18 +23,17 @@ By default Brickken is the on-chain owner of the agent identity in `brickken-rel
 | `chainId` | Yes | Target chain ID. Use `8453` for Base mainnet or `84532` for Base Sepolia. Decimal and hex values are accepted. |
 | `newOwner` | Yes | Wallet that will receive the ERC-8004 identity NFT. Must differ from the current owner. |
 | `agentUuid` or `agentId` | Usually | Agent identifier from registration or the on-chain agent ID. The agent must already be registered on-chain. |
-| `executionMode` | No | `brickken-relayed` (recommended) or `client-signed`. |
-| `signerAddress` | Conditional | Required in `client-signed` mode (must be the current owner). Omit in `brickken-relayed` mode. |
+| `executionMode` | No | `client-signed` (default) or `client-broadcast`. |
+| `signerAddress` | Yes | Wallet that signs the prepared transaction. It must be the current owner. |
 
 ## Response
 
 Returns a prepared unsigned transaction and `txId`. Submit it to `POST /send-transactions` and complete the x402 payment.
 
-- **`brickken-relayed`:** send `{ txId, transactions }`; Brickken signs and broadcasts.
 - **`client-signed`:** sign the transaction locally as the current owner, then send `{ txId, signedTransactions }`.
 
 <Warning>
-Ownership transfer is **irreversible** and is different from [`agentSetWallet`](/api-reference/endpoint/x402-agent-set-wallet), which only changes the operational wallet. After the identity leaves Brickken custody, Brickken's relayer can no longer perform owner-only operations for that agent unless ownership is transferred back.
+Ownership transfer is **irreversible** and is different from [`agentSetWallet`](/api-reference/endpoint/x402-agent-set-wallet), which only changes the operational wallet. After the transfer, only the new owner can perform owner-only operations for that agent.
 </Warning>
 
 <NextPayAndSend />

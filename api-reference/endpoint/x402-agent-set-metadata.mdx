@@ -19,8 +19,8 @@ Prepares unsigned transactions for writing an ERC-8004 agent metadata key/value 
 | Parameter | Required | Description |
 | --- | --- | --- |
 | `chainId` | Yes | Target chain ID. Use `8453` for Base mainnet or `84532` for Base Sepolia. Decimal and hex values are accepted. |
-| `executionMode` | No | `brickken-relayed` (recommended) or `client-signed`. |
-| `signerAddress` | Conditional | Required in `client-signed` mode. Omit in `brickken-relayed` mode (Brickken signs). |
+| `executionMode` | No | `client-signed` (default) or `client-broadcast`. |
+| `signerAddress` | Yes | Wallet that signs the prepared transaction. |
 | `agentUuid` or `agentId` | Usually | Agent identifier from registration or the on-chain agent ID. |
 | `metadataKey` | No | Metadata key to write. |
 | `metadataValue` | No | Metadata value to write. |
@@ -28,6 +28,6 @@ Prepares unsigned transactions for writing an ERC-8004 agent metadata key/value 
 
 ## Response
 
-Returns prepared unsigned transactions and `txId`. Submit it to `POST /send-transactions`: in `brickken-relayed` mode send `{ txId, transactions }` and pay via x402 (Brickken signs and broadcasts); in `client-signed` mode sign the transaction locally and send `{ txId, signedTransactions }`.
+Returns prepared unsigned transactions and `txId`. Sign the transaction locally and submit it to `POST /send-transactions` as `{ txId, signedTransactions }`.
 
 <NextPayAndSend />

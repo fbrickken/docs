@@ -14,7 +14,6 @@ Maps to `ramsGrantMandate`. The principal must already be eligible with the sele
 | --- | --- | --- |
 | Direct | Principal | Omit `signature`; the transaction encodes `0x` |
 | Principal signature | Any transaction sender/relayer | `signature` and the same `deadline` returned by [Typed Data](/api-reference/endpoint/rams-typed-data) |
-| Brickken relayed | Brickken relayer | Principal signature fields plus `executionMode: "brickken-relayed"` |
 
 ## Key fields
 
@@ -22,6 +21,6 @@ Maps to `ramsGrantMandate`. The principal must already be eligible with the sele
 
 ## Response
 
-Returns `txId`, unsigned `transactions`, and `info` with the contract, authorization `mode`, and EIP-712 nonce when applicable. Relayed preparation is free; client-controlled modes split the x402 charge between prepare and send.
+Returns `txId`, unsigned `transactions`, and `info` with the contract, authorization `mode`, and EIP-712 nonce when applicable. The x402 charge is split evenly between prepare and send.
 
 <NextPayAndSend />

@@ -19,8 +19,8 @@ Prepares unsigned transactions for registering an ERC-8004 agent identity. This 
 | Parameter | Required | Description |
 | --- | --- | --- |
 | `chainId` | Yes | Target chain ID. Use `8453` for Base mainnet or `84532` for Base Sepolia tests. Decimal and hex values are accepted. |
-| `executionMode` | No | `brickken-relayed` (recommended) or `client-signed`. |
-| `signerAddress` | Conditional | Required in `client-signed` mode. Omit in `brickken-relayed` mode (Brickken signs). |
+| `executionMode` | No | `client-signed` (default) or `client-broadcast`. |
+| `signerAddress` | Yes | Wallet that signs the prepared transaction. |
 | `name` | Yes | Human-readable agent name. |
 | `description` | Yes | Agent description. |
 | `image` | Yes | Publicly reachable HTTPS URL for the agent logo. Local paths and omitted values are rejected. |

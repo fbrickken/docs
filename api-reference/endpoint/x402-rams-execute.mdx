@@ -9,7 +9,7 @@ import NextPayAndSend from '/snippets/next-pay-and-send.mdx';
 Maps to `ramsExecute`. `signerAddress` must be the mandate's **agent**.
 
 <Warning>
-This operation is always client-signed. `brickken-relayed` is rejected because the AgentExecutor checks `msg.sender` against the mandated agent.
+This operation is always client-signed: the AgentExecutor checks `msg.sender` against the mandated agent.
 </Warning>
 
 ## Input modes

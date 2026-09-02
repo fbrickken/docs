@@ -19,16 +19,16 @@ Prepares unsigned transactions for deploying an agent-owned ERC-20 token. This f
 | Parameter | Required | Description |
 | --- | --- | --- |
 | `chainId` | Yes | Target chain ID. Use `8453` for Base mainnet or `84532` for Base Sepolia. Decimal and hex values are accepted. |
-| `executionMode` | No | `brickken-relayed` (recommended) or `client-signed`. |
-| `signerAddress` | Conditional | Required in `client-signed` mode. Omit in `brickken-relayed` mode (Brickken signs). |
+| `executionMode` | No | `client-signed` (default) or `client-broadcast`. |
+| `signerAddress` | Yes | Wallet that signs the prepared transaction. |
 | `name` | Yes | Token name. |
 | `symbol` | Yes | Token symbol. |
-| `agentWallet` | Conditional | Agent wallet that owns or operates the token (client-signed). Omit in `brickken-relayed` mode — Brickken's relayer becomes the owner. |
+| `agentWallet` | Yes | Agent wallet that owns or operates the token. |
 | `premint` | No | Optional initial token amount. |
 | `decimals` | No | Optional token decimals. |
 
 ## Response
 
-Returns prepared unsigned transactions and `txId`. Submit it to `POST /send-transactions`: in `brickken-relayed` mode send `{ txId, transactions }` and pay via x402 (Brickken signs and broadcasts); in `client-signed` mode sign the transaction locally and send `{ txId, signedTransactions }`. If executed, use the deployment receipt to recover the deployed `tokenAddress`. In `brickken-relayed` mode, omit `agentWallet` — Brickken's relayer becomes the token owner.
+Returns prepared unsigned transactions and `txId`. Sign the transaction locally and submit it to `POST /send-transactions` as `{ txId, signedTransactions }`. Use the deployment receipt to recover the deployed `tokenAddress`.
 
 <NextPayAndSend />

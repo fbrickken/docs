@@ -9,16 +9,16 @@ The Agentic API is the x402-paid surface for Brickken agentic methods. It covers
 
 Every agentic operation is a two-step flow:
 
-1. **Prepare** the unsigned transaction. In `brickken-relayed` mode this is free; in `client-signed` and `client-broadcast` modes the operation charge is split between prepare and send.
+1. **Prepare** the unsigned transaction. Half of the operation charge is collected here.
 2. **Send** the operation. The remaining x402 USDC charge is collected here.
 
-There are two execution modes for the send step:
+You always sign the blockchain transaction yourself. There are two execution modes for the send step:
 
-- **`brickken-relayed` (recommended).** You do **not** sign the blockchain transaction. You pay the x402 charge and Brickken's relayer signs, pays native gas, and broadcasts the operation on your behalf. No EOA, no native gas, no on-chain signing on your side.
-- **`client-signed`.** You sign the prepared blockchain transaction with your own private key and submit the signed payload. Use this when you want to retain full self-custody of signing.
+- **`client-signed` (default).** You sign the prepared transaction with your own private key and submit the signed payload; Brickken broadcasts it.
+- **`client-broadcast`.** You sign and broadcast the transaction yourself, then confirm it with `txHash`.
 
 <Warning>
-Never send a private key to the Brickken API. In `brickken-relayed` mode you only sign the x402 payment authorization. In `client-signed` mode, blockchain signing belongs in your client, the [Brickken CLI](/cli/introduction), or an MCP session you control.
+Never send a private key to the Brickken API. Blockchain signing belongs in your client, the [Brickken CLI](/cli/introduction), or an MCP session you control.
 </Warning>
 
 ## Base URLs
@@ -42,10 +42,10 @@ The Agentic API runs on Base, with Base Sepolia for tests. The x402 payment rail
 
 For x402, omit `x-api-key`.
 
-1. **Prepare.** Call a semantic facade such as `POST /x402/agent/register`, or `POST /prepare-transactions` with an eligible `method`. For relayed execution, pass `executionMode: "brickken-relayed"`. The response returns `txId`, `transactions`, and an `x402Requirements` quote. Relayed preparation is free; client-controlled preparation may return a payment challenge for its share of the operation price.
+1. **Prepare.** Call a semantic facade such as `POST /x402/agent/register`, or `POST /prepare-transactions` with an eligible `method`. The response returns `txId`, `transactions`, and an `x402Requirements` quote, and may return a payment challenge for its half of the operation price.
 2. **Send.** Call `POST /send-transactions`. The API responds `402 Payment Required` with a `PAYMENT-REQUIRED` header describing the exact chain, asset, transfer method, amount, recipient, and timeout.
 3. **Sign the x402 payment locally** with the payer's private key, and retry the send with `X-PAYMENT`.
-4. Brickken verifies the payment, then (in `brickken-relayed` mode) signs and broadcasts the operation. The settlement is returned in the `PAYMENT-RESPONSE` header.
+4. Brickken verifies the payment and processes the operation. The settlement is returned in the `PAYMENT-RESPONSE` header.
 
 <Note>
 For an agent facade, a `400` before a `txId` is request validation, not an insufficient x402 balance. x402 payment begins only when `send-transactions` returns `402 Payment Required`.
@@ -58,7 +58,7 @@ X-PAYMENT: BASE64_ENCODED_X402_PAYMENT_PAYLOAD
 Always read the chain, asset, transfer method, amount, recipient, and timeout from `PAYMENT-REQUIRED`; do not hardcode them client-side. On Base Sepolia the payment rail uses **EIP-3009**, whose signed authorization carries the transfer, so no separate ERC-20 `approve` transaction is required. On Base mainnet, follow the advertised token's transfer method.
 
 <Note>
-In `brickken-relayed` mode, x402 payment is **mandatory** — API keys are not accepted on the send step. The payment is reserved when you pay and only **settled after the operation confirms on-chain**. If the operation reverts or its authorization expires before confirmation, the reservation is released.
+The payment is reserved when you pay and only **settled after the operation confirms on-chain**. If the operation reverts or its authorization expires before confirmation, the reservation is released.
 </Note>
 
 ## Base Sepolia Testing
@@ -85,18 +85,18 @@ Production (`https://api.brickken.com`) is the public x402scan target. Sandbox e
 
 ## Prepare and Send
 
-The semantic `/x402/...` routes prepare unsigned transactions and do not submit transactions on-chain by themselves. Agent and token facades default to relayed execution, so their prepare is free; pass a client-controlled mode when you want to sign locally and expect the mode's prepare charge.
+The semantic `/x402/...` routes prepare unsigned transactions and do not submit transactions on-chain by themselves. Preparing is a paid call: it collects half of the operation price, unless you send a valid `x-api-key` instead.
 
-### Brickken-relayed (recommended)
+### Preparing an operation
 
-Prepare with `executionMode: "brickken-relayed"` and omit `signerAddress` — Brickken supplies its relayer as the signer.
+Pass `signerAddress` as the wallet that will sign the prepared transaction.
 
 ```bash
 curl --request POST 'https://api.sandbox.brickken.com/x402/agent/register' \
   --header 'Content-Type: application/json' \
   --data '{
     "chainId": "84532",
-    "executionMode": "brickken-relayed",
+    "signerAddress": "0x1111111111111111111111111111111111111111",
     "name": "Research Agent",
     "description": "Autonomous research agent",
     "image": "https://example.com/agent.png",
@@ -146,11 +146,11 @@ curl --request POST 'https://api.sandbox.brickken.com/send-transactions' \
   }'
 ```
 
-`send-transactions` x402 batches must contain only x402-eligible prepared transactions, and all transactions in the batch must be on the same chain. A `brickken-relayed` send carries a single `txId` and exactly one transaction.
+`send-transactions` x402 batches must contain only x402-eligible prepared transactions, and all transactions in the batch must be on the same chain.
 
 ### Polling
 
-For relayed operations, poll status with `GET /get-transaction-status` by `txId` or operation hash — no API key is required for `brickken-relayed` transactions. A response of `status: "pending"` means the operation was broadcast but not yet confirmed; do not pay or resubmit the same `txId` again. Brickken's reconciliation settles after confirmation or releases the payment on revert or authorization expiry.
+Poll status with `GET /get-transaction-status` by `txId` or operation hash. A response of `status: "pending"` means the operation was broadcast but not yet confirmed; do not pay or resubmit the same `txId` again. Brickken's reconciliation settles after confirmation or releases the payment on revert or authorization expiry.
 
 ## Endpoint Groups
 
@@ -179,7 +179,7 @@ Advanced clients can also call `POST /prepare-transactions` directly and pass `m
 The ten RAMS methods (`ramsGrantMandate`, `ramsRevokeMandate`, `ramsExtendMandate`, `ramsSetOperator`, `ramsExecute`, `ramsSetExecutorAction`, `ramsFreezeAgent`, `ramsUnfreezeAgent`, `ramsGrantPrincipal`, and `ramsRevokePrincipal`) are also eligible through `/prepare-transactions`. Their semantic facades live under `/x402/rams/*`.
 
 <Note>
-RAMS facades default to `client-signed`, unlike ERC-8004 facades that inject the relayed mode by default. Only the four signature-authorized lifecycle calls may use `brickken-relayed`; see [RAMS Mandates](/api-reference/endpoint/rams-overview).
+RAMS facades are client-signed; see [RAMS Mandates](/api-reference/endpoint/rams-overview).
 </Note>
 
 ## Common Fields
@@ -188,8 +188,8 @@ RAMS facades default to `client-signed`, unlike ERC-8004 facades that inject the
 | --- | --- | --- | --- |
 | `chainId` | string | Yes | Target chain ID. Use `8453` for Base mainnet or `84532` for Base Sepolia. Decimal and hex values are accepted. |
 | `method` | string | Yes for `/prepare-transactions`; no for `/x402/...` facades | One of the eligible method names. Facades derive it from the path. |
-| `executionMode` | string | No | `brickken-relayed` (Brickken signs and broadcasts), `client-signed` (you sign, Brickken broadcasts), or `client-broadcast` (you sign and broadcast, then confirm with `txHash`). **The default depends on the entry point**: `/x402/agent/*` and `/x402/token/*` inject `brickken-relayed`; `/x402/rams/*` and a direct `/prepare-transactions` call default to `client-signed` — which is a **paid** prepare. See [Pricing](/api-reference/endpoint/agentic-pricing). |
-| `signerAddress` | string | Conditional | Required in `client-signed` mode. Omit in `brickken-relayed` mode — Brickken sets its relayer as the signer. |
+| `executionMode` | string | No | `client-signed` (default: you sign, Brickken broadcasts) or `client-broadcast` (you sign and broadcast, then confirm with `txHash`). Either way the operation price is split evenly between prepare and send. See [Pricing](/api-reference/endpoint/agentic-pricing). |
+| `signerAddress` | string | Yes | Wallet that signs the prepared transaction. |
 | `gasLimit` | string or number | No | Optional explicit gas limit (client-signed). |
 | `nonce` | number | No | Optional explicit nonce when managing nonces manually (client-signed). |
 

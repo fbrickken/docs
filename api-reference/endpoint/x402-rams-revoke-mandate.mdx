@@ -14,7 +14,6 @@ Maps to `ramsRevokeMandate` for an `agent` / `principal` pair.
 | --- | --- |
 | Direct | `signerAddress` is the principal or an approved operator |
 | Principal signature | Any sender supplies `signature` and the matching `deadline` from [Typed Data](/api-reference/endpoint/rams-typed-data) |
-| Brickken relayed | Principal signature plus `executionMode: "brickken-relayed"` |
 
 The API preflights that the mandate is active. The response contains the unsigned transaction and `info.mode`; pay x402 only when sending.
 

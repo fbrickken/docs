@@ -53,7 +53,7 @@ Use this mode for the [Dapp API](/api-reference/introduction). An API key alone 
 
 ### x402 private-key mode
 
-Use this mode for the [Agentic API](/api-reference/endpoint/agentic-methods-x402). The private key is used by the MCP server session to sign x402 payments and, in `client-signed` mode, to sign the prepared blockchain transaction. In `brickken-relayed` mode the key signs only the x402 payment — Brickken's relayer signs and broadcasts the operation.
+Use this mode for the [Agentic API](/api-reference/endpoint/agentic-methods-x402). The private key is used by the MCP server session to sign x402 payments and to sign the prepared blockchain transaction.
 
 ```json
 {
@@ -133,7 +133,7 @@ These tools map to ERC-8004 and agent-token methods on Base. Relayed preparation
 | Agent-owned tokens | `agent_create_token`, `agent_mint_token`, `agent_burn_token`, `agent_transfer_token`, `agent_transfer_from_token`, `agent_approve_token` |
 | RAMS mandates (ERC-8226) | `rams_grant_mandate`, `rams_revoke_mandate`, `rams_extend_mandate`, `rams_set_operator`, `rams_execute`, `rams_set_executor_action`, `rams_freeze_agent`, `rams_unfreeze_agent`, `rams_grant_principal`, `rams_revoke_principal`, `rams_get_mandate`, `rams_can_execute`, `rams_get_status`, `rams_check_compliance`, `rams_get_executor_action`, `rams_get_typed_data` |
 
-RAMS reads and typed-data fetches use the session's API key when one is set, and fall back to x402 when it is not. `rams_get_typed_data` auto-signs when the session has a private key matching the principal; otherwise it returns the envelope with a warning for external signing. Pass the result's signature and deadline to the matching lifecycle tool with `executionMode: "brickken-relayed"`. The other six RAMS writes are client-signed only.
+RAMS reads and typed-data fetches use the session's API key when one is set, and fall back to x402 when it is not. `rams_get_typed_data` auto-signs when the session has a private key matching the principal; otherwise it returns the envelope with a warning for external signing. Pass the result's signature and deadline to the matching lifecycle tool.
 
 The three agent getters follow the same API-key-or-x402 rule and cost `0.000001 USDC` per x402 call. In x402 mode, `get_agents` requires `chainId` and `ownerWalletAddress`, and the payment signer must match that owner. Detail and transaction reads accept `agentUuid`, or `agentId` together with `chainId`; x402 payment is checked against the stored owner wallet.
 
@@ -143,14 +143,21 @@ Use `chainId: "8453"` for Base mainnet and `chainId: "84532"` for Base Sepolia t
 
 ## Execution modes
 
-Agentic tools support both modes:
+Agentic tools support both client-controlled modes:
 
-- **`brickken-relayed` (recommended).** Pass `executionMode: "brickken-relayed"` and omit `signerAddress` (and `agentWallet` for `agent_create_token`). Brickken's relayer signs and broadcasts; the session only authorizes the x402 payment. Prepare returns a single `txId`, exactly one transaction, and `x402Requirements`.
-- **`client-signed`.** Provide `signerAddress`; the session signs the prepared transaction locally before sending.
+- **`client-signed` (default).** Provide `signerAddress`; the session signs the prepared transaction locally, and Brickken broadcasts it.
+- **`client-broadcast`.** The session signs and broadcasts the transaction itself, then confirms it with `txHash`.
+
+Either way the operation price is split evenly between prepare and send. See [Pricing](/api-reference/endpoint/agentic-pricing).
+
+<Note>
+  If you would rather not hold an EOA or native gas at all, see [Base MCP](/mcp/base-mcp), where the
+  wallet only authorizes the payment and Brickken carries the signing and the gas.
+</Note>
 
 ## Example
 
-Configure x402 mode, then register an agent on Base Sepolia in relayed mode:
+Configure x402 mode, then register an agent on Base Sepolia:
 
 ```json
 {
@@ -163,7 +170,7 @@ Configure x402 mode, then register an agent on Base Sepolia in relayed mode:
 ```json
 {
   "chainId": "84532",
-  "executionMode": "brickken-relayed",
+  "signerAddress": "0x1111111111111111111111111111111111111111",
   "name": "Research Agent",
   "description": "On-chain AI research agent",
   "image": "https://example.com/agent.png",

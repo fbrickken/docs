@@ -14,8 +14,7 @@ Maps to `ramsExtendMandate`. `newValidUntil` must exceed the current expiry; ext
 | --- | --- |
 | Direct | `signerAddress` is the principal or an approved operator |
 | Principal signature | Any sender supplies `signature` and the same `deadline` returned by [Typed Data](/api-reference/endpoint/rams-typed-data) |
-| Brickken relayed | Principal signature plus `executionMode: "brickken-relayed"` |
 
-Relayed preparation is free. Client-controlled modes charge the prepare share before the remaining x402 fee is collected when the prepared transaction is sent.
+Preparing charges half of the operation price; the rest is collected when the prepared transaction is sent.
 
 <NextPayAndSend />

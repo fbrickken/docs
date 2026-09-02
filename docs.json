@@ -213,7 +213,8 @@
           {
             "group": "Server Documentation",
             "pages": [
-              "mcp/introduction"
+              "mcp/introduction",
+              "mcp/base-mcp"
             ]
           }
         ]

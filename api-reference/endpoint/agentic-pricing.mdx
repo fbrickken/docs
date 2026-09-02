@@ -1,49 +1,43 @@
 ---
 title: 'Pricing'
-description: 'Execution-mode-aware x402 pricing for Agentic API prepare and send operations.'
+description: 'x402 pricing for Agentic API prepare and send operations.'
 ---
 
 import RamsSepoliaNote from '/snippets/rams-sepolia-note.mdx';
 
-**Where the charge falls depends on `executionMode`, not on the method.**
+**Every operation is priced once and charged twice.** Half is collected when you prepare it, half when you send it, in both `client-signed` and `client-broadcast` mode. Calling `POST /prepare-transactions` directly is therefore **a paid call**.
 
-| `executionMode` | Prepare | Send |
-| --- | --- | --- |
-| `brickken-relayed` | free | the full price below |
-| `client-signed` *(default)* | half the price | half the price |
-| `client-broadcast` | half the price | half the price |
+A valid `x-api-key` is accepted instead of paying, on both steps.
 
-Only relaying gives you a free prepare, because there Brickken carries the signing and the gas. In the two client-controlled modes the same total is split evenly across the two calls — so calling `POST /prepare-transactions` directly, which defaults to `client-signed`, **is a paid call**.
+Prices are in USDC on **Base mainnet**, and the figures below are the **total** for the operation.
 
-Prices are in USDC on **Base mainnet**.
-
-| Method | Prepare | Send |
-| --- | ---: | ---: |
-| `agentRegister` | `0.00` | `0.98` |
-| `agentSetURI` | `0.00` | `0.48` |
-| `agentSetMetadata` | `0.00` | `0.48` |
-| `agentSetWallet` | `0.00` | `0.98` |
-| `agentTransferOwnership` | `0.00` | `0.98` |
-| `agentGiveFeedback` | `0.00` | `0.24` |
-| `agentRevokeFeedback` | `0.00` | `0.24` |
-| `agentAppendFeedbackResponse` | `0.00` | `0.48` |
-| `agentCreateToken` | `0.00` | `9.98` |
-| `agentMintToken` | `0.00` | `0.10` |
-| `agentBurnToken` | `0.00` | `0.04` |
-| `agentTransferToken` | `0.00` | `0.04` |
-| `agentTransferFromToken` | `0.00` | `0.04` |
-| `agentApproveToken` | `0.00` | `0.02` |
-| `newTokenizedAgent` (legacy registration alias) | `0.00` | `2.98` |
-| `ramsGrantMandate` | `0.00` | `0.98` |
-| `ramsRevokeMandate` | `0.00` | `0.48` |
-| `ramsExtendMandate` | `0.00` | `0.48` |
-| `ramsSetOperator` | `0.00` | `0.48` |
-| `ramsExecute` | `0.00` | `0.24` |
-| `ramsSetExecutorAction` | `0.00` | `0.48` |
-| `ramsFreezeAgent` | `0.00` | `0.48` |
-| `ramsUnfreezeAgent` | `0.00` | `0.48` |
-| `ramsGrantPrincipal` | `0.00` | `0.98` |
-| `ramsRevokePrincipal` | `0.00` | `0.48` |
+| Method | Total |
+| --- | ---: |
+| `agentRegister` | `0.98` |
+| `agentSetURI` | `0.48` |
+| `agentSetMetadata` | `0.48` |
+| `agentSetWallet` | `0.98` |
+| `agentTransferOwnership` | `0.98` |
+| `agentGiveFeedback` | `0.24` |
+| `agentRevokeFeedback` | `0.24` |
+| `agentAppendFeedbackResponse` | `0.48` |
+| `agentCreateToken` | `9.98` |
+| `agentMintToken` | `0.10` |
+| `agentBurnToken` | `0.04` |
+| `agentTransferToken` | `0.04` |
+| `agentTransferFromToken` | `0.04` |
+| `agentApproveToken` | `0.02` |
+| `newTokenizedAgent` (legacy registration alias) | `2.98` |
+| `ramsGrantMandate` | `0.98` |
+| `ramsRevokeMandate` | `0.48` |
+| `ramsExtendMandate` | `0.48` |
+| `ramsSetOperator` | `0.48` |
+| `ramsExecute` | `0.24` |
+| `ramsSetExecutorAction` | `0.48` |
+| `ramsFreezeAgent` | `0.48` |
+| `ramsUnfreezeAgent` | `0.48` |
+| `ramsGrantPrincipal` | `0.98` |
+| `ramsRevokePrincipal` | `0.48` |
 
 ## Agent getter pricing
 
@@ -53,7 +47,9 @@ Prices are in USDC on **Base mainnet**.
 
 <RamsSepoliaNote />
 
-RAMS is where the split above bites hardest, because **only four of the ten writes can be relayed at all** — `grant-mandate`, `revoke-mandate`, `extend-mandate`, and `set-operator`, and only with a principal EIP-712 signature. The other six check `msg.sender` against an on-chain role, so they are always client-controlled and therefore always split. `ramsGrantMandate` costs `0.49` + `0.49` rather than `0.00` + `0.98`.
+RAMS writes are priced the same way as the rest: the total splits evenly across prepare and send, so `ramsGrantMandate` costs `0.49` at prepare and `0.49` at send.
+
+Four of the ten writes — `grant-mandate`, `revoke-mandate`, `extend-mandate`, and `set-operator` — are authorized by a principal EIP-712 signature, so the wallet that sends the transaction does not have to be the principal. The other six check `msg.sender` against an on-chain role, so `signerAddress` must be the role holder itself.
 
 The nine RAMS read and typed-data endpoints (`GET /rams/*`) are priced at the cheaper `GETTER` tier, not the transaction tier. They are also callable with an `x-api-key` instead of paying.
 
@@ -61,7 +57,7 @@ The nine RAMS read and typed-data endpoints (`GET /rams/*`) are priced at the ch
 Prices are resolved from a database table at request time and environment defaults are only a fallback, so the `GETTER` amount is not fixed here. Read it from the `PAYMENT-REQUIRED` header of the `402` response.
 </Note>
 
-Sandbox, Base Sepolia, and other non-production environments use a flat reference price of `0.01` USDC per write send. Agent getters keep their separate `0.000001 USDC` price.
+Sandbox, Base Sepolia, and other non-production environments use a flat reference price of `0.01` USDC per write. Agent getters keep their separate `0.000001 USDC` price.
 
 <Note>
 The exact amount, asset, and chain are always quoted in the `PAYMENT-REQUIRED` header of the `402` response (and previewed in the prepare response's `x402Requirements`). Read them from there rather than hardcoding the table above.

@@ -3,16 +3,14 @@
 Preparing does not touch the chain. The response gives you `txId`, the unsigned `transactions`, and an `x402Requirements` quote.
 
 <Steps>
-  <Step title="Choose who signs and who broadcasts">
-    `brickken-relayed` — the relayer signs, broadcasts, and pays the native gas; you sign only the payment, and **prepare is free**. `client-signed` (the default) — you sign, Brickken broadcasts. `client-broadcast` — you sign and broadcast yourself, then confirm with `txHash`. **Both client-controlled modes charge half the price at prepare and half at send.**
-
-    Relaying is available on the ERC-8004 and agent-token facades and on the four signed RAMS lifecycle calls. The other RAMS operations check `msg.sender` against an on-chain role, so they reject it.
+  <Step title="Choose who broadcasts">
+    `client-signed` (the default) — you sign the transaction and Brickken broadcasts it. `client-broadcast` — you sign and broadcast it yourself, then confirm with `txHash`. Either way the operation price is split evenly: half at prepare, half at send.
   </Step>
   <Step title="Submit it and settle the payment">
-    `POST` to [`/send-transactions`](/api-reference/endpoint/send). The first attempt answers `402 Payment Required`; read `PAYMENT-REQUIRED`, sign the payment locally, and retry with `X-PAYMENT`. An API key is accepted here only in `client-signed` mode.
+    `POST` to [`/send-transactions`](/api-reference/endpoint/send). The first attempt answers `402 Payment Required`; read `PAYMENT-REQUIRED`, sign the payment locally, and retry with `X-PAYMENT`. An `x-api-key` is accepted here instead of paying.
   </Step>
   <Step title="Poll until it confirms">
-    Call [`GET /get-transaction-status`](/api-reference/endpoint/get-transaction-status) with the `txId`. Relayed transactions need no credential to poll. Your payment settles only after the operation confirms, and is released if it reverts.
+    Call [`GET /get-transaction-status`](/api-reference/endpoint/get-transaction-status) with the `txId`. Your payment settles only after the operation confirms, and is released if it reverts.
   </Step>
 </Steps>
 
