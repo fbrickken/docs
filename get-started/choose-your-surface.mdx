@@ -14,7 +14,7 @@ The REST API, the SDK, the CLI, the MCP server, and the Skill all talk to the sa
 | An API key and any other stack | **REST API** | Plain HTTP reaches everything |
 | An API key and a terminal | **CLI** | Dapp transaction methods and JSON endpoints from your terminal |
 | A funded wallet and no API key | **SDK**, **Agentic API**, or **CLI** | Pay per call with x402; no account needed |
-| An MCP-capable AI agent | **MCP** | One hosted endpoint, 62 tools, credentials set per session |
+| An MCP-capable AI agent | **MCP** | One hosted endpoint, 62 tools, connected with your API key |
 | A terminal and an agentic workflow | **CLI** | `npm i -g brickken-cli`, then one command per operation |
 | An AI coding agent, any of the above | **Skill** | Teaches the agent when to use which surface |
 
@@ -31,7 +31,7 @@ The REST API, the SDK, the CLI, the MCP server, and the Skill all talk to the sa
     Hosted at `https://mcp.brickken.com/mcp`. The client to use when an **AI agent** should drive the full Dapp API with just an API key.
   </Card>
   <Card title="CLI" icon="terminal" href="/cli/introduction">
-    `brickken-cli` on npm. Dapp API, KYC, the Sandbox/Forge BKN faucet, agentic, and RAMS workflows from your terminal.
+    `brickken-cli` on npm. Dapp API, KYC, the Sandbox BKN faucet, agentic, and RAMS workflows from your terminal.
   </Card>
   <Card title="Skill" icon="sparkles" href="/skill/introduction">
     Brickken knowledge for AI coding agents, with or without the CLI installed.
@@ -45,13 +45,13 @@ The REST API, the SDK, the CLI, the MCP server, and the Skill all talk to the sa
 | Dapp API writes | Yes | Yes | Yes | Yes | Guides the agent |
 | Dapp API reads | Yes | Yes | Yes | Yes | Guides the agent |
 | KYC link creation | Yes | Yes | Yes | Yes | Guides the agent |
-| BKN faucet (Sandbox/Forge) | Yes | Yes | Yes | Yes | Guides the agent |
+| BKN faucet (Sandbox) | Yes | Yes | Yes | Yes | Guides the agent |
 | Agent getters | Yes | Yes | Yes | Yes | Guides the agent |
 | Agentic writes (ERC-8004, agent tokens) | Yes | Yes | Yes | Yes | Guides the agent |
 | RAMS writes | Yes | Yes | Yes | Yes | Guides the agent |
 | RAMS reads | Yes | Yes | Yes | Yes | Guides the agent |
 | Accepts an API key | Yes | Yes | Yes | Dapp API, KYC, faucet, and reads | — |
-| Pays with x402 | Yes | Yes | Yes | Yes | — |
+| Pays with x402 | Yes | Yes | No | Yes | — |
 | Where it runs | Your code | Your code | Hosted by Brickken | Your machine | Your agent |
 
 <Note>
@@ -65,11 +65,11 @@ For Dapp API work, use the **SDK** if you write TypeScript, **MCP** if an agent 
 Both reach the full Dapp API with nothing but an API key. The difference is who is holding the credential:
 
 - **SDK** — your code holds the key, and every call is typed and testable. Illegal credential combinations fail locally, before a request leaves your process.
-- **MCP** — a hosted endpoint holds nothing; each session supplies its own credentials, and an AI agent picks the tools. Right when the driver is an agent rather than a program you wrote.
+- **MCP** — a hosted endpoint you connect to with your API key; it never receives a private key, and an AI agent picks the tools while you sign writes in your own wallet. Right when the driver is an agent rather than a program you wrote.
 
 ## Same backend, same rules
 
-Whichever surface you pick, the mechanics are identical: writes are **prepared** into unsigned transactions, **signed**, then **sent**; preparing a relayed agentic operation is free and only the send costs anything; and your private key never leaves your machine.
+Whichever surface you pick, the mechanics are identical: writes are **prepared** into unsigned transactions, **signed**, then **sent**, and your private key never leaves your machine.
 
 The surface changes the ergonomics, not the semantics — you can prepare with the CLI and send with curl.
 
