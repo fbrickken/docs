@@ -1,6 +1,6 @@
 ---
 title: 'MCP'
-description: 'Hosted Brickken MCP server for API-key and x402 workflows in MCP-compatible AI agents.'
+description: 'Hosted Brickken MCP server for MCP-compatible AI agents, authenticated with your Brickken API key.'
 ---
 
 ## Overview
@@ -20,79 +20,101 @@ It is **the client to reach for when an AI agent should drive the full Dapp API 
 
 ## Connect
 
-Use the hosted endpoint in Claude Code, Codex, or any MCP-compatible client. Note the `/mcp` path — the bare host serves an HTML landing page, not the MCP endpoint:
+The hosted endpoint requires your Brickken API key. Send it in the `x-api-key` header or as `Authorization: Bearer <api-key>`. Don't have a key yet? [Request an API key](/get-started/request-api-key).
 
-```json
-{
-  "mcpServers": {
-    "brickken": {
-      "url": "https://mcp.brickken.com/mcp"
+Note the `/mcp` path — the bare host serves an HTML landing page, not the MCP endpoint.
+
+<Tabs>
+  <Tab title="Claude Code">
+    ```bash
+    claude mcp add --transport http brickken https://mcp.brickken.com/mcp --header "x-api-key: YOUR_API_KEY"
+    ```
+  </Tab>
+
+  <Tab title="Cursor and JSON clients">
+    ```json
+    {
+      "mcpServers": {
+        "brickken": {
+          "url": "https://mcp.brickken.com/mcp",
+          "headers": {
+            "x-api-key": "YOUR_API_KEY"
+          }
+        }
+      }
     }
-  }
-}
+    ```
+  </Tab>
+
+  <Tab title="Claude Desktop (stdio)">
+    Clients that only support stdio servers connect through `mcp-remote`, with the key kept in `env`:
+
+    ```json
+    {
+      "mcpServers": {
+        "brickken": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "mcp-remote",
+            "https://mcp.brickken.com/mcp",
+            "--header",
+            "x-api-key:${BRICKKEN_API_KEY}"
+          ],
+          "env": {
+            "BRICKKEN_API_KEY": "YOUR_API_KEY"
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+A request without a key is rejected with `401`:
+
+```text
+Authentication required. Connect your Brickken sandbox or production account: send your Brickken API key in the x-api-key header or as Authorization: Bearer <api-key>.
 ```
 
-## Session Configuration
+A key that Brickken does not recognize is rejected with `401` and `The API key is not valid for Brickken sandbox or production.`
 
-Every MCP session is isolated. Configure credentials at runtime with the `configure` tool, then use `get_config` to verify the active environment without exposing secrets.
+## Environment
+
+Your API key selects the environment: a sandbox key opens a sandbox connection, a production key a production connection. Sandbox and production keys are separate — see [Authentication](/get-started/authentication).
+
+Use `configure` to switch `env` between `sandbox` and `production`. The switch is accepted only when your connected API key is valid in the target environment. The API key itself always comes from the connection header; `configure` does not accept `apiKey` or `privateKey`.
 
 <Note>
-A session is **either API-key mode or x402 mode, never both.** When an API key is configured the server attaches `x-api-key` to every outbound request and never falls back to the payment handshake. Set `"apiKey": ""` to force x402.
+Brickken never receives a private key. The MCP server never signs: every write tool returns unsigned transactions, you sign them in your own wallet, and only signed transactions are sent to Brickken.
 </Note>
-
-### API-key mode
-
-Use this mode for the [Dapp API](/api-reference/introduction). An API key alone unlocks every Dapp tool listed below — KYC, tokenization, STOs, security-token operations, and all reads.
-
-```json
-{
-  "env": "production",
-  "apiKey": "YOUR_BRICKKEN_API_KEY"
-}
-```
-
-### x402 private-key mode
-
-Use this mode for the [Agentic API](/api-reference/endpoint/agentic-methods-x402). The private key is used by the MCP server session to sign x402 payments and to sign the prepared blockchain transaction.
-
-```json
-{
-  "env": "production",
-  "privateKey": "0xYOUR_PRIVATE_KEY",
-  "apiKey": ""
-}
-```
-
-For sandbox:
-
-```json
-{
-  "env": "sandbox",
-  "privateKey": "0xYOUR_PRIVATE_KEY",
-  "apiKey": ""
-}
-```
-
-A custom `baseUrl` overrides the selected environment when needed. An internal `forge` environment exists for Brickken pre-release QA — contact `tech@brickken.com` for its base URL.
-
-<Warning>
-Only configure a private key in MCP clients and environments you trust. `get_config` returns booleans such as `hasApiKey` and `hasPrivateKey`, never the secret values.
-
-The hosted `/mcp` endpoint has no inbound authentication — anyone can connect, and every credential is supplied by the client per session. Nothing you configure is persisted server-side beyond the life of your session.
-</Warning>
 
 ## Configuration Tools
 
 | Tool | Purpose |
 | --- | --- |
-| `configure` | Set `env`, `baseUrl`, `apiKey`, or `privateKey` for the current session. |
-| `get_config` | Inspect `env`, `baseUrl`, `hasApiKey`, and `hasPrivateKey`. |
+| `configure` | Switch `env` (`sandbox` or `production`) for the current connection. |
+| `get_config` | Inspect `env`, `baseUrl`, `hasApiKey`, and `hasPrivateKey`. It returns booleans, never secret values, and `hasPrivateKey` is always `false`. |
+
+## Signing writes
+
+Every write tool follows the same flow:
+
+1. **Prepare.** The tool returns unsigned transactions and a `txId`.
+2. **Sign in your wallet.** Sign each prepared transaction with the wallet named in `signerAddress`. When the response includes a `signUrl`, open it to sign in your wallet.
+3. **Send.** Call `send_transactions` with the `txId` and the signed transaction(s). Brickken broadcasts them.
+
+The signer wallet must be whitelisted by Brickken before a write is accepted, and your key can only act on token symbols it tokenized. See [Authentication](/get-started/authentication).
+
+<Tip>
+For automatic signing or x402 pay-per-call without an API key, keep your private key in your **local** environment (`BRICKKEN_PRIVATE_KEY`) and use the [CLI](/cli/introduction) or the [SDK](/sdk/introduction). Both sign on your machine; the key never leaves it.
+</Tip>
 
 ## BKN Faucet Tool
 
-`request_bkn_faucet` requests 100 BKN on Ethereum Sepolia in Sandbox or Forge. Pass `recipientAddress` and optionally `idempotencyKey` as UUID v4. The tool generates and returns a UUID when omitted; use a new UUID for a new claim and the same UUID for a retry of that claim.
+`request_bkn_faucet` requests 100 BKN on Ethereum Sepolia in Sandbox. Pass `recipientAddress` and optionally `idempotencyKey` as UUID v4. The tool generates and returns a UUID when omitted; use a new UUID for a new claim and the same UUID for a retry of that claim.
 
-Configure exactly one credential. An API key has 10 dedicated lifetime faucet claims, separate from `mintToken`; private-key mode pays 0.01 USDC through x402. Recipients have a 24-hour cooldown. The public bearer/reCAPTCHA flow is not exposed.
+Each API key has 10 dedicated lifetime faucet claims, separate from `mintToken`. Recipients have a 24-hour cooldown. The public bearer/reCAPTCHA flow is not exposed.
 
 ## Transaction Tools
 
@@ -104,9 +126,7 @@ Configure exactly one credential. An API key has 10 dedicated lifetime faucet cl
 
 ## Dapp API Tools
 
-These tools map to API-key authenticated dapp flows and are **the legacy Dapp API, reachable from an AI agent with nothing but an API key**. If a private key is also configured, write tools can prepare, sign, and send automatically; otherwise they return prepared transactions for external signing.
-
-The signer wallet must be whitelisted by Brickken before a write is accepted, and your key can only act on token symbols it tokenized. See [Authentication](/get-started/authentication).
+These tools map to API-key authenticated dapp flows and are **the legacy Dapp API, reachable from an AI agent with nothing but an API key**. Write tools return prepared, unsigned transactions; sign them in your wallet and submit them with `send_transactions`.
 
 | Area | Tools |
 | --- | --- |
@@ -121,9 +141,9 @@ The signer wallet must be whitelisted by Brickken before a write is accepted, an
 `create_kyc_link` can create an investor account and send an invitation email. Treat its returned Sumsub URL as sensitive.
 </Warning>
 
-## x402 Agent Tools
+## Agent Tools
 
-These tools map to ERC-8004 and agent-token methods on Base. Relayed preparation is free; client-controlled modes split the x402 USDC payment between prepare and send.
+These tools map to ERC-8004 and agent-token methods on Base, plus RAMS mandates. They use your API key and follow the same prepare → sign in your wallet → send flow.
 
 | Area | Tools |
 | --- | --- |
@@ -133,22 +153,17 @@ These tools map to ERC-8004 and agent-token methods on Base. Relayed preparation
 | Agent-owned tokens | `agent_create_token`, `agent_mint_token`, `agent_burn_token`, `agent_transfer_token`, `agent_transfer_from_token`, `agent_approve_token` |
 | RAMS mandates (ERC-8226) | `rams_grant_mandate`, `rams_revoke_mandate`, `rams_extend_mandate`, `rams_set_operator`, `rams_execute`, `rams_set_executor_action`, `rams_freeze_agent`, `rams_unfreeze_agent`, `rams_grant_principal`, `rams_revoke_principal`, `rams_get_mandate`, `rams_can_execute`, `rams_get_status`, `rams_check_compliance`, `rams_get_executor_action`, `rams_get_typed_data` |
 
-RAMS reads and typed-data fetches use the session's API key when one is set, and fall back to x402 when it is not. `rams_get_typed_data` auto-signs when the session has a private key matching the principal; otherwise it returns the envelope with a warning for external signing. Pass the result's signature and deadline to the matching lifecycle tool.
+`rams_get_typed_data` returns the EIP-712 envelope for a signed lifecycle operation. The principal signs it in their own wallet; pass the resulting signature and deadline to the matching lifecycle tool.
 
-The three agent getters follow the same API-key-or-x402 rule and cost `0.000001 USDC` per x402 call. In x402 mode, `get_agents` requires `chainId` and `ownerWalletAddress`, and the payment signer must match that owner. Detail and transaction reads accept `agentUuid`, or `agentId` together with `chainId`; x402 payment is checked against the stored owner wallet.
+Agent detail and transaction reads accept `agentUuid`, or `agentId` together with `chainId`.
 
 ## Networks
 
-Use `chainId: "8453"` for Base mainnet and `chainId: "84532"` for Base Sepolia tests (decimal or hex accepted). On Base Sepolia the x402 asset is Circle USDC `0x036CbD53842c5426634e7929541eC2318f3dCF7e` (EIP-3009, 6 decimals). Always fund the payer with the exact asset quoted in `x402Requirements`.
+Use `chainId: "8453"` for Base mainnet and `chainId: "84532"` for Base Sepolia tests (decimal or hex accepted).
 
-## Execution modes
+## Execution mode
 
-Agentic tools support both client-controlled modes:
-
-- **`client-signed` (default).** Provide `signerAddress`; the session signs the prepared transaction locally, and Brickken broadcasts it.
-- **`client-broadcast`.** The session signs and broadcasts the transaction itself, then confirms it with `txHash`.
-
-Either way the operation price is split evenly between prepare and send. See [Pricing](/api-reference/endpoint/agentic-pricing).
+Agentic write tools use `client-signed` execution: provide `signerAddress`, sign the prepared transaction in your wallet, and submit it with `send_transactions`. Brickken broadcasts it. See [Pricing](/api-reference/endpoint/agentic-pricing).
 
 <Note>
   If you would rather not hold an EOA or native gas at all, see [Base MCP](/mcp/base-mcp), where the
@@ -157,15 +172,7 @@ Either way the operation price is split evenly between prepare and send. See [Pr
 
 ## Example
 
-Configure x402 mode, then register an agent on Base Sepolia:
-
-```json
-{
-  "env": "sandbox",
-  "privateKey": "0xYOUR_PRIVATE_KEY",
-  "apiKey": ""
-}
-```
+Connected with a sandbox API key, register an agent on Base Sepolia with `agent_register`:
 
 ```json
 {
@@ -183,4 +190,4 @@ Configure x402 mode, then register an agent on Base Sepolia:
 }
 ```
 
-The `agent_register` result includes prepared transaction data and, when executed, the send result. Save `prepared.info.agentUuid` for later agent updates, including `agent_transfer_ownership`.
+The `agent_register` result contains the unsigned transaction and its `txId`. Sign it with the `signerAddress` wallet (or open `signUrl` when present), then call `send_transactions` with the `txId` and the signed transaction. Save `info.agentUuid` for later agent updates, including `agent_transfer_ownership`.

@@ -175,40 +175,26 @@ Five first calls, one per surface. All of them run against **sandbox** — nothi
   </Tab>
 
   <Tab title="MCP">
-    Add the hosted server to your MCP client:
+    Add the hosted server to your MCP client with your Brickken API key in the `x-api-key` header (or as `Authorization: Bearer <api-key>`):
 
     ```json
     {
       "mcpServers": {
         "brickken": {
-          "url": "https://mcp.brickken.com/mcp"
+          "url": "https://mcp.brickken.com/mcp",
+          "headers": {
+            "x-api-key": "YOUR_BRICKKEN_API_KEY"
+          }
         }
       }
     }
     ```
 
-    Configure the session with the `configure` tool. With an API key you get the full Dapp API:
+    The key selects the environment: a sandbox key connects to sandbox, a production key to production. You get the full Dapp API. Ask the agent to call `get_stos`, `get_token_info`, or `create_tokenization`.
 
-    ```json
-    {
-      "env": "sandbox",
-      "apiKey": "YOUR_BRICKKEN_API_KEY"
-    }
-    ```
+    Write tools return unsigned transactions: sign them in your own wallet, then submit them with `send_transactions`. Brickken never receives a private key.
 
-    Then ask the agent to call `get_stos`, `get_token_info`, or `create_tokenization`.
-
-    For x402 agentic workflows instead, clear the key and set a private key:
-
-    ```json
-    {
-      "env": "sandbox",
-      "privateKey": "0xYOUR_PRIVATE_KEY",
-      "apiKey": ""
-    }
-    ```
-
-    Verify with `get_config` — it reports `hasApiKey` and `hasPrivateKey` as booleans, never the values.
+    Verify with `get_config` — it reports `env`, `baseUrl`, and `hasApiKey`, never the key itself. See [MCP](/mcp/introduction) for other clients.
   </Tab>
 </Tabs>
 
